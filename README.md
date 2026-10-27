@@ -25,7 +25,8 @@ This is a **dedicated public hackathon repository**. It is separate from Sustain
 
 ### Hackathon build — progress recorded by commit
 
-- **HACK-001 (registry implementation committed Oct 27):** A sector/agent registry, local validator and preliminary Boké scenario definition. This is **not** yet a live scientific council or integrated FSDC retrieval.\n- **HACK-002 (planned):** Implement Meta Muse Spark / Muse Wonder council orchestration with real evidence tools, challenge/revision cycle and abstentions.
+- **HACK-001 (registry implementation committed Oct 27):** A sector/agent registry, local validator and preliminary Boké scenario definition. This is **not** yet a live scientific council or integrated FSDC retrieval.
+- **HACK-002 (planned):** Implement Meta Muse Spark / Muse Wonder council orchestration with real evidence tools, challenge/revision cycle and abstentions.
 - **HACK-003 (planned):** Implement auditable evidence-to-decision analysis, including structured evidence checks, alternatives and investigation plans.
 - **HACK-004 (planned):** Implement an integrated multimedia council experience and evaluate Muse Image for illustrative visual output; transparently reuse existing ElevenLabs audio where helpful.
 
@@ -44,7 +45,8 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [Pre-hackathon foundation](docs/PRE_HACKATHON_FOUNDATION.md)
 - [Contribution register](docs/HACKATHON_CONTRIBUTIONS.md)
 - [Scientific evidence policy](docs/SCIENTIFIC_EVIDENCE_POLICY.md)
-- [Roadmap](docs/ROADMAP.md)\n- [HACK-001 registry architecture](docs/HACK-001-ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [HACK-001 registry architecture](docs/HACK-001-ARCHITECTURE.md)
 
 ## Submission transparency
 
