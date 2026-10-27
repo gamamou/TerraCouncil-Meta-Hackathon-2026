@@ -11,12 +11,12 @@
 - Formalize evidence schema requirements, abstention policy and Boké NOT_FIELD_VALIDATED caveat.
 - **Not delivered:** real FSDC data access, live Meta model orchestration or scientific inference.
 
-## October 28–30: HACK-002 — Meta live council (planned)
+## October 27–30: HACK-002 — Meta council runtime (prototype committed; live validation pending)
 
-- Connect to Meta Model API using runtime environment secret (never commit key).
-- Build question router and tool-based, source-bound evidence retrieval from authorized FSDC inputs.
-- Enforce isolated agent roles and challenge/revision stages.
-- Record model names, timestamps, prompt versions, tool outputs and trace IDs.
+- **Implemented in source:** optional direct Meta Model API HTTPS client using runtime environment secret (never commit key). **Not yet executed with a live key.**
+- **Implemented in source:** registry selection, strict JSON evidence intake gate and no-evidence abstention. **Not yet implemented:** automatic FSDC data connector or true cross-sector question routing.
+- **Implemented in source:** per-agent instructions and Spark positions → Wonder critique → Spark synthesis. **Not yet verified:** model instruction adherence.
+- **Partial:** model names, output timestamp and evidence fingerprint are recorded; prompt versioning, tool-call lineage and API usage trace IDs remain to be added.
 
 ## October 30–November 1: HACK-003 — scientific deliberation (planned)
 
