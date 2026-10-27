@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0.0",
+  "project": "TerraCouncil AI",
+  "track": "Startups",
+  "status": "prototype_registry",
+  "model_access": "Meta Model API directly; Muse Code not required",
+  "sectors": [
+    {
+      "id": "mining",
+      "platform": "FMI",
+      "state": "pilot"
+    },
+    {
+      "id": "agriculture",
+      "platform": "FAI",
+      "state": "planned_connector"
+    },
+    {
+      "id": "environment",
+      "platform": "FEI",
+      "state": "planned_connector"
+    },
+    {
+      "id": "energy",
+      "platform": "FCEI",
+      "state": "planned_connector"
+    },
+    {
+      "id": "simandou",
+      "platform": "Simandou Intelligence",
+      "state": "planned_connector"
+    },
+    {
+      "id": "digital_twins",
+      "platform": "FDTI",
+      "state": "planned_connector"
+    },
+    {
+      "id": "critical_minerals",
+      "platform": "CMH",
+      "state": "planned_connector"
+    }
+  ],
+  "agents": [
+    {
+      "id": "mining_industry",
+      "perspective": "industrial technical feasibility",
+      "sectors": [
+        "mining",
+        "simandou",
+        "critical_minerals"
+      ]
+    },
+    {
+      "id": "environment_climate",
+      "perspective": "environment and climate risks",
+      "sectors": [
+        "environment",
+        "mining",
+        "agriculture",
+        "energy"
+      ]
+    },
+    {
+      "id": "agriculture_land",
+      "perspective": "agriculture and land-use impacts",
+      "sectors": [
+        "agriculture",
+        "mining",
+        "simandou"
+      ]
+    },
+    {
+      "id": "energy_infrastructure",
+      "perspective": "energy demand and infrastructure",
+      "sectors": [
+        "energy",
+        "mining",
+        "simandou"
+      ]
+    },
+    {
+      "id": "communities",
+      "perspective": "community concerns and distributional effects; simulated analytical perspective, not actual representation",
+      "sectors": [
+        "mining",
+        "agriculture",
+        "simandou"
+      ]
+    },
+    {
+      "id": "economics_finance",
+      "perspective": "costs, benefits, finance and alternatives",
+      "sectors": [
+        "mining",
+        "agriculture",
+        "energy",
+        "simandou"
+      ]
+    },
+    {
+      "id": "governance_compliance",
+      "perspective": "applicable governance and compliance questions without asserting legal determinations",
+      "sectors": [
+        "mining",
+        "agriculture",
+        "energy",
+        "simandou"
+      ]
+    },
+    {
+      "id": "scientific_critic",
+      "perspective": "independent challenge of provenance, admissibility, causal claims, alternatives and uncertainty",
+      "sectors": [
+        "mining",
+        "agriculture",
+        "environment",
+        "energy",
+        "simandou",
+        "digital_twins",
+        "critical_minerals"
+      ]
+    }
+  ],
+  "evidence_contract": {
+    "required_fields": [
+      "evidence_id",
+      "dataset",
+      "source",
+      "observed_at",
+      "geography",
+      "method",
+      "license",
+      "validation_status",
+      "provenance"
+    ],
+    "allowed_statuses": [
+      "ADMISSIBLE",
+      "SCREENED_NOT_FIELD_VALIDATED",
+      "NOT_FIELD_VALIDATED",
+      "NO_ADMISSIBLE_EVIDENCE"
+    ],
+    "default_policy": "ABSTAIN_ON_MISSING_EVIDENCE",
+    "constraints": [
+      "No model-generated measurements without an explicit FSDC computation result",
+      "No stakeholder impersonation; agents represent viewpoints not organizations",
+      "No field-validation or impact claim for preliminary Boké data",
+      "Every quantitative statement must cite an eligible evidence_id",
+      "Preserve disagreement and human sign-off"
+    ]
+  },
+  "pilot": {
+    "location": "Boké, Guinea",
+    "domain": "mining",
+    "status": "NOT_FIELD_VALIDATED",
+    "question": "Which investigations and safeguards should be prioritized before deciding on a proposed industrial development in Boké?",
+    "note": "No claim that current data demonstrate specific harms or permit approval; only evidence-grounded investigative priorities."
+  }
+}
