@@ -18,11 +18,11 @@
 - **Implemented in source:** per-agent instructions and Spark positions → Wonder critique → Spark synthesis. **Not yet verified:** model instruction adherence.
 - **Partial:** model names, output timestamp and evidence fingerprint are recorded; prompt versioning, tool-call lineage and API usage trace IDs remain to be added.
 
-## October 30–November 1: HACK-003 — scientific deliberation (planned)
+## October 27–November 1: HACK-003 — independent verification (prototype source committed)
 
-- Assertive vs hypothetical claim detection; strict provenance checks; abstentions.
-- Generate consensus/disagreement tables, alternatives, investigation priorities and decision dossier.
-- End-to-end Boké test with real, authorized scientifically qualified evidence.
+- **Implemented as prototype:** deterministic metadata and citation/exact-finding checks, controlled exploratory status and fail-closed abstentions. Full semantics, numeric/causal checks and independent scientific truth validation remain pending.
+- **Partially implemented:** structured exploratory questions, hypothetical positions and investigation suggestions, marked unverified. Consensus/dissent analysis and formal release dossier remain to build.
+- **Pending:** end-to-end Boké test with real, authorized scientifically qualified FSDC evidence and live Meta calls.
 
 ## November 1–2: HACK-004 — demonstrator experience (planned)
 
