@@ -265,6 +265,23 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, KeyError, TypeError, ImportError) as exc:
                 return self.send_json(422, {"error": "chamber_unavailable", "detail": str(exc)[:180]})
             return self.send_json(200, data)
+        elif route.path == "/api/oral-draft":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            run_id = parse_qs(route.query).get("id", [""])[0]
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_verified_session_required"})
+            try:
+                from natural_french_dialogue import oral_storyboard
+                draft = oral_storyboard(snapshot, self.server.evidence)
+            except (ValueError, KeyError, TypeError, ImportError) as exc:
+                return self.send_json(422, {"error": "oral_draft_unavailable", "detail": str(exc)[:180]})
+            return self.send_json(200, draft)
         elif route.path == "/api/oral-manifest":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
@@ -337,6 +354,53 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/oral-approve":
+            if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "origin_or_token_rejected"})
+            if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
+                return self.send_json(415, {"error": "json_required"})
+            try:
+                count = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                count = 0
+            if not 1 <= count <= 14000:
+                return self.send_json(413, {"error": "invalid_request_size"})
+            try:
+                request_data = json.loads(self.rfile.read(count))
+            except (ValueError, UnicodeDecodeError):
+                return self.send_json(400, {"error": "bad_json"})
+            if not isinstance(request_data, dict) or request_data.get("reviewed_meaning") is not True:
+                return self.send_json(403, {"error": "explicit_human_review_required"})
+            run_id = request_data.get("run_id", "")
+            if not isinstance(run_id, str):
+                return self.send_json(400, {"error": "invalid_session"})
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_session_required"})
+            try:
+                from approve_oral_script import reviewed_manifest
+                manifest = reviewed_manifest(request_data.get("draft"), snapshot, self.server.evidence)
+                target_dir = self.server.out_dir / "Approved-Oral-Reviews"
+                target_dir.mkdir(parents=True, exist_ok=True)
+                target = target_dir / (run_id + "-" + manifest["script_sha256"][:16] + "-approved.json")
+                if target.exists():
+                    return self.send_json(409, {"error": "already_approved", "script_sha256": manifest["script_sha256"]})
+                with target.open("x", encoding="utf-8") as output:
+                    json.dump(manifest, output, ensure_ascii=False, indent=2)
+                    output.write("\\n")
+                return self.send_json(201, {
+                    "status": "EDITORIAL_APPROVED_NOT_FIELD_VALIDATED",
+                    "session_id": run_id,
+                    "script_sha256": manifest["script_sha256"],
+                    "saved_filename": target.name,
+                    "external_api_calls": 0
+                })
+            except (ValueError, KeyError, TypeError, OSError) as exc:
+                return self.send_json(422, {"error": "oral_approval_failed", "detail": str(exc)[:170]})
         if self.path != "/api/run":
             return self.send_json(404, {"error": "not_found"})
         if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
