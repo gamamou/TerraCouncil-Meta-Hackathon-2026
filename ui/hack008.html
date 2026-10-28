@@ -41,7 +41,18 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
 <label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
 <label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
-<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div id="dynamic-plan" class="card">Aucun aperçu.</div><button id="run" disabled>Déclencher le Conseil scientifique</button>
+<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div id="dynamic-plan" class="card">Aucun aperçu.</div><div class="card" id="dynamic-console">
+<h3>HACK-016B · Délibération dynamique</h3>
+<p class="muted">Les agents, les observations et les interventions sont déterminés par la question. Les sources proviennent uniquement du FSDC local. Les textes oraux et le PDF V3 ci-dessous concernent encore l'ancien pilote.</p>
+<p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p>
+<label><input id="dynamic-share" type="checkbox">J'autorise l'envoi des preuves sélectionnées à Meta.</label>
+<label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
+<div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
+<p id="dynamic-state" class="muted" role="status"></p>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div>
+</div>
+<p class="muted tiny">Pilote HACK-008 conservé séparément :</p>
+<button id="run" disabled>Déclencher le Conseil scientifique</button>
 <p id="feedback" class="muted" role="status"></p></section>
 <section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
 <section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
@@ -379,6 +390,91 @@ $("pdf-button").onclick=async()=>{
  finally{b.disabled=false;}
 };
 
+
+let dynamicPreview=null,dynamicBusy=false,dynamicActiveId=null;
+function dynamicControls(){
+ $("dynamic-run").disabled=dynamicBusy||!dynamicPreview||
+ !dynamicPreview.status.startsWith("READY_")||!dynamicPreview.source_ids.length||
+ !$("dynamic-share").checked||!$("dynamic-cost").checked||
+ dynamicPreview.question!==$("question").value;
+}
+for(const id of ["dynamic-share","dynamic-cost"])$(id).addEventListener("change",dynamicControls);
+$("question").addEventListener("input",()=>{dynamicPreview=null;dynamicControls();$("dynamic-meta").textContent="Question modifiée : relancez l'aperçu des preuves.";});
+function displayDynamic(trace){
+ const host=$("dynamic-results");host.replaceChildren();
+ add("h3",host,"Session dynamique : "+trace.run_id);
+ add("p",host,trace.question||"Question non disponible");
+ add("p",host,"État : "+trace.status+" · Appels tentés : "+(trace.calls_attempted||0)+"/"+(trace.planned_calls||"?"),"muted");
+ add("p",host,"Sources : "+(trace.source_ids||[]).join(", ")+" · SHA256 : "+(trace.evidence_sha256||""),"tiny muted");
+ if(trace.missing_topics?.length)add("p",host,"Dimensions non couvertes : "+trace.missing_topics.join(", "),"warn");
+ for(const step of trace.steps||[]){
+   const c=add("div",host,"","card");
+   add("h3",c,step.role+" · "+step.model);
+   add("p",c,step.status+" · "+(step.verification_status||"non évalué"),"muted");
+   if(step.checked_publication){
+     for(const [key,label] of [["observations","Observations sourcées"],["hypotheses","Hypothèses non vérifiées"],["investigations","Investigations"],["abstentions","Abstentions"]]){
+       renderItems(c,step.checked_publication[key],label);
+     }
+   }
+ }
+ if(trace.decision_support){
+   add("h3",host,"Synthèse de cette question");
+   renderItems(host,trace.decision_support.investigations,"Investigations proposées");
+   renderItems(host,trace.decision_support.abstentions,"Limites scientifiques");
+ }
+ add("p",host,"Nouvelle délibération sauvegardée. Son audio et son PDF dynamique ne sont pas encore générés.","tiny muted");
+}
+async function dynamicPoll(id){
+ try{
+   const response=await fetch("/api/dynamic-status?id="+encodeURIComponent(id),opts);
+   const trace=await response.json();
+   if(!response.ok)throw Error(trace.error||"Session introuvable");
+   displayDynamic(trace);
+   if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
+     setTimeout(()=>dynamicPoll(id),1200);
+   }else{dynamicBusy=false;dynamicControls();}
+ }catch(error){
+   $("dynamic-state").textContent="Suivi arrêté : "+error.message+" Consultez les sessions avant toute nouvelle tentative.";
+   dynamicBusy=false;dynamicControls();
+ }
+}
+$("dynamic-run").onclick=async()=>{
+ if($("dynamic-run").disabled||!dynamicPreview)return;
+ dynamicBusy=true;dynamicControls();
+ $("dynamic-state").textContent="Demande de nouvelle délibération en cours…";
+ try{
+   const r=await fetch("/api/dynamic-run",{
+     method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+     body:JSON.stringify({question:dynamicPreview.question,
+       evidence_sha256:dynamicPreview.evidence_sha256,share:true,consent:true})});
+   const d=await r.json();
+   if(!r.ok)throw Error(d.error||"Délibération non lancée");
+   dynamicActiveId=d.run_id;
+   $("dynamic-state").textContent="Session "+d.run_id+" : "+d.max_model_calls+" appels Meta maximum. Aucun retry automatique.";
+   await dynamicPoll(d.run_id);
+ }catch(error){
+   $("dynamic-state").textContent="Lancement refusé ou indéterminé : "+error.message+". Vérifiez l'historique avant de réessayer.";
+   dynamicBusy=false;dynamicControls();
+ }
+};
+$("dynamic-history").onclick=async()=>{
+ const host=$("dynamic-sessions");host.replaceChildren();
+ try{
+   const r=await fetch("/api/dynamic-sessions",opts),d=await r.json();
+   if(!r.ok)throw Error(d.error||"Historique indisponible");
+   if(!d.sessions.length){add("p",host,"Aucune délibération dynamique enregistrée.","muted");return;}
+   for(const entry of d.sessions){
+     const card=add("div",host,"","card");
+     add("small",card,entry.run_id+" · "+entry.status,"muted");
+     add("p",card,entry.question||"Question");
+     const b=add("button",card,"Ouvrir");
+     b.type="button";b.onclick=()=>{
+       dynamicActiveId=entry.run_id;
+       dynamicPoll(entry.run_id);
+     };
+   }
+ }catch(error){add("p",host,error.message,"warn");}
+};
 $("dynamic-preview").onclick=async()=>{
  const target=$("dynamic-plan");target.textContent="Analyse locale de la question…";
  try{
@@ -387,12 +483,14 @@ $("dynamic-preview").onclick=async()=>{
      body:JSON.stringify({question:$("question").value})});
    const plan=await res.json();
    if(!res.ok)throw Error(plan.detail||plan.error);
+   dynamicPreview={...plan,question:$("question").value};dynamicControls();
+   $("dynamic-meta").textContent="Plan prêt : "+plan.agents.length+" agents, "+plan.model_calls+" appels consommés pour cet aperçu.";
    target.textContent="Statut : "+plan.status+
      " | Agents : "+plan.agents.join(", ")+
      " | Preuves FSDC : "+plan.source_ids.join(", ")+
      " | Dimensions manquantes : "+plan.missing_topics.join(", ")+
      " | 0 appel Meta. Le bouton de débat existant reste le pilote fixe.";
- }catch(error){target.textContent="Aperçu indisponible : "+error.message;}
+ }catch(error){dynamicPreview=null;dynamicControls();target.textContent="Aperçu indisponible : "+error.message;}
 };
 function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
 ["share","billing","question"].forEach(x=>$(x).addEventListener("input",control));
