@@ -49,7 +49,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div></div>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div></div>
 </div>
 <p class="muted tiny">Pilote HACK-008 conservé séparément :</p>
 <button id="run" disabled>Déclencher le Conseil scientifique</button>
@@ -437,6 +437,23 @@ $("dynamic-brief").onclick=async()=>{
   setTimeout(()=>URL.revokeObjectURL(url),2000);
  }catch(error){$("dynamic-state").textContent=error.message;}
 };
+$("dynamic-audit").onclick=async()=>{
+ const out=$("dynamic-audit-output");out.replaceChildren();
+ if(!dynamicActiveId)return;
+ try{
+  const response=await fetch("/api/dynamic-oral-audit?id="+encodeURIComponent(dynamicActiveId),opts);
+  const report=await response.json();
+  if(!response.ok)throw Error(report.detail||report.error||"Audit indisponible");
+  add("h3",out,"Audit éditorial · "+report.status);
+  add("p",out,"Session : "+report.session_id+" · empreinte du script : "+report.script_sha256,"tiny muted");
+  for(const check of report.checks){
+    const line=add("div",out,"","card");
+    add("strong",line,"Intervention "+(check.turn||"")+(check.role?" · "+check.role:""));
+    add("p",line,check.classification+(check.issues?.length?" : "+check.issues.join(", "):""),"muted");
+  }
+  add("p",out,"Validation scientifique de terrain : non. Synthèse ElevenLabs : non autorisée par cet audit. Aucun appel externe.","warn");
+ }catch(error){add("p",out,"Audit impossible : "+error.message,"warn");}
+};
 $("dynamic-oral").onclick=async()=>{
  const area=$("dynamic-oral-output");area.replaceChildren();
  if(!dynamicActiveId)return;
@@ -467,6 +484,7 @@ async function dynamicPoll(id,initialChecks=0){
    if(!response.ok)throw Error(trace.error||"Session introuvable");
    displayDynamic(trace);
    $("dynamic-oral").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
+   $("dynamic-audit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
      setTimeout(()=>dynamicPoll(id),1200);
