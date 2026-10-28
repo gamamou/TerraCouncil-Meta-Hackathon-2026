@@ -10,6 +10,7 @@ from pathlib import Path
 
 from registry import load_registry
 from verification import gate_evidence, evidence_hash
+import hashlib
 
 # Bilingual keywords are discovery hints, NOT scientific assertions.
 TOPICS={
@@ -77,6 +78,10 @@ def classify(question,sector=None):
     return {"sector":sector,"topics":topics,
             "classification":"RULE_BASED_PRELIMINARY"}
 
+def plan_fingerprint(plan):
+    fields={key:plan.get(key) for key in ("question","geography","sector","topics","proposers","evidence_sha256","missing_topics")}
+    return hashlib.sha256(json.dumps(fields,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
+
 def plan_question(question,records,geography="Boké, Guinea",sector=None,max_proposers=4):
     if not isinstance(geography,str) or not geography.strip():
         raise ValueError("Explicit FSDC geography is required")
@@ -116,7 +121,7 @@ def plan_question(question,records,geography="Boké, Guinea",sector=None,max_pro
     digest=evidence_hash(available)
     status=("READY_EXPLORATORY_MISSING_TOPICS" if available and missing else
             "READY_EXPLORATORY" if available else "ABSTAIN_NO_QUESTION_RELEVANT_EVIDENCE")
-    return {"schema_version":"HACK016.1","status":status,"question":question,
+    result={"schema_version":"HACK016.1","status":status,"question":question,
             "geography":geography,"sector":sector,"topics":decision["topics"],
             "classification":decision["classification"],
             "proposers":proposers,"critic":"scientific_critic",
@@ -127,3 +132,5 @@ def plan_question(question,records,geography="Boké, Guinea",sector=None,max_pro
                "Available records are only from supplied local FSDC data; no external retrieval.",
                "Missing domains/measurements are not inferred from related sources.",
                "Screened evidence is not field-validated."]}
+    result["plan_sha256"]=plan_fingerprint(result)
+    return result
