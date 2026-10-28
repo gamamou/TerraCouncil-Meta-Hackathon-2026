@@ -54,3 +54,15 @@ python -X utf8 $bridge.FullName --manifest $manifest --out $report
 
 ## Jury-facing provenance
 This bridge and its tests are **hackathon code**; FAITH/FSMI data and scientific methods were produced earlier. Commit dates are not source acquisition dates. Record exact passing test output before claiming execution. The bridge is a **source intake milestone**, not proof of completed Council scientific ingestion.
+
+## User-executed acceptance checkpoint — 2026-10-28 (Windows PowerShell)
+
+Execution location: `TerraCouncil-Meta-Hackathon-2026-main (24)` with Python `-X utf8`.
+
+Command: `python -X utf8 -m unittest discover -s (Join-Path $repo "tests") -p "test_faith_scientific_evidence_bridge_002.py" -v`
+
+Observed test report supplied directly by the participant: **Ran 7 tests in 0.115s — OK (skipped=1)**. Six passed: Cheng class and attribution quarantine, historical MAUS 572-row separation, CAMS malformed input rejection, empty-input no-success policy, expected source inventory, and unknown asset rejection. Symlink exclusion test **skipped due to lack of Windows symlink creation privileges**; this control has not been verified on that workstation. Do not label this 7/7 pass.
+
+The `--list` command separately completed, enumerating all seven source families with the expected scientific status codes.
+
+**Acceptance scope:** local software/tests and registry listing ONLY. No real Base44/FSMI science asset imported, no source hash checked by this bridge, no Boké AOI promotion, no Meta calls or scientific debate during this acceptance.
