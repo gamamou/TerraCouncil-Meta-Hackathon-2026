@@ -747,6 +747,17 @@ $("dynamic-preview").onclick=async()=>{
    if(!res.ok)throw Error(plan.detail||plan.error);
    dynamicPreview={...plan,question:$("question").value};dynamicControls();
    $("dynamic-meta").textContent="Plan prêt : "+plan.agents.length+" agents, 0 appel consommé pour cet aperçu. "+plan.planned_model_calls+" appels Meta au maximum si vous déclenchez le débat.";
+   if(plan.regional_context?.length){
+      const container=$("fsdc-compare-output");
+      container.replaceChildren();
+      add("h3",container,"Contexte scientifique régional ajouté au plan");
+      for(const e of plan.regional_context){
+        const card=add("div",container,"","card");
+        add("strong",card,e.evidence_id+" · "+e.source_type);
+        add("p",card,e.claim);
+        add("p",card,"Portée : "+e.scope+" · "+e.validation_status+" ; ne remplace PAS les observations locales.","warn");
+      }
+   }
    target.textContent="Statut : "+plan.status+
      " | Agents : "+plan.agents.join(", ")+
      " | Preuves FSDC : "+plan.source_ids.join(", ")+
