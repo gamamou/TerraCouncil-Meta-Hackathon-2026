@@ -24,9 +24,10 @@
 - **Partially implemented:** structured exploratory questions, hypothetical positions and investigation suggestions, marked unverified. Consensus/dissent analysis and formal release dossier remain to build.
 - **Pending:** end-to-end Boké test with real, authorized scientifically qualified FSDC evidence and live Meta calls.
 
-## November 1–2: HACK-004 — demonstrator experience (planned)
+## October 27–November 2: HACK-004 — real Boké data bridge and demonstrator (in progress)
 
-- Integrate interactive question, council trace and results into a unified demo.
+- **Implemented in source:** adapter for pre-existing screened Boké WorldPop/ESA evidence and associated QA metadata; no-field-validation preserved. **Pending:** local source ingestion verification and first live Spark/Wonder call.
+- **Planned:** integrate interactive question, council trace and results into a unified demo.
 - A PDF decision brief/audio player may reuse prior TerraCouncil work with clear disclosures.
 - Muse Image optional, illustration-only. Avoid SAM/transcription scope creep.
 
