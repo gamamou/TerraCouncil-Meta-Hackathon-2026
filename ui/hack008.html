@@ -62,7 +62,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label class="audiofile">Charger des MP3 locaux pour écoute d'archive (facultatif)
 <input id="audio-files" type="file" accept=".mp3,audio/mpeg" multiple></label>
 <div id="audio-playlist"></div>
-<div class="actions"><button id="pdf-button" type="button" disabled>Télécharger la note décisionnelle PDF</button><button id="oral-button" type="button" disabled>Télécharger le scénario oral français</button><button id="manifest-button" type="button" disabled>Projet oral modifiable (JSON)</button><span id="pdf-status" class="muted">PDF et scénario oral disponibles après une session complète.</span></div>
+<div class="actions"><button id="pdf-button" type="button" disabled>Télécharger le rapport exécutif V3 (PDF)</button><button id="oral-button" type="button" disabled>Télécharger le scénario oral français</button><button id="manifest-button" type="button" disabled>Projet oral modifiable (JSON)</button><span id="pdf-status" class="muted">PDF et scénario oral disponibles après une session complète.</span></div>
 </section>
 <section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section>
 </div></main>
@@ -171,10 +171,10 @@ $("pdf-button").onclick=async()=>{
    const r=await fetch("/api/pdf?id="+encodeURIComponent(activeRunId),opts);
    if(!r.ok){const d=await r.json();throw Error(d.detail||d.error||"Erreur PDF");}
    const url=URL.createObjectURL(await r.blob());
-   const a=document.createElement("a");a.href=url;a.download="TerraCouncil-"+activeRunId+"-Decision-Brief.pdf";
+   const a=document.createElement("a");a.href=url;a.download="TerraCouncil-"+activeRunId+"-Executive-Brief-V3.pdf";
    document.body.appendChild(a);a.click();a.remove();
    setTimeout(()=>URL.revokeObjectURL(url),2000);
-   $("pdf-status").textContent="Brief PDF généré à partir des traces vérifiées.";
+   $("pdf-status").textContent="Rapport exécutif V3 généré. Vérifiez la couverture bleu nuit et la matrice des priorités.";
  }catch(e){$("pdf-status").textContent="PDF indisponible : "+e.message;}
  finally{b.disabled=false;}
 };
