@@ -278,6 +278,34 @@ class Handler(BaseHTTPRequestHandler):
             trace.pop("evidence_snapshot",None)
             for step in trace.get("steps",[]):step.pop("raw_model_text",None)
             return self.send_json(200,trace)
+        elif route.path == "/api/dynamic-brief":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            folder=self.server.out_dir/"Dynamic-HACK016"
+            source=folder/(run_id+".json")
+            if not source.is_file() or source.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_brief import build_dynamic_pdf
+                trace=json.loads(source.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id:
+                    raise ValueError("Session ID mismatch")
+                target=folder/(run_id+"-Dynamic-Brief-V1.pdf")
+                if not target.exists():
+                    build_dynamic_pdf(trace,target)
+                content=target.read_bytes()
+            except (ValueError,KeyError,TypeError,OSError,RuntimeError,ImportError) as e:
+                return self.send_json(422,{"error":"dynamic_brief_unavailable","detail":str(e)[:150]})
+            self.send_response(200)
+            self.send_header("Content-Type","application/pdf")
+            self.send_header("Content-Disposition","attachment; filename=TerraCouncil-Dynamic-Brief-V1.pdf")
+            self.send_header("Cache-Control","no-store")
+            self.send_header("Content-Length",str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif route.path == "/api/dynamic-oral":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"token_required"})
