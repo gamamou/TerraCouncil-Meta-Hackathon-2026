@@ -289,6 +289,23 @@ class Handler(BaseHTTPRequestHandler):
             trace.pop("evidence_snapshot",None)
             for step in trace.get("steps",[]):step.pop("raw_model_text",None)
             return self.send_json(200,trace)
+        elif route.path == "/api/dynamic-decision-matrix":
+            if self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            file=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not file.is_file() or file.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_decision_matrix import decision_matrix
+                trace=json.loads(file.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id:raise ValueError("Session mismatch")
+                matrix=decision_matrix(trace)
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"decision_matrix_unavailable","detail":str(error)[:140]})
+            return self.send_json(200,matrix)
         elif route.path == "/api/dynamic-brief":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"token_required"})
