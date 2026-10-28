@@ -1,0 +1,164 @@
+{
+  "schema_version": "TERRA_META_OPEN_EVIDENCE_001",
+  "created_utc": "2026-10-28",
+  "purpose": "Open-evidence demonstrator for multi-perspective Meta Spark/Wonder council, separate from future AWS S3 FSDC Data Lake",
+  "drive_folder": "https://drive.google.com/drive/folders/12IY3bsJlNH2wORjO1ppOzc44cKy21SlN",
+  "spatial_focus": {
+    "name": "Boké pilot rectangular AOI",
+    "bbox_epsg4326": [
+      -14.5,
+      10.5,
+      -14,
+      11
+    ],
+    "caution": "Not the prefecture administrative boundary"
+  },
+  "sources": [
+    {
+      "id": "OSM_GUINEA_GEOFABRIK",
+      "domain": [
+        "mining",
+        "communities",
+        "water",
+        "transport"
+      ],
+      "title": "OpenStreetMap Guinea extract (Geofabrik)",
+      "official_url": "https://download.geofabrik.de/africa/guinea.html",
+      "license": "ODbL 1.0; attribution and derived-database conditions",
+      "access": "country extract, Geofabrik PBF or shapefiles; Boké AOI clipping required",
+      "acquisition_status": "SOURCE_VERIFIED_NOT_DOWNLOADED",
+      "scientific_status": "NOT_INGESTED",
+      "prospective_metrics": [
+        "road length by type",
+        "distance to waterways and settlements",
+        "site-to-infrastructure intersections"
+      ],
+      "limitations": [
+        "OSM is volunteered mapping, variable completeness",
+        "No population exposure inference from features alone"
+      ]
+    },
+    {
+      "id": "CHIRPS_V3",
+      "domain": [
+        "climate",
+        "agriculture",
+        "water"
+      ],
+      "title": "CHIRPS v3 rainfall time series",
+      "official_url": "https://www.chc.ucsb.edu/data/chirps3",
+      "download_url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/",
+      "license": "CC BY 4.0 / public domain conditions described by CHC",
+      "access": "0.05 degree precipitation grids; subset Boké, choose preliminary/final and time aggregation",
+      "acquisition_status": "SOURCE_VERIFIED_NOT_DOWNLOADED",
+      "scientific_status": "NOT_INGESTED",
+      "prospective_metrics": [
+        "rainfall totals",
+        "anomalies",
+        "seasonality"
+      ],
+      "limitations": [
+        "Rainfall alone is not water quality or proof of flooding",
+        "Daily timing requires caveats"
+      ]
+    },
+    {
+      "id": "FAITH_DYNAMICWORLD_2025",
+      "domain": [
+        "land",
+        "agriculture",
+        "mining",
+        "biodiversity"
+      ],
+      "title": "FAITH Dynamic World 2025 Guinea raster candidate",
+      "official_url": "https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1",
+      "drive_candidate": "https://drive.google.com/file/d/1C2hc7ME3qHHQBoYmiEsYMayduqKk7oAv/view?usp=drivesdk",
+      "license": "Verify rights and attribution for derived export",
+      "acquisition_status": "COPIED_FROM_EXISTING_FAITH_DRIVE",
+      "scientific_status": "CANDIDATE_UNCHECKED_RASTER_METADATA",
+      "prospective_metrics": [
+        "classification fractions",
+        "land-cover comparison subject to same-area and method QA"
+      ],
+      "limitations": [
+        "Tile coverage and bands unverified",
+        "2025 filename is not independent proof of temporal coverage"
+      ]
+    },
+    {
+      "id": "FAITH_JRC_TMF_2025",
+      "domain": [
+        "forest",
+        "biodiversity",
+        "land"
+      ],
+      "title": "FAITH JRC Tropical Moist Forest 2025 Guinea raster candidate",
+      "official_url": "https://forobs.jrc.ec.europa.eu/TMF/",
+      "drive_candidate": "https://drive.google.com/file/d/11-_--j_rjLD59hK2V8TT2cdW7aiuqrkx/view?usp=drivesdk",
+      "license": "Verify JRC source terms for exported tile",
+      "acquisition_status": "COPIED_FROM_EXISTING_FAITH_DRIVE",
+      "scientific_status": "CANDIDATE_UNCHECKED_RASTER_METADATA",
+      "prospective_metrics": [
+        "forest-cover state or disturbances if bands verified"
+      ],
+      "limitations": [
+        "No automatic attribution of deforestation to mining",
+        "GeoTIFF metadata and AOI overlap unchecked"
+      ]
+    },
+    {
+      "id": "FAITH_HANSEN_2025",
+      "domain": [
+        "forest",
+        "land",
+        "mining"
+      ],
+      "title": "FAITH Hansen Guinea raster archive",
+      "official_url": "https://glad.earthengine.app/view/global-forest-change",
+      "drive_folder": "https://drive.google.com/drive/folders/1E7f5Gp4UeqN73JWAgELoezXhBvj_w3yk",
+      "license": "Verify version-specific data terms",
+      "acquisition_status": "EXISTS_IN_FAITH_DRIVE_NOT_COPIED",
+      "scientific_status": "CANDIDATE_UNCHECKED_RASTER_METADATA",
+      "prospective_metrics": [
+        "forest loss for specified year and AOI"
+      ],
+      "limitations": [
+        "Tree-cover loss is not a mining-causality measurement"
+      ]
+    },
+    {
+      "id": "FAITH_WAPOR_2025",
+      "domain": [
+        "agriculture",
+        "water",
+        "climate"
+      ],
+      "title": "FAO WaPOR v3 Guinea raster archive",
+      "official_url": "https://data.apps.fao.org/wapor/",
+      "drive_folder": "https://drive.google.com/drive/folders/1al2Y9KOdfh4vE3AnOVEA2gketTEmowpI",
+      "license": "Confirm FAO source attribution",
+      "acquisition_status": "EXISTS_IN_FAITH_DRIVE_NOT_COPIED",
+      "scientific_status": "CANDIDATE_UNCHECKED_RASTER_METADATA",
+      "prospective_metrics": [
+        "actual evapotranspiration estimates"
+      ],
+      "limitations": [
+        "WaPOR evapotranspiration does not measure PM10 or surface water quality"
+      ]
+    }
+  ],
+  "council_design": {
+    "question_driven_selection": true,
+    "agents": [
+      "mining_industry",
+      "environment_climate",
+      "agriculture_land",
+      "communities",
+      "economics_finance",
+      "scientific_critic"
+    ],
+    "debate_rule": "Use only inspected evidence and clearly separate hypotheses from observations; Wonder challenges contradictory interpretations and data gaps.",
+    "go_no_go": "No numeric finding enters Meta until source format, CRS, AOI intersection, valid dates, license and checksum are verified.",
+    "planned_comparison": "Same question before/after additional admissible evidence; differences in factual observations, agent objections and final investigations assessed against provenance."
+  }
+}
