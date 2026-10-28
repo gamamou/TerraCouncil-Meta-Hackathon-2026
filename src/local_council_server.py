@@ -289,6 +289,19 @@ class Handler(BaseHTTPRequestHandler):
             trace.pop("evidence_snapshot",None)
             for step in trace.get("steps",[]):step.pop("raw_model_text",None)
             return self.send_json(200,trace)
+        elif route.path == "/api/fsdc-evidence-comparison":
+            if self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            question=parse_qs(route.query).get("question",[""])[0]
+            if len(question)>1800:
+                return self.send_json(422,{"error":"question_too_long"})
+            try:
+                from fsdc_evidence_expansion import compare_question
+                result=compare_question(question,self.server.evidence)
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"comparison_unavailable",
+                    "detail":str(error)[:130]})
+            return self.send_json(200,result)
         elif route.path == "/api/dynamic-quantification":
             if self.headers.get("X-Terra-Token")!=self.server.token:
                 return self.send_json(403,{"error":"token_required"})
