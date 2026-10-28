@@ -17,6 +17,7 @@ import datetime as dt
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import re
 from pathlib import Path
 import secrets
 import sys
@@ -153,6 +154,18 @@ class App(ThreadingHTTPServer):
         self.job_lock = threading.Lock()
         self.running = False
 
+def read_session_file(directory, run_id):
+    if not re.fullmatch(r"HACK008-[A-Za-z0-9_-]{10,80}", run_id):
+        return None
+    path = directory / (run_id + ".json")
+    if not path.is_file() or path.stat().st_size > 2_000_000:
+        return None
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) and value.get("run_id") == run_id else None
+    except (OSError, ValueError, UnicodeDecodeError):
+        return None
+
 class Handler(BaseHTTPRequestHandler):
     server: App
     def log_message(self, fmt, *args):
@@ -190,7 +203,22 @@ class Handler(BaseHTTPRequestHandler):
             with self.server.job_lock:
                 trace = self.server.jobs.get(run_id)
                 payload = json.loads(json.dumps(trace)) if trace else None
+            if payload is None:
+                payload = read_session_file(self.server.out_dir, run_id)
             self.send_json(200 if payload else 404, payload or {"error": "unknown_run"})
+        elif route.path == "/api/sessions":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            items = []
+            if self.server.out_dir.is_dir():
+                for item in sorted(self.server.out_dir.glob("HACK008-*.json"),
+                                   key=lambda f: f.stat().st_mtime, reverse=True)[:25]:
+                    trace = read_session_file(self.server.out_dir, item.stem)
+                    if trace:
+                        items.append({"run_id": trace["run_id"], "status": trace.get("status"),
+                                      "question": trace.get("question", ""),
+                                      "calls_attempted": trace.get("calls_attempted", 0)})
+            self.send_json(200, {"sessions": items})
         elif route.path == "/api/pdf":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
@@ -198,6 +226,8 @@ class Handler(BaseHTTPRequestHandler):
             with self.server.job_lock:
                 trace = self.server.jobs.get(run_id)
                 snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
             if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
                 return self.send_json(409, {"error": "complete_verified_session_required"})
             try:
