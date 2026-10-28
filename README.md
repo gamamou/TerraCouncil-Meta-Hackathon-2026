@@ -6,6 +6,18 @@
 **Official build period (per participant guide):** October 27 – November 4, 2026  
 **Submission deadline:** November 4, 2026 at 9:00 PM Eastern Time
 
+
+## Current jury navigation — TERRA-DATA-001 (28 October 2026)
+
+**The technical milestones are cumulative and their original Git history is preserved.** For a current, auditable synopsis use:
+
+- [Development and contribution ledger](docs/DEVELOPMENT_HISTORY.md) — separates FAITH pre-hackathon assets from new hackathon work, including **new API data acquisition during the event**.
+- [Scientific evidence and provenance](docs/SCIENTIFIC_EVIDENCE.md) — identifies what is recovered, unvalidated, missing or only planned, with scientific attribution limits.
+- [Jury demonstration guide](docs/DEMO_GUIDE.md) — an evidence-first, multi-perspective debate path and honest no-claim boundaries.
+- [Unified API/recovery development plan](docs/TERRA-DATA-GATEWAY-001-RECOVERY-API-INTERFACE.md) — existing FAITH reuse, ingestion, QA, reconciliation and council wiring.
+
+**TERRA-DATA-001 implemented in source:** precision local recovery scanner `src/faith_asset_recovery_001.py` handles MAUS/Guinea cadastre/Cheng/FSDC science, enumerates ZIP members without extracting them and groups same-hash copies; tests committed. The older broader scanner remains in Git history with known false-positive filenames. **Not yet performed here:** Windows scan of newly identified Desktop folders, live API downloads, validated Boké spatial processing, and a new evidence-expanded paid debate.
+
 ## Vision
 
 **A Meta-powered multi-stakeholder decision intelligence council for the FAITH/FSDC ecosystem.**
