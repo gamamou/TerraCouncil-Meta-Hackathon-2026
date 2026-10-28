@@ -54,6 +54,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-006 verified Wonder critique / Spark revision](docs/HACK-006-CONTINUE-DEBATE.md)
 - [HACK-007 Interactive Scientific Council](docs/HACK-007-INTERACTIVE-COUNCIL.md)
 - [HACK-008 Local interactive Meta Council](docs/HACK-008-INTERACTIVE-LOCAL-COUNCIL.md)
+- [HACK-009 Chamber, source visualization, audio and scientific PDF](docs/HACK-009-CHAMBER-PDF-AUDIO.md)
 
 ## Submission transparency
 
@@ -84,3 +85,7 @@ The participant has completed three live Meta calls (Spark first position, Wonde
 ## HACK-008 local interactive council (source committed; live browser validation pending)
 
 New `src/local_council_server.py` and `ui/hack008.html` provide a localhost-only question interface and an explicitly authorized **maximum 4-call** Meta debate (2 simulated stakeholder perspectives via Spark, Wonder critic, Spark revised synthesis). Every stage must pass independent FSDC structural checks. Local private checkpoints, zero default calls, no automatic retries. The first HACK-008 browser/API run is **not yet verified**, and no full 8-agent council is claimed.
+
+## HACK-009 — session-bound scientific PDF and audiovisual chamber (source committed)
+
+The local interactive Council now supports reopening previously completed HACK-008 sessions at zero additional Meta cost, downloading a source-verified Scientific Decision Brief PDF (requires local ReportLab), visualizing preliminary WorldCover 2021 shares, and manually playing locally selected archival MP3s. Pre-hackathon ElevenLabs audio is **not** claimed as the audio of new HACK-008 model responses. New session-specific French TTS and synchronization are planned, not yet implemented. User-side PDF/Edge validation pending.
