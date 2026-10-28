@@ -49,7 +49,14 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div></div>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
+<p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
+<label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
+<div class="actions"><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
+<button id="dynamic-voice-generate" type="button" disabled>Générer la voix une seule fois</button>
+<button id="dynamic-voice-listen" type="button" disabled>Écouter le débat</button></div>
+<p id="dynamic-voice-state" role="status" class="muted">Ouvrez une session dynamique terminée.</p>
+<div id="dynamic-voice-player"></div></div></div>
 </div>
 <p class="muted tiny">Pilote HACK-008 conservé séparément :</p>
 <button id="run" disabled>Déclencher le Conseil scientifique</button>
@@ -437,6 +444,72 @@ $("dynamic-brief").onclick=async()=>{
   setTimeout(()=>URL.revokeObjectURL(url),2000);
  }catch(error){$("dynamic-state").textContent=error.message;}
 };
+
+let dynamicVoiceState=null, dynamicAudioUrl=null;
+function updateDynamicVoiceControls(){
+ const ready=Boolean(dynamicActiveId);
+ $("dynamic-voice-check").disabled=!ready;
+ $("dynamic-voice-generate").disabled=!ready||!dynamicVoiceState||
+   dynamicVoiceState.state!=="NOT_REQUESTED"||!dynamicVoiceState.key_available||
+   !$("dynamic-voice-consent").checked;
+ $("dynamic-voice-listen").disabled=!ready||!dynamicVoiceState||dynamicVoiceState.state!=="READY";
+}
+$("dynamic-voice-consent").addEventListener("change",updateDynamicVoiceControls);
+async function checkDynamicVoice(){
+ if(!dynamicActiveId)return;
+ try{
+  const r=await fetch("/api/dynamic-voice-status?id="+encodeURIComponent(dynamicActiveId),opts);
+  const data=await r.json();
+  if(!r.ok)throw Error(data.detail||data.error);
+  dynamicVoiceState=data;updateDynamicVoiceControls();
+  $("dynamic-voice-state").textContent="État : "+data.state+
+     (data.key_available?" · clé vocale chargée":" · clé vocale absente");
+ }catch(e){$("dynamic-voice-state").textContent=e.message;dynamicVoiceState=null;updateDynamicVoiceControls();}
+}
+$("dynamic-voice-check").onclick=checkDynamicVoice;
+$("dynamic-voice-generate").onclick=async()=>{
+ if($("dynamic-voice-generate").disabled||!dynamicActiveId)return;
+ $("dynamic-voice-generate").disabled=true;
+ $("dynamic-voice-state").textContent="Autorisation reçue. Une seule tentative, sans relance automatique.";
+ try{
+  const r=await fetch("/api/dynamic-voice-start",{method:"POST",
+    headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+    body:JSON.stringify({run_id:dynamicActiveId,approve_cost_and_sharing:true})});
+  const d=await r.json();
+  if(!r.ok)throw Error(d.detail||d.error);
+  $("dynamic-voice-consent").checked=false;
+  $("dynamic-voice-state").textContent="Tentative acceptée. Consultez l'état ; ne cliquez pas une seconde fois sur Générer.";
+  await checkDynamicVoice();
+ }catch(e){$("dynamic-voice-state").textContent="Non lancé ou état incertain : "+e.message+" Vérifiez le journal et le fournisseur avant toute autre tentative.";await checkDynamicVoice();}
+};
+$("dynamic-voice-listen").onclick=async()=>{
+ if(!dynamicActiveId||!dynamicVoiceState||dynamicVoiceState.state!=="READY")return;
+ const sessionId=dynamicActiveId;
+ const host=$("dynamic-voice-player");host.replaceChildren();
+ try{
+  const [a,t]=await Promise.all([
+   fetch("/api/dynamic-voice-audio?id="+encodeURIComponent(sessionId),opts),
+   fetch("/api/dynamic-voice-timing?id="+encodeURIComponent(sessionId),opts)]);
+  if(!a.ok||!t.ok)throw Error("Fichiers audio indisponibles");
+  const bytes=await a.arrayBuffer(), manifest=await t.json();
+  if(manifest.session_id!==sessionId || manifest.editorial_type!=="EDITORIAL_RECONSTRUCTION_NOT_VERBATIM")
+     throw Error("Association source/session invalide");
+  const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
+    .map(x=>x.toString(16).padStart(2,"0")).join("");
+  if(digest!==manifest.audio_sha256)throw Error("Empreinte audio incorrecte");
+  if(!Array.isArray(manifest.timeline)||!manifest.timeline.length)throw Error("Horodatages absents");
+  if(dynamicAudioUrl)URL.revokeObjectURL(dynamicAudioUrl);
+  dynamicAudioUrl=URL.createObjectURL(new Blob([bytes],{type:"audio/mpeg"}));
+  const player=document.createElement("audio");player.controls=true;player.preload="metadata";
+  player.src=dynamicAudioUrl;host.appendChild(player);
+  player.addEventListener("timeupdate",()=>{
+    const active=manifest.timeline.find(x=>player.currentTime>=x.start_seconds&&player.currentTime<x.end_seconds);
+    $("dynamic-voice-state").textContent=active?"Intervenant actif : "+active.speaker:
+       "Audio validé ; transition ou pause.";
+  });
+  $("dynamic-voice-state").textContent="MP3 et session vérifiés. Lecture disponible.";
+ }catch(e){$("dynamic-voice-state").textContent="Lecture refusée : "+e.message;}
+};
 $("dynamic-audit").onclick=async()=>{
  const out=$("dynamic-audit-output");out.replaceChildren();
  if(!dynamicActiveId)return;
@@ -483,6 +556,7 @@ async function dynamicPoll(id,initialChecks=0){
    }
    if(!response.ok)throw Error(trace.error||"Session introuvable");
    displayDynamic(trace);
+   updateDynamicVoiceControls();
    $("dynamic-oral").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-audit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
@@ -506,6 +580,7 @@ $("dynamic-run").onclick=async()=>{
    const d=await r.json();
    if(!r.ok)throw Error(d.error||"Délibération non lancée");
    dynamicActiveId=d.run_id;
+   dynamicVoiceState=null;updateDynamicVoiceControls();
    $("dynamic-state").textContent="Session "+d.run_id+" : "+d.max_model_calls+" appels Meta maximum. Aucun retry automatique.";
    await dynamicPoll(d.run_id);
  }catch(error){
@@ -526,6 +601,7 @@ $("dynamic-history").onclick=async()=>{
      const b=add("button",card,"Ouvrir");
      b.type="button";b.onclick=()=>{
        dynamicActiveId=entry.run_id;
+       dynamicVoiceState=null;updateDynamicVoiceControls();checkDynamicVoice();
        dynamicPoll(entry.run_id);
      };
    }
