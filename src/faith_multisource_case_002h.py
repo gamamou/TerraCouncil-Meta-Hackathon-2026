@@ -67,7 +67,7 @@ def main():
        "regional_context_sources":result["regional_documentary_context_count"],
        "missing_topics":result["plan"]["missing_topics"],
        "chirps":result["chirps_status"],
-       "fa_i_th_climate":"CONTEXT_OUTSIDE_AOI",
+       "faith_climate":"CONTEXT_OUTSIDE_AOI",
        "meta_calls":0,
        "out":str(dest)
     },indent=2,ensure_ascii=False))
