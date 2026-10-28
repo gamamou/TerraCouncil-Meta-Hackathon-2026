@@ -248,6 +248,23 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path == "/api/chamber":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            run_id = parse_qs(route.query).get("id", [""])[0]
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_verified_session_required"})
+            try:
+                from chamber_visuals import visual_cues
+                data = visual_cues(snapshot, self.server.evidence)
+            except (ValueError, KeyError, TypeError, ImportError) as exc:
+                return self.send_json(422, {"error": "chamber_unavailable", "detail": str(exc)[:180]})
+            return self.send_json(200, data)
         elif route.path == "/api/oral-manifest":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
