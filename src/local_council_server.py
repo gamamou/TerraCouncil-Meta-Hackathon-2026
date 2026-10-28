@@ -1,7 +1,7 @@
 """HACK-008: localhost-only interactive evidence-gated FAITH scientific council.
 
 Usage:
-  python -X utf8 src/local_council_server.py --evidence C:\...\boke_screened_evidence.json
+  python -X utf8 src/local_council_server.py --evidence <local-evidence.json>
 Open printed localhost URL in Edge. This serves only 127.0.0.1.
 
 - 0 model calls on page load, question preparation and evidence inspection.
