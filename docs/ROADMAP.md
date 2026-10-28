@@ -88,3 +88,9 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 - Existing timestamped playback selects the active scene, grounded in the same session and validated MP3 digest.
 - Offline approved-script review preparation; no TTS calls or new Meta runs required to inspect the scene navigation.
 - User-side interactive validation and first approved ElevenLabs audio remain pending.
+
+## HACK-014 — in-browser French audio editorial studio
+
+- Four editable French oral interventions and manual fidelity approval on localhost, no manual JSON editor needed.
+- Explicit no-external-call approval endpoint stores source-bound reviewed script in private Documents.
+- Remaining: Windows user test, then separately authorized ElevenLabs voice generation and synchronized playback validation.
