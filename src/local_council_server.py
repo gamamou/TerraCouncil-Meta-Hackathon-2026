@@ -278,6 +278,22 @@ class Handler(BaseHTTPRequestHandler):
             trace.pop("evidence_snapshot",None)
             for step in trace.get("steps",[]):step.pop("raw_model_text",None)
             return self.send_json(200,trace)
+        elif route.path == "/api/dynamic-oral":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            source=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not source.is_file():
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_narration import build_dynamic_oral
+                record=json.loads(source.read_text(encoding="utf-8"))
+                result=build_dynamic_oral(record)
+            except (ValueError,KeyError,TypeError,OSError) as e:
+                return self.send_json(422,{"error":"oral_unavailable","detail":str(e)[:150]})
+            return self.send_json(200,result)
         elif route.path == "/api/chamber":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
