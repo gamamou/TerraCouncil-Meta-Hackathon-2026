@@ -321,7 +321,7 @@ class Handler(BaseHTTPRequestHandler):
                 trace=json.loads(source.read_text(encoding="utf-8"))
                 if trace.get("run_id")!=run_id:
                     raise ValueError("Session ID mismatch")
-                target=folder/(run_id+"-Dynamic-Brief-V1.pdf")
+                target=folder/(run_id+"-Dynamic-Brief-V2.pdf")
                 if not target.exists():
                     build_dynamic_pdf(trace,target)
                 content=target.read_bytes()
@@ -329,7 +329,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(422,{"error":"dynamic_brief_unavailable","detail":str(e)[:150]})
             self.send_response(200)
             self.send_header("Content-Type","application/pdf")
-            self.send_header("Content-Disposition","attachment; filename=TerraCouncil-Dynamic-Brief-V1.pdf")
+            self.send_header("Content-Disposition","attachment; filename=TerraCouncil-Dynamic-Brief-V2.pdf")
             self.send_header("Cache-Control","no-store")
             self.send_header("Content-Length",str(len(content)))
             self.end_headers()
