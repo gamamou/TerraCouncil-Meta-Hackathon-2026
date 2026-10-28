@@ -1,0 +1,49 @@
+{
+  "schema_version": "TERRA_BOKE_CONTEXT_CANDIDATE_002E",
+  "recovery_date": "2026-10-28",
+  "historic_producer": "FAITH FSMI",
+  "source_file": "public/data/fsmi/guinea_34_nasa_power_2001_2025_v01.json",
+  "source_policy": "FSMI_NATIONAL_POWER_POINT_SCREENING_001",
+  "source_status": "COMPUTED_SCREENING_UNREVIEWED",
+  "indicator_location": {
+    "name": "Boke",
+    "reference_lon": -14.413188,
+    "reference_lat": 11.068551,
+    "reference_type": "APPROXIMATE_PREFECTURAL_REFERENCE_CENTROID_NOT_ADMINISTRATIVE_MEAN"
+  },
+  "pilot_aoi_bbox_epsg4326": [
+    -14.5,
+    10.5,
+    -14,
+    11
+  ],
+  "point_inside_pilot_rectangle": false,
+  "period": "2001-2025",
+  "baseline": "2001-2020",
+  "observation_year": 2025,
+  "indicators": {
+    "rain_2025_mm": 1944.2,
+    "rain_baseline_2001_2020_mm": 1918,
+    "rain_anomaly_2025_mm": 26.2,
+    "rain_anomaly_2025_pct": 1.4,
+    "temp_2025_c": 27.66,
+    "temp_baseline_2001_2020_c": 27.25,
+    "temp_anomaly_2025_c": 0.41
+  },
+  "source_reference": {
+    "provider": "NASA POWER monthly point API / MERRA-2",
+    "response_sha256": "ac0be2a6eb4f7c8b395489201127470170a0a10cd1fe868dc29600d5a8198518",
+    "source_release": "v2.10.0",
+    "generated_at_utc": "2026-10-20T04:07:26.290942+00:00",
+    "source_url": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR&community=AG&longitude=-14.413188&latitude=11.068551&format=JSON&start=2001&end=2025"
+  },
+  "scientific_tier": "CONTEXT_CANDIDATE_NOT_AOI_ADMITTED",
+  "scientific_limits": [
+    "Point estimate, not prefecture polygon average",
+    "Reference point falls outside previously chosen exploratory pilot rectangle; do not claim within-pilot measurement",
+    "Not a mine impact or flood assessment",
+    "Source product and redistribution license review required before model use",
+    "Summary metrics are historic FAITH computations, not new hackathon acquisition"
+  ],
+  "council_admission": false
+}
