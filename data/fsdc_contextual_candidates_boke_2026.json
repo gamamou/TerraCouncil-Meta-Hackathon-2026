@@ -1,0 +1,60 @@
+{
+  "schema_version": "FSDC_CONTEXT_001",
+  "description": "Sources contextuelles réelles, séparées des observations géospatiales locales.",
+  "records": [
+    {
+      "evidence_id": "BOKE-FODEL-GAC-2022-COMPANY-STATEMENT",
+      "title": "GAC — contribution annoncée au FODEL de Boké au titre de 2022",
+      "domain": "governance_finance",
+      "topics": [
+        "governance",
+        "finance",
+        "mining",
+        "communities"
+      ],
+      "scope": "Région de Boké, Guinée",
+      "coverage_relation": "REGIONAL_CONTEXT_NOT_AOI_OVERLAP_ESTABLISHED",
+      "period": "2022",
+      "publication_date": "2023-05-11",
+      "source_type": "COMPANY_PRESS_RELEASE_ARCHIVED",
+      "source_url": "https://www.gacguinee.com/fr/media-releases/gac-supports-boke",
+      "claim": "GAC a annoncé avoir versé 18,5 milliards GNF au FODEL de Boké au titre de 2022.",
+      "value": 18500000000,
+      "unit": "GNF",
+      "validation_status": "SOURCE_REPORTED_NOT_INDEPENDENTLY_AUDITED",
+      "limitations": [
+        "Déclaration de l'entreprise, non audit indépendant.",
+        "Ne démontre ni exécution finale des projets ni montant disponible en 2026.",
+        "N'établit aucun chevauchement avec l'emprise rectangulaire du pilote WorldCover.",
+        "Le site de GAC indique avoir cessé ses activités en Guinée en août 2025; cette déclaration est historique."
+      ]
+    },
+    {
+      "evidence_id": "BOKE-CECIDE-GRANT-2022-RESEARCH-SHEET",
+      "title": "CECIDE — subvention 2022 de suivi social et FODEL mentionnée dans une compilation",
+      "domain": "community_governance",
+      "topics": [
+        "governance",
+        "finance",
+        "mining",
+        "communities"
+      ],
+      "scope": "Région de Boké (projet décrit); bénéficiaire basé à Conakry",
+      "coverage_relation": "REGIONAL_CONTEXT_NOT_AOI_OVERLAP_ESTABLISHED",
+      "period": "2022",
+      "publication_date": "UNKNOWN",
+      "source_type": "SECONDARY_USER_DRIVE_RESEARCH_SHEET",
+      "source_url": "https://docs.google.com/spreadsheets/d/1rGQOe5D24kwTd-axXs4dlxkKWDukve-5DIyjA1yaB70/edit",
+      "claim": "Le tableau de recherche 'Guinea Research' liste une subvention de 10 811 USD attribuée en 2022 au CECIDE par Global Greengrants Fund, avec une description d'activités de suivi des engagements sociaux et environnementaux dans la région de Boké.",
+      "value": 10811,
+      "unit": "USD",
+      "validation_status": "SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE",
+      "limitations": [
+        "Compilation secondaire; entrée individuelle non confirmée sur le site primaire du bailleur.",
+        "Montant de subvention listé, pas une mesure des impacts socio-environnementaux.",
+        "Ne démontre pas la réalisation des activités ni un effet dans l'emprise géospatiale.",
+        "Exclu de toute affirmation quantitative validée tant que la source primaire n'est pas retrouvée."
+      ]
+    }
+  ]
+}
