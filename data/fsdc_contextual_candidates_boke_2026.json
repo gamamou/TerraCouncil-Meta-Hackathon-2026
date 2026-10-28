@@ -55,6 +55,33 @@
         "Ne démontre pas la réalisation des activités ni un effet dans l'emprise géospatiale.",
         "Exclu de toute affirmation quantitative validée tant que la source primaire n'est pas retrouvée."
       ]
+    },
+    {
+      "evidence_id": "BOKE-MINING-PM10-KOLIE-2024-ABSTRACT",
+      "title": "Environmental Threat Assessment Framework for Mining Activities in Guinea (Kolie et al., 2024)",
+      "domain": "environment_air_water",
+      "topics": [
+        "dust",
+        "water",
+        "mining",
+        "climate"
+      ],
+      "scope": "Zones minières de bauxite de Boké et projet minier de fer de Kérouané, Guinée",
+      "coverage_relation": "REGIONAL_CONTEXT_NOT_AOI_OVERLAP_ESTABLISHED",
+      "period": "2022-10 to 2023-01 (collecte rapportée dans le résumé)",
+      "publication_date": "2024",
+      "source_type": "PEER_REVIEWED_PUBLISHED_ABSTRACT",
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/39527266/",
+      "claim": "Le résumé scientifique fait état de niveaux élevés de PM10 dans des opérations minières étudiées et de préoccupations liées à la qualité de l'eau, aux sols et au bruit dans les régions évaluées. Il ne fournit pas dans ce résumé de concentration PM10 numérique propre à l'AOI TerraCouncil.",
+      "value": null,
+      "unit": null,
+      "validation_status": "PEER_REVIEWED_ABSTRACT_NOT_AOI_GEOREFERENCED",
+      "limitations": [
+        "Étude multisite (Boké et Kérouané), ne pas attribuer chaque chiffre/constat à Boké sans lecture des tableaux originaux.",
+        "Résumé seul examiné, concentrations PM10 exactes et emplacements des mesures non accessibles dans la source consultée.",
+        "Ne permet pas d'établir une concentration PM10 pour l'emprise rectangulaire du pilote ni les niveaux actuels en 2026.",
+        "Source scientifique publiée, mais résultats non reproduits ni revalidés dans notre pipeline FSDC."
+      ]
     }
   ]
 }
