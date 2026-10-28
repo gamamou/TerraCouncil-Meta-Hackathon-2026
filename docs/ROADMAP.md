@@ -53,3 +53,10 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 - New-question field prepares a question but does not invoke a model or produce fake answers.
 - Local validation / Edge review and public demo deployment remain pending.
 - Later: live evidence-gated question backend and additional actually executed stakeholder perspectives.
+
+## HACK-008 — real interactive council (prototype committed)
+
+- Live user question interface on localhost (`127.0.0.1`), no public server.
+- Explicit consent/billing and local API key; 2 Spark analytical perspectives, 1 Wonder critique, 1 Spark revision.
+- Independent checks and private session checkpointing after each attempt.
+- Not yet validated in participant's browser. Need run tests and live session, then improve structured disagreement summaries.
