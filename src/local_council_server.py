@@ -378,6 +378,37 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/dynamic-preview":
+            if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            if self.headers.get("Content-Type","").split(";")[0].strip() != "application/json":
+                return self.send_json(415,{"error":"json_required"})
+            try: n=int(self.headers.get("Content-Length","0"))
+            except ValueError: n=0
+            if not 1 <= n <= 4000:
+                return self.send_json(413,{"error":"invalid_request_size"})
+            try: request_data=json.loads(self.rfile.read(n))
+            except (ValueError,UnicodeDecodeError):
+                return self.send_json(400,{"error":"bad_json"})
+            if not isinstance(request_data,dict):
+                return self.send_json(400,{"error":"json_object_required"})
+            try:
+                from dynamic_council import plan_question
+                selected=plan_question(request_data.get("question",""),
+                    self.server.evidence,"Boké, Guinea",
+                    request_data.get("sector") or None)
+            except (ValueError,KeyError,TypeError) as exc:
+                return self.send_json(422,{"error":"dynamic_preview_failed","detail":str(exc)[:150]})
+            return self.send_json(200,{
+                "schema_version":selected.get("schema_version"),
+                "status":selected["status"],"sector":selected.get("sector"),
+                "topics":selected["topics"],"agents":selected["proposers"],
+                "source_ids":[x["evidence_id"] for x in selected["evidence"]],
+                "missing_topics":selected["missing_topics"],
+                "evidence_sha256":selected.get("evidence_sha256"),
+                "model_calls":0,
+                "note":"Preview only. Existing HACK-008 run button remains the fixed pilot."
+            })
         if self.path == "/api/voice-start":
             if not self.same_origin() or self.headers.get("X-Terra-Token")!=self.server.token:
                 return self.send_json(403,{"error":"origin_or_token_rejected"})
