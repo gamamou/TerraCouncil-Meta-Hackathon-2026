@@ -10,7 +10,8 @@ from dynamic_council import classify,plan_question
 
 REGISTRY=Path(__file__).resolve().parents[1]/"data"/"fsdc_contextual_candidates_boke_2026.json"
 VALID={"SOURCE_REPORTED_NOT_INDEPENDENTLY_AUDITED",
-       "SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE"}
+       "SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE",
+       "PEER_REVIEWED_ABSTRACT_NOT_AOI_GEOREFERENCED"}
 
 def load_context_registry(path=REGISTRY):
     payload=json.loads(Path(path).read_text(encoding="utf-8"))
@@ -43,7 +44,8 @@ def compare_question(question,local_records,sector="mining",geography="Boké, Gu
         eligible=[x for x in candidates
           if set(category["topics"]).intersection(x["topics"])]
     accepted=[x for x in eligible
-       if x["validation_status"]=="SOURCE_REPORTED_NOT_INDEPENDENTLY_AUDITED"]
+       if x["validation_status"] in ("SOURCE_REPORTED_NOT_INDEPENDENTLY_AUDITED",
+                               "PEER_REVIEWED_ABSTRACT_NOT_AOI_GEOREFERENCED")]
     secondary=[x for x in eligible
        if x["validation_status"]=="SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE"]
     result={"schema_version":"FSDC_EXP_001",
@@ -61,11 +63,12 @@ def compare_question(question,local_records,sector="mining",geography="Boké, Gu
             "status":x["validation_status"],"source_url":x["source_url"]}
            for x in secondary],
        "contextual_sources_added":len(accepted),
+       "peer_reviewed_regional_studies_found":sum(x["validation_status"]=="PEER_REVIEWED_ABSTRACT_NOT_AOI_GEOREFERENCED" for x in accepted),
        "aoi_scientific_observations_added":0,
        "debate_rerun_performed":False,
        "model_calls":0,
        "scientific_conclusion_changed":"NOT_EVALUATED_NO_NEW_DEBATE",
-       "message":"Regional historical corporate statements are context, not measurements on the selected AOI or proof of current outcomes."}
+       "message":"The regional documentary/scientific evidence does not establish measurements, current outcomes or geospatial overlap on the pilot AOI."}
     result["comparison_sha256"]=hashlib.sha256(json.dumps(result,
       sort_keys=True,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
     return result
