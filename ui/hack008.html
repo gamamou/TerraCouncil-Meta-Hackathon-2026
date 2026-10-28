@@ -21,7 +21,7 @@ label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;ve
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
 hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 @media(max-width:850px){main{display:block}}
-.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}.theater{background:#091b2d;border:1px solid #3e6677;border-radius:15px;padding:20px;margin:12px 0 18px}.theater-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px}.theater h3{font-size:19px;color:#d9eff3}.theater .focuscard{background:#142b3e;border-radius:10px;padding:14px;min-height:130px}.cuebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cuebar button{flex:1;min-width:140px;font-size:13px;padding:10px}.cuebar button.active{background:#117982;border-color:#7ce5d6}.cue-quote{color:#c9e0e9;font-size:13px;line-height:1.6}.cue-number{font-size:27px;font-weight:750;color:#82cfd4}.cue-foot{font-size:11px;color:#b0cad1}.speaker-glow{background:#1179824f;border:1px solid #6bd5c5;border-radius:10px;padding:12px}.cue-pulse{box-shadow:0 0 0 2px #67d3bd88}.playback-note{font-size:12px;color:#b2d0da;margin:10px 0}@media(max-width:850px){.theater-grid{grid-template-columns:1fr}}</style></head>
+.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}.theater{background:#091b2d;border:1px solid #3e6677;border-radius:15px;padding:20px;margin:12px 0 18px}.theater-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px}.theater h3{font-size:19px;color:#d9eff3}.theater .focuscard{background:#142b3e;border-radius:10px;padding:14px;min-height:130px}.cuebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cuebar button{flex:1;min-width:140px;font-size:13px;padding:10px}.cuebar button.active{background:#117982;border-color:#7ce5d6}.cue-quote{color:#c9e0e9;font-size:13px;line-height:1.6}.cue-number{font-size:27px;font-weight:750;color:#82cfd4}.cue-foot{font-size:11px;color:#b0cad1}.speaker-glow{background:#1179824f;border:1px solid #6bd5c5;border-radius:10px;padding:12px}.cue-pulse{box-shadow:0 0 0 2px #67d3bd88}.playback-note{font-size:12px;color:#b2d0da;margin:10px 0}@media(max-width:850px){.theater-grid{grid-template-columns:1fr}}.oraleditor{border:1px solid #3e6578;background:#10263a;border-radius:12px;padding:16px;margin:14px 0}.oraleditor textarea{min-height:95px}.oraleditor .turn{padding:10px 0;border-bottom:1px solid #3c536b}.oraleditor .counter{font-size:12px;color:#b7d0df}.oraleditor input[type=checkbox]{width:18px;height:18px}.stage-result{color:#b7d0df;margin-top:10px}.oraleditor button{margin-right:8px}</style></head>
 <body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
 <h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Exploratoire · Non validé sur le terrain</span></header>
 <main><aside>
@@ -61,6 +61,18 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
   </div>
   <div class="focuscard" style="margin-top:12px"><div class="tag">PRIORITÉ D'INVESTIGATION</div><div id="scene-action" class="cue-quote">Aucune.</div><div id="scene-caution" class="cue-foot"></div></div>
 </div>
+<div id="oral-editor" class="oraleditor">
+  <div class="top"><h3>Atelier oral · Relecture française</h3><span class="badge">HACK-014</span></div>
+  <p class="muted">Modifier les phrases destinées aux voix sans toucher aux réponses scientifiques originales. Aucun appel Meta ou ElevenLabs à cette étape.</p>
+  <button id="load-oral" type="button" disabled>Ouvrir le scénario de cette session</button>
+  <div id="oral-turns"></div>
+  <div id="oral-approval" class="hidden">
+    <p id="oral-length" class="counter"></p>
+    <label><input type="checkbox" id="approve-meaning">J'ai relu les quatre interventions et vérifié leur fidélité aux réponses scientifiques originales. Je comprends qu'il s'agit d'une reconstruction éditoriale non verbatim et non d'une validation de terrain.</label>
+    <button id="save-oral" type="button" disabled>Approuver et enregistrer localement</button>
+  </div>
+  <p id="oral-status" class="stage-result" role="status">Ouvrez une session terminée pour préparer le dialogue oral.</p>
+</div>
 <h3>Lecture synchronisée de la session</h3>
 <p class="muted">Utilisez le MP3 et son fichier d'horodatage générés après relecture du scénario français. Les deux fichiers doivent correspondre à la session ouverte.</p>
 <label>Audio de la délibération actuelle<input id="session-audio" type="file" accept=".mp3,audio/mpeg"></label>
@@ -82,7 +94,7 @@ const TOKEN="__SESSION_TOKEN__";
 const $=id=>document.getElementById(id);
 const add=(tag,parent,txt,cls)=>{let n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;parent.appendChild(n);return n};
 const opts={headers:{"X-Terra-Token":TOKEN}};
-let busy=false, activeRunId=null, loadedAudioUrl=null, chamberData=null, currentScene=0;
+let busy=false, activeRunId=null, loadedAudioUrl=null, chamberData=null, currentScene=0, editableOral=null;
 function showBars(evidence){
  const record=(evidence||[]).find(e=>String(e.dataset).includes("WorldCover 2021"));
  const target=$("landcover-bars");target.replaceChildren();
@@ -158,6 +170,60 @@ async function loadChamber(runId){
    selectScene(0,false);
  }catch(err){$("scene-status").textContent="Chambre non disponible : "+err.message;}
 }
+
+$("approve-meaning").addEventListener("change",()=>{
+  $("save-oral").disabled=!$("approve-meaning").checked||!editableOral||!activeRunId;
+});
+$("load-oral").onclick=async()=>{
+  if(!activeRunId)return;
+  $("oral-status").textContent="Chargement du scénario…";
+  $("oral-turns").replaceChildren();
+  $("oral-approval").classList.add("hidden");
+  $("approve-meaning").checked=false;
+  $("save-oral").disabled=true;
+  try{
+    const response=await fetch("/api/oral-draft?id="+encodeURIComponent(activeRunId),opts);
+    const result=await response.json();
+    if(!response.ok)throw Error(result.detail||result.error||"Scénario indisponible");
+    if(result.session_id!==activeRunId||result.turns.length!==4)throw Error("Données de session incohérentes");
+    editableOral=result;
+    for(const [i,turn] of result.turns.entries()){
+      const card=add("div",$("oral-turns"),"","turn");
+      add("strong",card,(i+1)+". "+turn.speaker);
+      add("p",card,"Reconstruction éditoriale, non verbatim.","counter");
+      const area=document.createElement("textarea");area.value=turn.text_to_review;
+      area.setAttribute("aria-label","Texte oral de "+turn.speaker);
+      area.maxLength=1100;card.appendChild(area);
+      area.addEventListener("input",()=>{
+        turn.text_to_review=area.value;
+        $("approve-meaning").checked=false;
+        $("save-oral").disabled=true;
+        updateLength();
+      });
+    }
+    $("oral-approval").classList.remove("hidden");
+    updateLength();
+    $("oral-status").textContent="Relisez chaque intervention en regard des positions scientifiques enregistrées avant d'approuver.";
+  }catch(error){editableOral=null;$("oral-status").textContent="Erreur de préparation : "+error.message;}
+};
+function updateLength(){
+ const n=editableOral?editableOral.turns.reduce((sum,t)=>sum+t.text_to_review.length,0):0;
+ $("oral-length").textContent="Longueur totale : "+n+" caractères (plafond de préparation : 2 000)."+(n>2000?" Raccourcissez avant validation.":"");
+}
+$("save-oral").onclick=async()=>{
+ if(!activeRunId||!editableOral||!$("approve-meaning").checked)return;
+ const button=$("save-oral");button.disabled=true;
+ $("oral-status").textContent="Vérification et enregistrement local, sans appel extérieur…";
+ try{
+   const response=await fetch("/api/oral-approve",{method:"POST",
+     headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+     body:JSON.stringify({run_id:activeRunId,draft:editableOral,reviewed_meaning:true})});
+   const result=await response.json();
+   if(!response.ok)throw Error(result.detail||result.error||"Validation refusée");
+   $("oral-status").textContent="Scénario approuvé et enregistré dans Documents/TerraCouncil-Hack008-Sessions/Approved-Oral-Reviews. Aucun appel facturé. Empreinte : "+result.script_sha256;
+   $("approve-meaning").checked=false;
+ }catch(err){$("oral-status").textContent="Approbation non enregistrée : "+err.message;}
+};
 async function loadSessionPlayback(){
  const audio=$("session-audio").files[0],timing=$("session-timing").files[0];
  const status=$("audio-match"),holder=$("session-audio-player");
@@ -299,7 +365,7 @@ async function loadSaved(){
       const trace=await res.json();render(trace);
       if(trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED") await loadChamber(ses.run_id);
       activeRunId=trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?ses.run_id:null;
-      $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;$("manifest-button").disabled=!activeRunId;
+      $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;$("manifest-button").disabled=!activeRunId;$("load-oral").disabled=!activeRunId;
       $("pdf-status").textContent=activeRunId?"PDF de cette session disponible sans appel Meta.":"PDF non disponible : session incomplète.";
       describe("Session restaurée : "+ses.run_id+" · Aucun nouvel appel Meta.");
       $("progress").scrollIntoView({behavior:"smooth",block:"start"});
@@ -326,7 +392,7 @@ async function poll(id){
 }
 $("run").onclick=async()=>{
  if(busy||!$("share").checked||!$("billing").checked)return;
- busy=true;activeRunId=null;$("pdf-button").disabled=true;$("oral-button").disabled=true;$("manifest-button").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
+ busy=true;activeRunId=null;$("pdf-button").disabled=true;$("oral-button").disabled=true;$("manifest-button").disabled=true;$("load-oral").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
  try{
  const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
   body:JSON.stringify({question:$("question").value,consent:true,reviewed_sharing:true})});
