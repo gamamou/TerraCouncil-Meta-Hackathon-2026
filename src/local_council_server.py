@@ -636,9 +636,11 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 from dynamic_council import plan_question
                 from fsdc_evidence_expansion import attach_regional_context
+                from faith_environmental_context_002k import attach_environmental_context
                 from dynamic_runtime import execute_dynamic
-                plan=attach_regional_context(plan_question(request_data.get("question",""),self.server.evidence,
-                                   "Boké, Guinea",request_data.get("sector") or None))
+                plan=attach_environmental_context(attach_regional_context(plan_question(
+                    request_data.get("question",""),self.server.evidence,
+                    "Boké, Guinea",request_data.get("sector") or None)))
                 if not plan["status"].startswith("READY_") or not plan["evidence"]:
                     return self.send_json(422,{"error":"not_enough_question_relevant_data",
                                                "status":plan["status"],"missing_topics":plan["missing_topics"]})
@@ -680,9 +682,10 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 from dynamic_council import plan_question
                 from fsdc_evidence_expansion import attach_regional_context
-                selected=attach_regional_context(plan_question(request_data.get("question",""),
-                    self.server.evidence,"Boké, Guinea",
-                    request_data.get("sector") or None))
+                from faith_environmental_context_002k import attach_environmental_context
+                selected=attach_environmental_context(attach_regional_context(plan_question(
+                    request_data.get("question",""),self.server.evidence,"Boké, Guinea",
+                    request_data.get("sector") or None)))
             except (ValueError,KeyError,TypeError) as exc:
                 return self.send_json(422,{"error":"dynamic_preview_failed","detail":str(exc)[:150]})
             return self.send_json(200,{
@@ -695,7 +698,8 @@ class Handler(BaseHTTPRequestHandler):
                 "plan_sha256":selected.get("plan_sha256"),
                 "planned_model_calls":selected.get("model_calls_planned",0),
                 "regional_context":[{"evidence_id":e["evidence_id"],"source_type":e["source_type"],
-                    "scope":e["scope"],"claim":e["claim"],"source_url":e["source_url"],
+                    "scope":e["scope"],"claim":e["claim"],"source_url":e.get("source_url"),
+                    "source_path":e.get("source_path"),"coverage_relation":e.get("coverage_relation"),
                     "validation_status":e["validation_status"]} for e in selected.get("regional_context",[])],
                 "model_calls":0,
                 "note":"Preview only. Existing HACK-008 run button remains the fixed pilot."
