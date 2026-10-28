@@ -20,7 +20,7 @@ class MultisourceTests(unittest.TestCase):
             source_record("TEST-WORLDCOVER","ESA WorldCover 2021","2021 land cover forest share screened."),
             source_record("TEST-WORLDPOP","WorldPop 2026","2026 population raster sum screened.")
         ]
-        with patch.object(module,"expand",return_value=records):
+        with patch.object(module,"expand",return_value=records), patch.object(module,"check_chirps",return_value={"status":"REFERENCED_NOT_QUANTIFIED","accepted":[]}):
             return module.case_file("test_hi","test_qa")
     def test_real_documentary_lane_not_as_aoi_evidence(self):
         x=self._case()
@@ -36,7 +36,7 @@ class MultisourceTests(unittest.TestCase):
         self.assertEqual(x["model_calls_executed"],0)
     def test_original_chirps_hash_is_not_an_observation(self):
         x=self._case()
-        self.assertEqual(x["chirps_status"],module.CHIRPS_ROLE)
+        self.assertEqual(x["chirps_status"],"REFERENCED_NOT_QUANTIFIED")
         self.assertIn("dust",x["plan"]["missing_topics"])
     def test_no_source_transmission(self):
         x=self._case()
