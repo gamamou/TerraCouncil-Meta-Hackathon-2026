@@ -76,3 +76,19 @@ The permanent BOM-handling patch and its regression test were separately committ
 ## Cross-studio inventory linked
 
 The new machine-readable `config/faith_fsmi_existing_sources_002.json` catalogs 12 source rails already present or documented in FSMI, with precise file paths, real source universes and explicit Boké geography/rights gates. These are provenance pointers, **not** data downloaded or incorporated into agent evidence. This work is hackathon source integration engineering; the original historical science remains attributed to FAITH.
+
+## TERRA-DATA-002D — Question-to-source trace (28 October 2026)
+
+Implemented in `src/faith_question_source_selection_002.py` and tested in `tests/test_faith_question_source_selection_002.py` (tests committed; **execution pending**).
+
+This function reuses the existing `HACK-016` question classifier and planner, matching topics against the existing twelve-source FSMI/FAITH catalog. It reports which source pointers are thematically relevant and which are geographically excluded or need AOI validation. It also invokes `plan_question(question, [])` with **zero evidence** to confirm scientific abstention rather than silently elevate catalog metadata into observations. It performs no network calls, no model calls and no scientific recalculation.
+
+Windows latest GitHub checkout:
+~~~powershell
+$script = Get-ChildItem . -Recurse -File -Filter "faith_question_source_selection_002.py" | Select-Object -First 1
+if (-not $script) { throw "Actualiser TerraCouncil depuis GitHub" }
+$root = $script.Directory.Parent.FullName
+python -X utf8 -m unittest discover -s (Join-Path $root "tests") -p "test_faith_question_source_selection_002.py" -v
+python -X utf8 $script.FullName --question "Comment concilier extraction minière, poussière, forêt, eau et communautés à Boké ?" --geography "Boké, Guinea"
+~~~
+An expected **`ABSTAIN`** status means only that this source discovery pass does not yet have admitted Boké observations; it is **not a failure of source discovery**. Do not interpret pointers as geolocated source observations. The next scientific step is approved private source access and exact AOI crosswalk, not new source acquisition.
