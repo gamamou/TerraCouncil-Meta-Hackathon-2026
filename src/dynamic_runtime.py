@@ -37,7 +37,7 @@ state its exact source period and geographic scope, and challenge any unsupporte
 transfer from Guinea-wide screening to the rectangular Boké pilot.
 The independent scientific critic MUST identify at least one source-scope limitation
 and the most decision-relevant unresolved disagreement.
-The final synthesis MUST distinguish: (a) facts quoted exactly from AOI evidence;
+If a dust_protocol is supplied, compare its testable investigations, challenge their preconditions,\nand propose priorities without implying any on-site concentration was observed.\nThe final synthesis MUST distinguish: (a) facts quoted exactly from AOI evidence;
 (b) explicitly labeled historical context; (c) alternative hypotheses;
 (d) prioritized additional measurements with a falsifiable question, relevant method,
 and decision that the measurement would inform.
@@ -69,6 +69,8 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
       "plan_sha256":plan.get("plan_sha256"),
       "regional_context":plan.get("regional_context",[]),
       "regional_context_sha256":plan.get("regional_context_sha256"),
+      "scientific_protocol_sha256":plan.get("scientific_protocol_sha256"),
+      "dust_protocol":plan.get("dust_protocol",[]),
       "evidence_snapshot":plan["evidence"],"planned_calls":len(plan["proposers"])+2,
       "calls_attempted":0,"status":"STARTED",
       "human_review_required":True,"steps":[]}
@@ -81,7 +83,8 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
             "geography":plan["geography"],"topics":plan["topics"],
             "missing_topics":plan["missing_topics"],
             "evidence_sha256":plan["evidence_sha256"],"evidence":plan["evidence"],
-            "regional_context":plan.get("regional_context",[])}
+            "regional_context":plan.get("regional_context",[]),
+            "dust_protocol":plan.get("dust_protocol",[])}
     def call(role,model,payload):
         item={"role":role,"model":model,"status":"REQUEST_STARTED_DO_NOT_RETRY"}
         data["steps"].append(item)
