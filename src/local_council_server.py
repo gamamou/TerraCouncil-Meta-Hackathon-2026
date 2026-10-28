@@ -231,17 +231,51 @@ class Handler(BaseHTTPRequestHandler):
             if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
                 return self.send_json(409, {"error": "complete_verified_session_required"})
             try:
-                from export_decision_pdf import validate_session, export_pdf
+                from export_decision_pdf import validate_session
+                from elegant_decision_pdf import export_elegant_pdf
                 record = validate_session(snapshot, self.server.evidence)
                 target = self.server.out_dir / (run_id + "-Decision-Brief.pdf")
                 if not target.exists():
-                    export_pdf(record, target)
+                    export_elegant_pdf(record, target)
                 content = target.read_bytes()
             except (ValueError, RuntimeError, OSError, ImportError, KeyError, TypeError) as exc:
                 return self.send_json(500, {"error": "pdf_generation_failed", "detail": str(exc)[:170]})
             self.send_response(200)
             self.send_header("Content-Type", "application/pdf")
             self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Decision-Brief.pdf")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+        elif route.path == "/api/oral-review":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            run_id = parse_qs(route.query).get("id", [""])[0]
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_verified_session_required"})
+            try:
+                from natural_french_dialogue import oral_storyboard
+                manifest = oral_storyboard(snapshot, self.server.evidence)
+                parts = [
+                    "TERRACOUNCIL — SCRIPT ORAL À RELIRE",
+                    "Reconstruction éditoriale en français, NON VERBATIM.",
+                    "Aucune génération audio ou validation scientifique implicite.",
+                    "Session : " + manifest["session_id"], ""
+                ]
+                for turn in manifest["turns"]:
+                    parts.extend([turn["speaker"].upper(), turn["text_to_review"], ""])
+                parts.append("Relecture humaine obligatoire avant tout appel ElevenLabs.")
+                content = ("\n".join(parts) + "\n").encode("utf-8")
+            except (ValueError, KeyError, TypeError, ImportError) as exc:
+                return self.send_json(422, {"error": "oral_script_not_available", "detail": str(exc)[:150]})
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Oral-Review.txt")
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
