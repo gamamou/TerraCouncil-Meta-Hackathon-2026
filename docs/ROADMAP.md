@@ -74,3 +74,10 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 - Creates a restricted, reviewed-only oral editorial reconstruction, not mechanical JSON narration.
 - Adds optional explicitly authorized ElevenLabs v4 speech/timestamps output; browser can highlight speaking agent when matching audio/timing files are loaded.
 - No new Meta calls needed for existing sessions; real user-side PDF QA and TTS authorization pending.
+
+## HACK-011 — Oral-script approval and synchronized chamber
+
+- New source-bound editable narration manifest with mandatory human meaning review, separate from unchanged scientific model JSON.
+- ElevenLabs request refuses unapproved or altered text, needs separate user consent and cost approval.
+- Edge rechecks session ID and MP3 SHA256 before speaker-highlighted synchronized playback.
+- No paid calls in development/checks. Windows runtime validation and first approved session audio still pending.
