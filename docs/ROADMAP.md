@@ -67,3 +67,10 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 - Reopen saved HACK-008 session traces without repeating model calls.
 - WorldCover 2021 preliminary land-cover bar visualization and user-selected archival MP3 playback; no false linkage between archive audio and a new debate.
 - Pending: real-time session-specific natural French audio, time-aligned debate visualization, PDF QA on Windows.
+
+## HACK-010 — refined executive reporting & optional natural voice
+
+- Replaces technical PDF export with elegant French decision memo plus audit appendix.
+- Creates a restricted, reviewed-only oral editorial reconstruction, not mechanical JSON narration.
+- Adds optional explicitly authorized ElevenLabs v4 speech/timestamps output; browser can highlight speaking agent when matching audio/timing files are loaded.
+- No new Meta calls needed for existing sessions; real user-side PDF QA and TTS authorization pending.
