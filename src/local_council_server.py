@@ -248,6 +248,17 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path == "/api/dynamic-readiness":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            try:
+                from dynamic_readiness import inspect_readiness
+                report=inspect_readiness(self.server.evidence,self.server.out_dir,
+                    bool(os.environ.get("MODEL_API_KEY")),
+                    bool(os.environ.get("ELEVENLABS_API_KEY")))
+            except (ValueError,OSError,KeyError,TypeError) as error:
+                return self.send_json(422,{"error":"readiness_failed","detail":str(error)[:140]})
+            return self.send_json(200,report)
         elif route.path in ("/api/dynamic-sessions","/api/dynamic-status"):
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"token_required"})
