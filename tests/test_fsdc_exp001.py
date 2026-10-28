@@ -3,7 +3,8 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"src"))
-from fsdc_evidence_expansion import compare_question,load_context_registry
+from fsdc_evidence_expansion import compare_question,load_context_registry,attach_regional_context
+from dynamic_council import plan_question,plan_fingerprint
 
 def local():
     return [{"evidence_id":"BOKE-LAND","dataset":"ESA WorldCover 2021",
@@ -31,6 +32,17 @@ class EvidenceExpansionTests(unittest.TestCase):
     def test_outside_boke_rejects_contextual_inference(self):
         result=compare_question("Quels financements et quelle occupation du sol à Conakry ?",local())
         self.assertEqual(result["contextual_sources_added"],0)
+    def test_source_bound_meta_plan_excludes_secondary_document(self):
+        a=attach_regional_context(plan_question(
+            "Quels impacts miniers sur l'occupation du sol à Boké ?",local(),sector="mining"))
+        self.assertEqual(a["plan_sha256"],plan_fingerprint(a))
+        self.assertEqual(a["evidence"][0]["evidence_id"],"BOKE-LAND")
+        self.assertEqual(len(a["regional_context"]),2)
+        self.assertTrue(all(x["validation_status"]!="SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE"
+             for x in a["regional_context"]))
+        before=plan_question(a["question"],local(),sector="mining")
+        self.assertNotEqual(a["plan_sha256"],before["plan_sha256"])
+        self.assertEqual(a["evidence_sha256"],before["evidence_sha256"])
     def test_dust_is_still_not_established(self):
         result=compare_question("Quelles concentrations PM10 à Boké ?",local())
         self.assertEqual(result["baseline"]["status"],"ABSTAIN_NO_QUESTION_RELEVANT_EVIDENCE")
