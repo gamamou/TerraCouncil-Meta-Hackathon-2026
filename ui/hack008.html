@@ -49,7 +49,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div></div>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div></div>
 </div>
 <p class="muted tiny">Pilote HACK-008 conservé séparément :</p>
 <button id="run" disabled>Déclencher le Conseil scientifique</button>
@@ -425,6 +425,18 @@ function displayDynamic(trace){
  add("p",host,"Nouvelle délibération sauvegardée. Son audio et son PDF dynamique ne sont pas encore générés.","tiny muted");
 }
 
+$("dynamic-brief").onclick=async()=>{
+ if(!dynamicActiveId)return;
+ try{
+  const r=await fetch("/api/dynamic-brief?id="+encodeURIComponent(dynamicActiveId),opts);
+  if(!r.ok)throw Error("Brief indisponible");
+  const url=URL.createObjectURL(await r.blob());
+  const a=document.createElement("a");a.href=url;
+  a.download="TerraCouncil-"+dynamicActiveId+"-Dynamic-Brief-V1.pdf";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+ }catch(error){$("dynamic-state").textContent=error.message;}
+};
 $("dynamic-oral").onclick=async()=>{
  const area=$("dynamic-oral-output");area.replaceChildren();
  if(!dynamicActiveId)return;
@@ -455,6 +467,7 @@ async function dynamicPoll(id,initialChecks=0){
    if(!response.ok)throw Error(trace.error||"Session introuvable");
    displayDynamic(trace);
    $("dynamic-oral").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
+   $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
      setTimeout(()=>dynamicPoll(id),1200);
    }else{dynamicBusy=false;dynamicControls();}
