@@ -72,3 +72,29 @@ def compare_question(question,local_records,sector="mining",geography="Boké, Gu
     result["comparison_sha256"]=hashlib.sha256(json.dumps(result,
       sort_keys=True,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
     return result
+
+def attach_regional_context(plan):
+    """Attach published sources only, update fingerprint; keep spatial evidence separate."""
+    from dynamic_council import plan_fingerprint
+    question=plan.get("question","")
+    decision=classify(question,plan.get("sector"))
+    context=[]
+    if "bok" in question.casefold():
+        for record in load_context_registry():
+            if record["validation_status"]=="SECONDARY_UNCONFIRMED_NOT_ADMISSIBLE":
+                continue
+            if not set(decision["topics"]).intersection(record["topics"]):
+                continue
+            context.append({"evidence_id":record["evidence_id"],
+                "claim":record["claim"],"source_url":record["source_url"],
+                "source_type":record["source_type"],"period":record["period"],
+                "scope":record["scope"],
+                "coverage_relation":record["coverage_relation"],
+                "validation_status":record["validation_status"],
+                "limitations":record["limitations"]})
+    plan=dict(plan)
+    plan["regional_context"]=context
+    plan["regional_context_sha256"]=hashlib.sha256(json.dumps(context,
+        sort_keys=True,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
+    plan["plan_sha256"]=plan_fingerprint(plan)
+    return plan
