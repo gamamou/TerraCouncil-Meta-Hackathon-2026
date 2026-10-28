@@ -234,7 +234,7 @@ class Handler(BaseHTTPRequestHandler):
                 from export_decision_pdf import validate_session
                 from elegant_decision_pdf import export_elegant_pdf
                 record = validate_session(snapshot, self.server.evidence)
-                target = self.server.out_dir / (run_id + "-Decision-Brief.pdf")
+                target = self.server.out_dir / (run_id + "-Executive-Brief-v2.pdf")
                 if not target.exists():
                     export_elegant_pdf(record, target)
                 content = target.read_bytes()
