@@ -780,5 +780,8 @@ $("run").onclick=async()=>{
  poll(d.run_id);
  }catch(e){busy=false;control();describe("Conseil non lancé : "+e.message);}
 };
+$("dynamic-share").checked=false;
+$("dynamic-cost").checked=false;
+$("dynamic-voice-consent").checked=false;
 control();context();loadSaved();inspectDynamicReadiness();
 </script></body></html>
