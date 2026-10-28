@@ -59,6 +59,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-011 Reviewed oral narration & synchronized chamber](docs/HACK-011-AUDIO-REVIEW-CHAMBER.md)
 - [HACK-012 visibly redesigned Executive Brief V3](docs/HACK-012-EXECUTIVE-V3.md)
 - [HACK-013 Immersive scientific chamber](docs/HACK-013-IMMERSIVE-CHAMBER.md)
+- [HACK-014 French Oral Studio and source-bound review](docs/HACK-014-ORAL-STUDIO.md)
 
 ## Submission transparency
 
@@ -109,3 +110,7 @@ Verified that the user's October 28 PDF still had the previous five-page visual 
 ## HACK-013 — grounded audiovisual chamber
 
 The live local TerraCouncil app now has four manually browsable visual scenes derived from a completed and structurally verified HACK-008 session. During future approved session-specific ElevenLabs playback, the timestamped MP3 selects the corresponding scene and highlights the active scientific role. `src/chamber_visuals.py` derives figures and warnings only from original checked WorldPop/WorldCover evidence; `src/prepare_chamber.py` creates reviewable audio text **offline**. No new Meta or ElevenLabs calls were made during HACK-013. Edge playback with new audio and user-side tests remain pending. Audio remains a reviewed editorial reconstruction, never a verbatim original model recording.
+
+## HACK-014 — review natural French speech directly in Edge
+
+A new French Oral Studio permits review/editing of all four session-specific speaker interventions inside the local TerraCouncil Chamber. A protected localhost endpoint validates the original HACK-008 evidence and saves an immutable, session-fingerprint-bound oral manuscript only after explicit manual approval. It never triggers Meta or ElevenLabs. The existing separately authorized ElevenLabs synthesis and matched audio player remain available for a future reviewed session. User-side Windows validation is pending.
