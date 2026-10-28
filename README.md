@@ -50,6 +50,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-002 runtime and local test instructions](docs/HACK-002-RUNTIME.md)
 - [HACK-003 independent scientific verification](docs/HACK-003-INDEPENDENT-VERIFICATION.md)
 - [HACK-004 real Boké screened-data bridge](docs/HACK-004-REAL-BOKE-DATA.md)
+- [HACK-005 one-call Meta Spark live pilot](docs/HACK-005-LIVE-PILOT.md)
 
 ## Submission transparency
 
@@ -64,3 +65,7 @@ No public code license has yet been selected. All rights reserved pending an exp
 ## HACK-004 data integration status
 
 The new `src/import_boke_010hi.py` bridges pre-existing TerraCouncil 010HI/010HJ scientific screening into locally generated, **not field validated**, source-derived evidence records with strict hash consistency checks. Source inputs are not published in this repository. The code and isolated tests are committed; an actual model run with the local Boké input has **not** yet been completed or validated. See [HACK-004](docs/HACK-004-REAL-BOKE-DATA.md).
+
+## HACK-005 live-readiness checkpoint
+
+The new `src/live_pilot.py` supports one **explicitly authorized** real Meta Spark 1.3 API request with independent structural verification, private audit file and no automatic retry. The source/tests are committed; **a live Meta API call has not yet been performed here**. Preserve data-sharing and scientific review boundaries. Full Spark/Wonder deliberation remains pending successful first live validation.
