@@ -9,6 +9,7 @@ import json
 import re
 from dynamic_oral_audit import verify_oral
 from dynamic_narration import build_dynamic_oral
+from scientific_pronunciation import spoken_storyboard
 
 BLOCKED=re.compile(r"[<>{}#@\\|*_]|https?://|www\.",re.I)
 ENGLISH=re.compile(r"\b(the|should|with|without|evidence|missing|investigate|cannot|further|recommend|survey)\b",re.I)
@@ -25,20 +26,16 @@ def prepare_voice(trace,voice_spark,voice_wonder):
         raise ValueError("Unsupported number of council interventions")
     if not voice_spark or not voice_wonder or voice_spark==voice_wonder:
         raise ValueError("Distinct configured voice IDs required")
-    inputs=[]
-    for turn in turns:
-        message=turn["text_to_review"].strip()
-        if not message or len(message)>1100 or BLOCKED.search(message) or ENGLISH.search(message):
-            raise ValueError("Unreviewed language or technical speech content")
-        if any(char.isdigit() for char in message):
-            raise ValueError("Numbers need source-faithful oral normalization")
-        inputs.append({"text":message,"voice_id":voice_wonder if turn["source_model"]=="muse-wonder-1.0" else voice_spark})
+    spoken=spoken_storyboard(draft)
+    inputs=[{"text":item["spoken_text"],
+             "voice_id":voice_wonder if turn["source_model"]=="muse-wonder-1.0" else voice_spark}
+            for item,turn in zip(spoken,turns)]
     if sum(len(v["text"]) for v in inputs)>2000:
-        raise ValueError("Too many characters for one provider call")
+        raise ValueError("Dialogue exceeds single call limit")
     return {"session_id":trace["run_id"],"evidence_sha256":draft["evidence_sha256"],
             "script_sha256":checked["script_sha256"],
             "editorial_type":draft["type"],
-            "turns":turns,"payload":{"inputs":inputs,"model_id":"eleven_v4","language_code":"fr"},
+            "turns":turns,"pronunciation_audit":spoken,"payload":{"inputs":inputs,"model_id":"eleven_v4","language_code":"fr"},
             "gate":"EXACT_EXTRACTION_CHECK_PASSED",
             "scientific_validation":"STRUCTURAL_ONLY_NOT_FIELD_VALIDATED",
             "requires_paid_consent":True}
