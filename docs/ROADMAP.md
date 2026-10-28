@@ -126,3 +126,7 @@ Using the first completed real Boké council, an evidence-linked investigations 
 ## HACK-016K — Quantified Evidence
 
 Existing HACK-016 Boké sessions now expose literal quantified FSDC evidence values (ESA WorldCover 2021 cover shares) and a separate dynamic PDF V3, without invented impacts, trends or cost rankings. Edge provides Indicateurs FSDC; no new paid calls are required to view the archived council. See docs/HACK-016K-QUANTIFIED-REASONING.md. Windows validation pending.
+
+## FSDC-EXP-001 — Real evidence expansion (Boké, 28 Oct 2026)
+
+New evidence actually discovered: published Kolie et al. 2024 Boké/Kérouané air/environment study abstract reporting elevated PM10 at mining operations; archived May 2023 GAC historical FODEL contribution declaration; an unconfirmed 2022 CECIDE funding entry in the user's Drive marked secondary only. All are **regional/documentary**, not measurements on the local WorldCover AOI. A source-scoped comparison endpoint and Edge viewer expose before/after discovery, and published sources now accompany future question-bound Meta debate plans under explicit user consent, without inventing numerical PM10 values. No new billed debate performed. See docs/FSDC-EXP-001-REAL-EVIDENCE.md.
