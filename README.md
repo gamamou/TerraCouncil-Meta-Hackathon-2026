@@ -60,6 +60,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-012 visibly redesigned Executive Brief V3](docs/HACK-012-EXECUTIVE-V3.md)
 - [HACK-013 Immersive scientific chamber](docs/HACK-013-IMMERSIVE-CHAMBER.md)
 - [HACK-014 French Oral Studio and source-bound review](docs/HACK-014-ORAL-STUDIO.md)
+- [HACK-015 approved one-click ElevenLabs dialogue](docs/HACK-015-ONE-CLICK-AUDIO.md)
 
 ## Submission transparency
 
@@ -114,3 +115,7 @@ The live local TerraCouncil app now has four manually browsable visual scenes de
 ## HACK-014 — review natural French speech directly in Edge
 
 A new French Oral Studio permits review/editing of all four session-specific speaker interventions inside the local TerraCouncil Chamber. A protected localhost endpoint validates the original HACK-008 evidence and saves an immutable, session-fingerprint-bound oral manuscript only after explicit manual approval. It never triggers Meta or ElevenLabs. The existing separately authorized ElevenLabs synthesis and matched audio player remain available for a future reviewed session. User-side Windows validation is pending.
+
+## HACK-015 — explicit one-click voice production
+
+The local Edge Chamber now exposes a separate, consent-gated ElevenLabs voice generation action for a **source-bound and already human-approved** four-turn French script. The server creates a durable no-retry claim before one potentially paid TTS call, retains the MP3 and timing manifest privately, and serves them to a SHA-256-checking synchronized browser player. No new Meta debate is required. **HACK-015 source and offline tests are committed; paid synthesis and listening have not yet been user-validated.** The audio is a faithful-intent editorial reconstruction, not a verbatim scientific recording or field validation.
