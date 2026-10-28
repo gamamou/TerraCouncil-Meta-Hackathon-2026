@@ -1,0 +1,89 @@
+{
+  "schema_version": "TERRA_DUST_002L1",
+  "as_of": "2026-10-28",
+  "scope": "GUINEA_REGIONAL_SCREENING_CONTEXT_NOT_MINE_ATTRIBUTION",
+  "source_app": "FAITH FSMI",
+  "sources": [
+    {
+      "id": "FAITH-CAMS-AIR-SEPT2026",
+      "path": "public/fmri/guinea-cams-air-quality-september-2026.json",
+      "policy": "FSMI_CAMS_AIR_QUALITY_001",
+      "status": "PUBLIC_CAMS_REGIONAL_MODEL_CONTEXT_NOT_GROUND_MONITORING",
+      "period": "2026-09-01/2026-09-30",
+      "spatial_resolution_approx_km": 45,
+      "regional_model_points": 10,
+      "parameters": [
+        "pm10",
+        "pm2_5",
+        "dust",
+        "aerosol_optical_depth"
+      ],
+      "unit_particulate": "µg/m³",
+      "example_point": {
+        "lon": -14.181477,
+        "lat": 10.905188,
+        "pm10_mean_daily_means": 9.25,
+        "pm25_mean_daily_means": 5.2,
+        "dust_mean_daily_means": 6.12,
+        "location_status": "NONCANONICAL_CADASTRE_SCREENING_BOX_CENTER",
+        "inside_exploratory_rectangle": true
+      },
+      "ground_sensor_measurements": 0,
+      "mine_attribution_verified": false,
+      "restrictions": [
+        "CAMS model output is not on-site particulate monitoring",
+        "Example point is inside bounding rectangle but is not spatially validated mine exposure",
+        "CAMS grid is about 45 km, not a mine receptor",
+        "Dust field cannot be attributed to mining activity",
+        "Source license and sharing permission require review"
+      ]
+    },
+    {
+      "id": "FAITH-WIND-SEPT2026",
+      "path": "public/fmri/guinea-hourly-wind-september-2026.json",
+      "policy": "FSMI_HOURLY_REGIONAL_METEO_091I",
+      "status": "REGIONAL_MODELED_HOURLY_WIND_NOT_ONSITE_NOT_MINING_DISPERSION",
+      "period": "2026-09-01/2026-09-30",
+      "regional_model_points": 10,
+      "hourly_samples_each": 720,
+      "parameters": [
+        "wind_speed_10m",
+        "wind_direction_10m",
+        "precipitation"
+      ],
+      "ground_wind_sensors": 0,
+      "dispersion_validated": false,
+      "restrictions": [
+        "Modeled reference wind, not installed mine station",
+        "Cannot infer dust transport to a school or village without source and receptors",
+        "Source sharing requires license review"
+      ]
+    },
+    {
+      "id": "FAITH-AERMOD-EPA-REFERENCE",
+      "path": "public/fmri/fsmi095-official-aermod-benchmark.json",
+      "policy": "FSMI_095_EPA_AERMOD_REAL_REFERENCE_EXECUTION_001",
+      "status": "REAL_EPA_EXECUTION_NUMERICAL_REFERENCE_MATCH",
+      "model": "US EPA AERMOD 26135",
+      "benchmark_pollutant": "SO2",
+      "reference_area": "Martin's Creek 1992-93 USA",
+      "matched_ranked_concentrations": 587,
+      "matched_highest_values": 6,
+      "validated_guinea_mine_dispersion": false,
+      "field_sensor_calibration_passed": false,
+      "restrictions": [
+        "US SO2 reference benchmark, not Guinea PM10 or PM2.5 result",
+        "No measured mine emissions or receptor concentrations implied",
+        "No public claim of mining compliance from benchmark"
+      ]
+    }
+  ],
+  "decision_gates": [
+    "Identify canonical mine emission sources and activity data",
+    "Specify onsite meteorology and dispersion-ready AERMET inputs",
+    "Map actual community, school and ecological receptors",
+    "Run PM10 and PM2.5 dispersion with uncertainty and baseline sources",
+    "Compare with calibrated measurements where available",
+    "Human scientific and legal approval before asserting risk or compliance"
+  ]
+}
