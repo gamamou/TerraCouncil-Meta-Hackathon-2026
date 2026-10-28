@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TerraCouncil — FAITH Scientific Council</title>
+<style>
+:root{font:15px/1.5 system-ui,"Segoe UI",sans-serif;color:#edf5ff;background:#0d1523}
+*{box-sizing:border-box}body{margin:0}header{background:#122035;padding:18px max(20px,calc((100vw - 1260px)/2));border-bottom:1px solid #304158}
+h1{font-size:24px;margin:2px 0}h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:10px 0}
+main{max-width:1260px;margin:20px auto;padding:0 18px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px}
+section,.panel{background:#172538;border:1px solid #35465b;padding:20px;border-radius:14px;margin-bottom:16px}
+p{margin:8px 0 12px}small,.muted{color:#b0c4d6}.tiny{font-size:12px}.tag{font-size:12px;color:#a9d3e8;font-weight:650;letter-spacing:.07em}
+.warn{background:#332b1e;border-left:3px solid #e5ba73;color:#ffe0b0;padding:10px 12px;border-radius:6px;margin:12px 0}
+.badge{padding:5px 8px;border-radius:10px;background:#26415b;color:#d6e8f6;display:inline-block;font-size:12px}
+button{font:inherit;cursor:pointer;background:#235877;color:#fff;padding:11px 16px;border:1px solid #67a3c3;border-radius:8px}
+button:disabled{opacity:.43;cursor:not-allowed}
+textarea{font:inherit;color:#fff;background:#0b1727;width:100%;min-height:100px;border:1px solid #54708a;border-radius:8px;padding:13px}
+label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;vertical-align:middle;margin-right:9px;accent-color:#46b2d3}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.card{background:#1e3047;padding:13px;border:1px solid #3d5570;border-radius:10px;margin:10px 0;overflow-wrap:anywhere}
+.fact{border-left:3px solid #81b8d0}.uncertain{border-left:3px solid #e8b968}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.link{color:#bce0f6}
+#progress{min-height:50px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#5bd1a8;margin-right:5px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
+hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
+@media(max-width:850px){main{display:block}}
+</style></head>
+<body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
+<h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Explorat oire · Non validé sur le terrain</span></header>
+<main><aside>
+<div class="panel"><h2>Conseil FAITH</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
+<div class="card">Mining & Industry<br><small>Première perspective exécutée</small></div>
+<div class="card">Environment & Climate<br><small>Deuxième perspective exécutée</small></div>
+<div class="card">Scientific Critic<br><small>Muse Wonder — critique</small></div>
+<div class="card">Final Synthesis<br><small>Muse Spark — révision</small></div>
+<p class="muted tiny">Agriculture, énergie, communautés et gouvernance : capacités du registre FAITH, non exécutées dans ce parcours de 4 appels.</p></div>
+<div class="panel"><h2>Fondation FSDC</h2><div id="context">Chargement des observations…</div><div id="evidence"></div></div>
+<div class="panel"><h2>Traçabilité</h2><p class="tiny muted">Le serveur est local. Les résultats et états des appels sont conservés dans Documents ; aucune clé API ne transite dans la page.</p><div id="fingerprint" class="tiny muted" style="overflow-wrap:anywhere"></div></div>
+</aside>
+<div>
+<section><div class="top"><h2>1. Poser une question</h2><span class="badge">Meta Model API · Direct</span></div>
+<p class="muted">Le Conseil confronte des points de vue à des observations scientifiques préliminaires. Il ne délivre pas d'autorisation d'investissement.</p>
+<textarea id="question" maxlength="1800" aria-label="Question au conseil">Quelles investigations scientifiques et garanties faut-il prioriser avant une décision de développement minier dans le périmètre étudié de Boké ?</textarea>
+<div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
+<label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
+<label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
+<button id="run" disabled>Déclencher le Conseil scientifique</button>
+<p id="feedback" class="muted" role="status"></p></section>
+<section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
+<div id="progress" class="muted">Les interventions apparaîtront après le lancement autorisé.</div></section>
+<section><h2>3. Synthèse décisionnelle</h2>
+<div id="decision" class="muted">La synthèse ne sera affichée que si chaque intervention a franchi le vérificateur indépendant. Les hypothèses et investigations resteront non vérifiées scientifiquement.</div></section>
+<section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section>
+</div></main>
+<script>
+"use strict";
+const TOKEN="__SESSION_TOKEN__";
+const $=id=>document.getElementById(id);
+const add=(tag,parent,txt,cls)=>{let n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;parent.appendChild(n);return n};
+const opts={headers:{"X-Terra-Token":TOKEN}};
+let busy=false;
+function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
+["share","billing","question"].forEach(x=>$(x).addEventListener("input",control));
+function describe(text){$("feedback").textContent=text;}
+function renderItems(parent,items,heading){add("h3",parent,heading);if(!items||!items.length)add("p",parent,"Aucun élément.", "muted");
+for(const item of items||[]){let c=add("div",parent,item.finding||item.text||"","card "+(heading.includes("Observation")?"fact":"uncertain"));
+if(item.evidence_id)add("small",c,item.evidence_id+" · "+item.validation_status+" · "+item.usage,"muted");}}
+function render(trace){
+$("runstate").textContent=trace.status;
+const host=$("progress");host.replaceChildren();
+add("p",host,"Appels tentés : "+(trace.calls_attempted||0)+" / 4","muted");
+for(const step of trace.steps||[]){
+ let card=add("div",host,"","card");add("h3",card,step.role+" · "+step.model);
+ add("p",card,"Statut : "+step.status+" · Vérification : "+(step.verification_status||"en attente"),"muted");
+ if(step.checked_publication){
+  renderItems(card,step.checked_publication.observations,"Observations FSDC");
+  renderItems(card,step.checked_publication.hypotheses,"Hypothèses non vérifiées");
+  renderItems(card,step.checked_publication.investigations,"Investigations proposées");
+  renderItems(card,step.checked_publication.abstentions,"Abstentions scientifiques");
+ }
+ if(step.verification_issues?.length)add("pre",card,step.verification_issues.join("\n"));
+ if(step.error_message)add("p",card,step.error_message,"warn");
+}
+const final=$("decision");final.replaceChildren();
+if(trace.decision_support){
+ add("p",final,"Synthèse vérifiée structurellement — validation scientifique humaine encore nécessaire.","warn");
+ renderItems(final,trace.decision_support.observations,"Observations documentées");
+ renderItems(final,trace.decision_support.investigations,"Investigations proposées");
+ renderItems(final,trace.decision_support.abstentions,"Abstentions scientifiques");
+}else add("p",final,"Aucune synthèse finale validée : délibération absente, en cours ou arrêtée.","muted");
+}
+async function context(){
+ try{
+ let res=await fetch("/api/context",opts);if(!res.ok)throw Error("Impossible de charger les preuves");
+ let d=await res.json();
+ $("context").textContent=d.status+" · "+d.evidence.length+" observations · clé Meta : "+(d.api_key_available?"disponible":"absente");
+ $("fingerprint").textContent="SHA-256 : "+d.evidence_sha256;
+ const host=$("evidence");
+ for(const e of d.evidence){let c=add("div",host,e.finding,"card fact");add("small",c,e.evidence_id+" · "+e.validation_status,"muted");}
+ if(!d.api_key_available)describe("Clé Meta absente : chargez MODEL_API_KEY dans PowerShell avant de lancer le serveur.");
+ }catch(e){describe(e.message);}
+}
+async function poll(id){
+ try{
+  const r=await fetch("/api/status?id="+encodeURIComponent(id),opts);
+  const d=await r.json();if(!r.ok)throw Error(d.error||"Erreur de suivi");
+  render(d);
+  if(["QUEUED","STARTED"].includes(d.status)||d.status.startsWith("RUNNING_")||d.status.startsWith("CHECKED_")){
+    setTimeout(()=>poll(id),1100);
+  }else{
+    busy=false;control();describe("Session terminée : "+d.status+". Trace conservée dans Documents. Aucun nouvel appel automatique.");
+  }
+ }catch(e){busy=false;control();describe("Suivi indisponible : "+e.message+". Vérifiez le terminal et les fichiers de session avant toute nouvelle tentative.");}
+}
+$("run").onclick=async()=>{
+ if(busy||!$("share").checked||!$("billing").checked)return;
+ busy=true;control();describe("Transmission autorisée. Lancement du Conseil…");
+ try{
+ const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+  body:JSON.stringify({question:$("question").value,consent:true,reviewed_sharing:true})});
+ const d=await r.json();if(!r.ok)throw Error(d.error||"Échec");
+ describe("Session "+d.run_id+" créée. Quatre appels au maximum ; aucun nouvel appel automatique.");
+ poll(d.run_id);
+ }catch(e){busy=false;control();describe("Conseil non lancé : "+e.message);}
+};
+control();context();
+</script></body></html>
