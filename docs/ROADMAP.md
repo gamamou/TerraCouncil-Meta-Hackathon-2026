@@ -60,3 +60,10 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 - Explicit consent/billing and local API key; 2 Spark analytical perspectives, 1 Wonder critique, 1 Spark revision.
 - Independent checks and private session checkpointing after each attempt.
 - Not yet validated in participant's browser. Need run tests and live session, then improve structured disagreement summaries.
+
+## HACK-009 — decision chamber and report (prototype committed)
+
+- Source-verified session PDF in a local server route, with explicit exploratory and human-review warnings.
+- Reopen saved HACK-008 session traces without repeating model calls.
+- WorldCover 2021 preliminary land-cover bar visualization and user-selected archival MP3 playback; no false linkage between archive audio and a new debate.
+- Pending: real-time session-specific natural French audio, time-aligned debate visualization, PDF QA on Windows.
