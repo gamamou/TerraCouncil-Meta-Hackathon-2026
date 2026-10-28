@@ -110,3 +110,7 @@ A deterministic auditor now cross-checks dynamic oral drafts against actual sess
 ## HACK-016F — Dynamic Voice
 
 Variable-length, source-bound ElevenLabs v4 speech is now wired to completed HACK-016B sessions. Local checks reject stale sources, English/technical draft content, overlength and unauthorized paid synthesis. A durable attempt ledger prevents silent retry and Edge checks MP3 SHA256 before playback. The historical fixed HACK-015 player remains unchanged. See docs/HACK-016F-DYNAMIC-VOICE.md. Mock tests committed; real Edge playback not yet validated.
+
+## HACK-016G — Scientific Pronunciation
+
+Dynamic spoken inputs now include deterministic, source-preserving pronunciations for whitelisted scientific acronyms (PM10, PM2.5, AERMOD, FSDC, ESG). Unknown measurements and English still block, preventing manufactured scientific interpretations. The Edge panel offers a no-cost voice preview before separately authorized ElevenLabs. See docs/HACK-016G-SCIENTIFIC-PRONUNCIATION.md. Windows checks pending.
