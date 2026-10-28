@@ -73,6 +73,14 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
   </div>
   <p id="oral-status" class="stage-result" role="status">Ouvrez une session terminée pour préparer le dialogue oral.</p>
 </div>
+<div class="oraleditor" id="voice-generation">
+ <h3>Génération vocale de cette session</h3>
+ <p class="muted">Nécessite le scénario déjà approuvé dans cet atelier, une clé ElevenLabs chargée dans le serveur et une autorisation distincte pour l'appel potentiellement facturé. Aucun nouvel appel Meta.</p>
+ <label><input id="voice-consent" type="checkbox">J'autorise l'envoi du scénario oral approuvé à ElevenLabs et un appel vocal potentiellement facturé. Je comprends qu'un échec réseau ne doit pas entraîner une relance automatique.</label>
+ <div class="actions"><button id="voice-start" disabled>Produire l'audio une seule fois</button><button id="voice-check" disabled>Actualiser l'état de l'audio</button><button id="voice-play" disabled>Écouter dans la Chambre</button></div>
+ <p id="voice-status" class="muted" role="status">Sélectionnez une session pour consulter son audio.</p>
+ <div id="voice-native-player"></div>
+</div>
 <h3>Lecture synchronisée de la session</h3>
 <p class="muted">Utilisez le MP3 et son fichier d'horodatage générés après relecture du scénario français. Les deux fichiers doivent correspondre à la session ouverte.</p>
 <label>Audio de la délibération actuelle<input id="session-audio" type="file" accept=".mp3,audio/mpeg"></label>
@@ -224,6 +232,72 @@ $("save-oral").onclick=async()=>{
    $("approve-meaning").checked=false;
  }catch(err){$("oral-status").textContent="Approbation non enregistrée : "+err.message;}
 };
+
+let voiceState=null;
+$("voice-consent").addEventListener("change",updateVoiceControls);
+function updateVoiceControls(){
+ $("voice-check").disabled=!activeRunId;
+ $("voice-start").disabled=!activeRunId||!$("voice-consent").checked||
+    !voiceState||voiceState.state!=="NOT_REQUESTED"||!voiceState.key_available;
+ $("voice-play").disabled=!activeRunId||!voiceState||voiceState.state!=="READY";
+}
+async function checkVoice(){
+ if(!activeRunId)return;
+ try{
+   const r=await fetch("/api/voice-status?id="+encodeURIComponent(activeRunId),opts);
+   const data=await r.json();if(!r.ok)throw Error(data.error||"Suivi audio indisponible");
+   voiceState=data;
+   $("voice-status").textContent="État audio : "+data.state+
+      (data.key_available?" · clé vocale disponible":" · clé vocale absente");
+   updateVoiceControls();
+   return data;
+ }catch(e){$("voice-status").textContent=e.message;voiceState=null;updateVoiceControls();}
+}
+$("voice-check").onclick=checkVoice;
+$("voice-start").onclick=async()=>{
+ if(!activeRunId||!$("voice-consent").checked||!voiceState||voiceState.state!=="NOT_REQUESTED")return;
+ $("voice-start").disabled=true;$("voice-status").textContent="Demande vocale autorisée. Un seul appel, sans relance automatique.";
+ try{
+  const r=await fetch("/api/voice-start",{method:"POST",
+   headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+   body:JSON.stringify({run_id:activeRunId,approve_cost_and_sharing:true})});
+  const d=await r.json();if(!r.ok)throw Error(d.detail||d.error||"Appel non accepté");
+  $("voice-status").textContent="Appel accepté. Vérifiez son état dans quelques instants, sans relancer la génération.";
+  await checkVoice();
+ }catch(e){$("voice-status").textContent="Génération non lancée ou à diagnostiquer : "+e.message+" Ne cliquez pas une deuxième fois sans vérifier le journal.";}
+};
+$("voice-play").onclick=async()=>{
+ if(!activeRunId||!voiceState||voiceState.state!=="READY")return;
+ const wanted=activeRunId;
+ $("voice-status").textContent="Chargement de l'audio et vérification d'intégrité…";
+ try{
+   const [ar,tr]=await Promise.all([
+     fetch("/api/voice-audio?id="+encodeURIComponent(wanted),opts),
+     fetch("/api/voice-timing?id="+encodeURIComponent(wanted),opts)
+   ]);
+   if(!ar.ok||!tr.ok)throw Error("Fichiers vocaux indisponibles");
+   const audio=await ar.blob(),timing=await tr.json();
+   if(timing.session_id!==wanted)throw Error("Audio lié à une autre session");
+   if(!Array.isArray(timing.timeline)||!timing.timeline.length)
+      throw Error("Horodatages incomplets");
+   const bytes=await audio.arrayBuffer();
+   const hex=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
+     .map(x=>x.toString(16).padStart(2,"0")).join("");
+   if(hex!==timing.audio_sha256)throw Error("Empreinte audio incorrecte");
+   if(loadedAudioUrl)URL.revokeObjectURL(loadedAudioUrl);
+   loadedAudioUrl=URL.createObjectURL(audio);
+   const holder=$("voice-native-player");holder.replaceChildren();
+   const player=document.createElement("audio");player.controls=true;player.preload="metadata";
+   player.src=loadedAudioUrl;holder.appendChild(player);
+   player.addEventListener("timeupdate",()=>{
+      const t=player.currentTime;
+      const current=timing.timeline.find(x=>t>=x.start_seconds&&t<x.end_seconds);
+      $("active-speaker").textContent="Intervenant actif : "+(current?current.speaker:"Transition");
+      if(current&&chamberData&&currentScene!==current.turn-1)selectScene(current.turn-1,true);
+   });
+   $("voice-status").textContent="Audio authentifié et lié à cette session. Reconstruction éditoriale, non verbatim.";
+ }catch(e){$("voice-status").textContent="Lecture refusée : "+e.message;}
+};
 async function loadSessionPlayback(){
  const audio=$("session-audio").files[0],timing=$("session-timing").files[0];
  const status=$("audio-match"),holder=$("session-audio-player");
@@ -365,6 +439,7 @@ async function loadSaved(){
       const trace=await res.json();render(trace);
       if(trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED") await loadChamber(ses.run_id);
       activeRunId=trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?ses.run_id:null;
+      voiceState=null;$("voice-consent").checked=false;updateVoiceControls();if(activeRunId)await checkVoice();
       $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;$("manifest-button").disabled=!activeRunId;$("load-oral").disabled=!activeRunId;
       $("pdf-status").textContent=activeRunId?"PDF de cette session disponible sans appel Meta.":"PDF non disponible : session incomplète.";
       describe("Session restaurée : "+ses.run_id+" · Aucun nouvel appel Meta.");
@@ -385,6 +460,7 @@ async function poll(id){
     setTimeout(()=>poll(id),1100);
   }else{
     activeRunId=d.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?id:null;
+    voiceState=null;updateVoiceControls();if(activeRunId)await checkVoice();
     $("pdf-button").disabled=!activeRunId;
     busy=false;control();describe("Session terminée : "+d.status+". Trace conservée dans Documents. Aucun nouvel appel automatique.");
   }
@@ -392,7 +468,7 @@ async function poll(id){
 }
 $("run").onclick=async()=>{
  if(busy||!$("share").checked||!$("billing").checked)return;
- busy=true;activeRunId=null;$("pdf-button").disabled=true;$("oral-button").disabled=true;$("manifest-button").disabled=true;$("load-oral").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
+ busy=true;activeRunId=null;voiceState=null;updateVoiceControls();$("pdf-button").disabled=true;$("oral-button").disabled=true;$("manifest-button").disabled=true;$("load-oral").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
  try{
  const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
   body:JSON.stringify({question:$("question").value,consent:true,reviewed_sharing:true})});
