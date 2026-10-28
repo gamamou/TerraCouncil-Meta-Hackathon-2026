@@ -595,7 +595,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send_json(422,{"error":"not_enough_question_relevant_data",
                                                "status":plan["status"],"missing_topics":plan["missing_topics"]})
                 # Exact preview/execute binding: refuse stale or modified plans.
-                if plan["evidence_sha256"]!=request_data.get("evidence_sha256"):
+                if plan["evidence_sha256"]!=request_data.get("evidence_sha256") or plan["plan_sha256"]!=request_data.get("plan_sha256"):
                     return self.send_json(409,{"error":"preview_changed_refresh_first"})
                 model_key=os.environ.get("MODEL_API_KEY","")
                 if not model_key:return self.send_json(409,{"error":"MODEL_API_KEY_missing"})
@@ -643,6 +643,8 @@ class Handler(BaseHTTPRequestHandler):
                 "source_ids":[x["evidence_id"] for x in selected["evidence"]],
                 "missing_topics":selected["missing_topics"],
                 "evidence_sha256":selected.get("evidence_sha256"),
+                "plan_sha256":selected.get("plan_sha256"),
+                "planned_model_calls":selected.get("model_calls_planned",0),
                 "model_calls":0,
                 "note":"Preview only. Existing HACK-008 run button remains the fixed pilot."
             })
