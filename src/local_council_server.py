@@ -232,17 +232,18 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(409, {"error": "complete_verified_session_required"})
             try:
                 from export_decision_pdf import validate_session
-                from elegant_decision_pdf import export_elegant_pdf
+                from executive_brief_v3 import export_v3, VERSION
                 record = validate_session(snapshot, self.server.evidence)
-                target = self.server.out_dir / (run_id + "-Executive-Brief-v2.pdf")
+                target = self.server.out_dir / (run_id + "-Executive-Brief-V3.pdf")
                 if not target.exists():
-                    export_elegant_pdf(record, target)
+                    export_v3(record, target)
                 content = target.read_bytes()
             except (ValueError, RuntimeError, OSError, ImportError, KeyError, TypeError) as exc:
                 return self.send_json(500, {"error": "pdf_generation_failed", "detail": str(exc)[:170]})
             self.send_response(200)
             self.send_header("Content-Type", "application/pdf")
-            self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Decision-Brief.pdf")
+            self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Executive-Brief-V3.pdf")
+            self.send_header("X-Terra-Pdf-Version", VERSION)
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
