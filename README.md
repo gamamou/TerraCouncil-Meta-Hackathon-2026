@@ -51,6 +51,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-003 independent scientific verification](docs/HACK-003-INDEPENDENT-VERIFICATION.md)
 - [HACK-004 real Boké screened-data bridge](docs/HACK-004-REAL-BOKE-DATA.md)
 - [HACK-005 one-call Meta Spark live pilot](docs/HACK-005-LIVE-PILOT.md)
+- [HACK-006 verified Wonder critique / Spark revision](docs/HACK-006-CONTINUE-DEBATE.md)
 
 ## Submission transparency
 
@@ -69,3 +70,7 @@ The new `src/import_boke_010hi.py` bridges pre-existing TerraCouncil 010HI/010HJ
 ## HACK-005 live-readiness checkpoint
 
 The new `src/live_pilot.py` supports one **explicitly authorized** real Meta Spark 1.3 API request with independent structural verification, private audit file and no automatic retry. The source/tests are committed; **a live Meta API call has not yet been performed here**. Preserve data-sharing and scientific review boundaries. Full Spark/Wonder deliberation remains pending successful first live validation.
+
+## HACK-006 continuation status
+
+The participant's first live Spark call passed HACK-003 structural gates. HACK-006 code now supports separate, explicitly authorized Wonder critique and Spark revision stages, with re-verification of saved local traces. **Neither the Wonder nor revised Spark call has yet been executed live.** Science remains exploratory and human review is required.
