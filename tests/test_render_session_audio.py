@@ -12,7 +12,8 @@ from render_session_audio import build_payload, render_one
 def manifest():
     return {
         "session_id":"HACK008-TEST-AUDIO", "recording_status":"NOT_GENERATED",
-        "human_review_required":True,"script_sha256":"testhash",
+        "human_review_required":True,"human_review_complete":True,
+        "approval_type":"USER_REVIEWED_EDITORIAL_RECONSTRUCTION","script_sha256":"testhash",
         "scientific_validation":"SCREENED_NOT_FIELD_VALIDATED",
         "type":"EDITORIAL_RECONSTRUCTION_NOT_VERBATIM",
         "turns":[{"speaker":"Speaker "+str(i+1),
