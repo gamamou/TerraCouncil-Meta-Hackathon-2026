@@ -424,10 +424,13 @@ function displayDynamic(trace){
  }
  add("p",host,"Nouvelle délibération sauvegardée. Son audio et son PDF dynamique ne sont pas encore générés.","tiny muted");
 }
-async function dynamicPoll(id){
+async function dynamicPoll(id,initialChecks=0){
  try{
    const response=await fetch("/api/dynamic-status?id="+encodeURIComponent(id),opts);
    const trace=await response.json();
+   if(response.status===404&&initialChecks<5){
+      setTimeout(()=>dynamicPoll(id,initialChecks+1),500);return;
+   }
    if(!response.ok)throw Error(trace.error||"Session introuvable");
    displayDynamic(trace);
    if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
