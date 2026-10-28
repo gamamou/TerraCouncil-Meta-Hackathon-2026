@@ -109,6 +109,14 @@ async function loadSessionPlayback(){
   const data=JSON.parse(await timing.text());
   if(!activeRunId||data.session_id!==activeRunId)throw Error("Audio d'une autre session : chargement refusé.");
   if(data.audio_filename!==audio.name)throw Error("Le MP3 ne correspond pas au manifeste d'horodatage.");
+  if(!/^[a-f0-9]{64}$/i.test(data.audio_sha256||""))throw Error("Empreinte MP3 manquante.");
+  const bytes=await audio.arrayBuffer();
+  const computed=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
+      .map(b=>b.toString(16).padStart(2,"0")).join("");
+  if(computed.toLowerCase()!==data.audio_sha256.toLowerCase())
+      throw Error("Le fichier audio a été modifié ou ne correspond pas au manifeste.");
+  if(data.editorial_type!=="EDITORIAL_RECONSTRUCTION_NOT_VERBATIM")
+      throw Error("Statut éditorial de l'audio non reconnu.");
   if(!Array.isArray(data.timeline)||!data.timeline.length)throw Error("Horodatage absent.");
   const turns=data.timeline;
   if(turns.some(t=>!Number.isFinite(t.start_seconds)||!Number.isFinite(t.end_seconds)||t.end_seconds<t.start_seconds||t.turn<1||t.turn>4))
@@ -122,7 +130,7 @@ async function loadSessionPlayback(){
    $("active-speaker").textContent="Intervenant actif : "+name;
    document.querySelectorAll("[data-turn]").forEach(el=>el.classList.toggle("speaking",Boolean(active&&el.dataset.turn===String(active.turn))));
   });
-  status.textContent="Audio de cette session prêt. Synchronisation selon les horodatages ElevenLabs, pas une transcription verbatim.";
+  status.textContent="Audio de cette session prêt. Empreinte audio vérifiée. Synchronisation ElevenLabs, reconstruction éditoriale non verbatim.";
  }catch(err){status.textContent="Audio refusé : "+err.message;}
 }
 $("session-audio").addEventListener("change",loadSessionPlayback);
