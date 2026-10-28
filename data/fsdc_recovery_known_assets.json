@@ -1,0 +1,61 @@
+{
+  "schema_version": "FSDC_RECOVERY_KNOWN_ASSETS_001",
+  "generated_for": "FAITH/FSDC existing-data recovery; metadata only",
+  "assets": [
+    {
+      "id": "TERRA-010HI-EVIDENCE",
+      "expected_filename": "010HI_evidence.json",
+      "related_product": "TerraCouncil",
+      "what_it_is": "Multidomain screened scientific evidence record",
+      "previously_referenced_by": "src/import_boke_010hi.py",
+      "location_status": "NOT_RELOCATED_IN_CONNECTED_REPOSITORY",
+      "validation_requirement": "010H-I-1 schema and 010HJ cross-file hashes"
+    },
+    {
+      "id": "TERRA-010HJ-QA",
+      "expected_filename": "010HJ_spatial_qa.json",
+      "related_product": "TerraCouncil",
+      "what_it_is": "Geospatial QA companion to 010HI including CHIRPS source hash",
+      "previously_referenced_by": "src/import_boke_010hi.py",
+      "location_status": "NOT_RELOCATED_IN_CONNECTED_REPOSITORY",
+      "validation_requirement": "010H-J-QA-1 schema, AOI EPSG:4326 and input hash checks"
+    },
+    {
+      "id": "TERRA-OSM-BOKE",
+      "expected_filename": "OSM-BOKE-* or mining/agriculture/water screened GeoJSON",
+      "related_product": "TerraCouncil / FSDC",
+      "what_it_is": "Earlier local OSM screened vectors and intersection products",
+      "previously_referenced_by": "Prior TERRA-META-008B/008C discussions",
+      "location_status": "NOT_LOCATED_FILE",
+      "validation_requirement": "OSM origin, extraction time, license/attribution, geometry CRS, coverage, spatial QA, tile completeness"
+    },
+    {
+      "id": "FSMI-DUST-AERMOD",
+      "expected_filename": "AERMOD / PM10 / PM2.5 / dust result or input artifacts",
+      "related_product": "FSMI Dust Impact Studio",
+      "what_it_is": "Dispersion-model workflows and possible site-specific results",
+      "previously_referenced_by": "Earlier FSMI dust development discussions",
+      "location_status": "NOT_LOCATED_FILE",
+      "validation_requirement": "Measured vs modeled, real emission and met inputs, units, receptor coordinates, run/version, validation"
+    },
+    {
+      "id": "FEI-CHIRPS",
+      "expected_filename": "CHIRPS evidence or derived precipitation record",
+      "related_product": "FEI / FSDC",
+      "what_it_is": "Rainfall reference already cross-checked by 010HI/010HJ",
+      "previously_referenced_by": "src/import_boke_010hi.py",
+      "location_status": "REFERENCE_ONLY_NOT_IMPORTED",
+      "validation_requirement": "Retrieve original CHIRPS evidence and QA; distinguish climate trend from single date"
+    },
+    {
+      "id": "FMI-CPDM-PERMITS",
+      "expected_filename": "CPDM permit geometries / spatial overlays",
+      "related_product": "FAITH Mining Intelligence",
+      "what_it_is": "Prior ministry pilot permit screening and spatial overlays",
+      "previously_referenced_by": "Prior CPDM/FMI progress discussions",
+      "location_status": "NOT_LOCATED_FILE",
+      "validation_requirement": "Check permission, sensitive spatial layers, reporting rights, CRS, authoritative dates"
+    }
+  ],
+  "policy": "Metadata mentions of assets do not establish current file availability. Never substitute synthetic or public demo datasets for the private existing files."
+}
