@@ -609,7 +609,7 @@ class Handler(BaseHTTPRequestHandler):
         if not key:
             return self.send_json(409, {"error": "MODEL_API_KEY_not_set_restart_server_after_loading_key"})
         with self.server.job_lock:
-            if self.server.running:
+            if self.server.running or getattr(self.server,"dynamic_running",False):
                 return self.send_json(409, {"error": "another_run_in_progress"})
             self.server.running = True
             run_id = "HACK008-" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + secrets.token_hex(4)
