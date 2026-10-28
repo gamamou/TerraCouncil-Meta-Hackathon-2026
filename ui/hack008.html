@@ -52,7 +52,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Matrice décisionnelle</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Matrice décisionnelle</button><button id="dynamic-metrics" type="button" disabled>Indicateurs FSDC</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
 <div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Aperçu vocal sans appel payant</button><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
@@ -465,6 +465,22 @@ function displayDynamic(trace){
  add("p",host,"Nouvelle délibération sauvegardée. Son audio et son PDF dynamique ne sont pas encore générés.","tiny muted");
 }
 
+$("dynamic-metrics").onclick=async()=>{
+ if(!dynamicActiveId)return;
+ const host=$("dynamic-metrics-output");host.replaceChildren();
+ try{
+  const r=await fetch("/api/dynamic-quantification?id="+encodeURIComponent(dynamicActiveId),opts);
+  const result=await r.json();
+  if(!r.ok)throw Error(result.detail||result.error);
+  add("h3",host,"Indicateurs documentés — "+result.metrics.length+" mesures extraites");
+  for(const item of result.metrics){
+    const entry=add("div",host,"","card");
+    add("strong",entry,item.metric+" : "+item.value+" "+item.unit);
+    add("p",entry,item.evidence_id+" · "+item.dataset+" · "+item.observed_at,"muted");
+  }
+  add("p",host,result.coverage_note+" Aucun changement temporel ni impact causal démontré.","warn");
+ }catch(error){add("p",host,"Quantification indisponible : "+error.message,"warn");}
+};
 $("dynamic-matrix").onclick=async()=>{
  if(!dynamicActiveId)return;
  const host=$("dynamic-matrix-output");host.replaceChildren();
@@ -493,7 +509,7 @@ $("dynamic-brief").onclick=async()=>{
   if(!r.ok)throw Error("Brief indisponible");
   const url=URL.createObjectURL(await r.blob());
   const a=document.createElement("a");a.href=url;
-  a.download="TerraCouncil-"+dynamicActiveId+"-Dynamic-Brief-V2.pdf";
+  a.download="TerraCouncil-"+dynamicActiveId+"-Dynamic-Brief-V3.pdf";
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
  }catch(error){$("dynamic-state").textContent=error.message;}
@@ -639,6 +655,7 @@ async function dynamicPoll(id,initialChecks=0){
    $("dynamic-audit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-matrix").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
+   $("dynamic-metrics").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
      setTimeout(()=>dynamicPoll(id),1200);
    }else{dynamicBusy=false;dynamicControls();}
