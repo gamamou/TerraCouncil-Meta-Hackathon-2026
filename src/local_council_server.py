@@ -306,6 +306,30 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length",str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path == "/api/dynamic-voice-preview":
+            if self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            source=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not source.is_file() or source.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_voice_plan import prepare_voice
+                trace=json.loads(source.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id:
+                    raise ValueError("Source/session mismatch")
+                plan=prepare_voice(trace,os.environ.get("TERRA_VOICE_SPARK",""),
+                                   os.environ.get("TERRA_VOICE_WONDER",""))
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"voice_preview_blocked",
+                                           "detail":str(error)[:160]})
+            return self.send_json(200,{"session_id":run_id,"status":"PRONUNCIATION_PREPARED_NOT_TTS_APPROVED",
+                "pronunciation_audit":plan["pronunciation_audit"],
+                "evidence_sha256":plan["evidence_sha256"],"script_sha256":plan["script_sha256"],
+                "total_characters":sum(len(x["text"]) for x in plan["payload"]["inputs"]),
+                "external_calls":0,"cost_consent_required":True})
         elif route.path in ("/api/dynamic-voice-status","/api/dynamic-voice-audio","/api/dynamic-voice-timing"):
             if self.headers.get("X-Terra-Token")!=self.server.token:
                 return self.send_json(403,{"error":"token_required"})
