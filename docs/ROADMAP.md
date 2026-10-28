@@ -106,3 +106,7 @@ Source-grounded narration draft and new dynamic decision brief PDF from actual s
 ## HACK-016E automated fidelity
 
 A deterministic auditor now cross-checks dynamic oral drafts against actual session-specific Spark/Wonder publications, provenance, and evidence fingerprints. Edge displays per-intervention review issues. The audit cannot auto-approve paid ElevenLabs calls or certify scientific accuracy. See docs/HACK-016E-FIDELITY-GATE.md. User-side validation pending.
+
+## HACK-016F — Dynamic Voice
+
+Variable-length, source-bound ElevenLabs v4 speech is now wired to completed HACK-016B sessions. Local checks reject stale sources, English/technical draft content, overlength and unauthorized paid synthesis. A durable attempt ledger prevents silent retry and Edge checks MP3 SHA256 before playback. The historical fixed HACK-015 player remains unchanged. See docs/HACK-016F-DYNAMIC-VOICE.md. Mock tests committed; real Edge playback not yet validated.
