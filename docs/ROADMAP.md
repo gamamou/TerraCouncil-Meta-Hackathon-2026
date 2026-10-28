@@ -98,3 +98,7 @@ Never equate a checked-in registry or mocked tests with functioning agents or ve
 ## HACK-016B — dynamic Edge council
 
 New question-specific Spark/Wonder sessions can be submitted from Edge after FSDC preview, explicit consent and provenance matching. Each model call is checkpointed before dispatch; failed sessions never retry automatically. Existing HACK-008/015 assets remain separate and functional. See docs/HACK-016B-EDGE-DYNAMIC-RUNTIME.md. Tests added, Windows validation pending. Next: question-specific editorial narrator and decision brief for dynamic traces.
+
+## HACK-016C/D dynamic outputs
+
+Source-grounded narration draft and new dynamic decision brief PDF from actual saved Spark/Wonder steps, not prewritten Boké text. Validates FSDC snapshots and exact cited observations; TTS remains gated pending translation fidelity. See docs/HACK-016C-D-DYNAMIC-OUTPUTS.md. Windows test pending.
