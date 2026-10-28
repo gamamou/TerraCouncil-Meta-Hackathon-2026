@@ -38,3 +38,36 @@ On the participant Windows PC, search **by exact expected basename**, not by gen
 ## Meta hackathon novelty and provenance
 
 Pre-existing scientific output stays credited to FAITH with its historical date. Newly authored recovery software, exact-asset location, API acquisition, harmonization and evidence-based council integration are hackathon activities with separate execution timestamps. Never rewrite old status, Git history, or claim pre-existing calculations were created during the competition.
+
+
+## Participant Windows recovery audit — 28 October 2026
+
+This section records metadata-only execution results reported directly from the participant's PowerShell terminal. Historical files are pre-hackathon FAITH scientific outputs; their discovery, preservation and proposed integration during the event are hackathon work.
+
+| Historical file | Rows | SHA-256 | Source fields |
+| --- | ---: | --- | --- |
+| maus_v2_overlap_by_license.csv | 572 | ed6ac8947539afb4fbf146494f449a3beac03fc682b81d7c8874dee7599dd73b | Code, guidLicense, Commodity, Status, Region, cad_area_ha, maus_ov_ha, maus_count, maus_pct, has_maus |
+| restoration_priority_score_v1_table.csv | 572 | 508c57bd71eedcc53e62799fccb8cb442ebe4ee84caa7ced56fec5d7c271ec2c | score_uid, sat_score, maus_score, cad_score, priority_score_v1_raw, priority_score_v1, priority_index_v1_100, days_to_expiry, priority_class_v1_abs, priority_class_v1, evidence_tier_v1, sat_flag, maus_flag, cad_flag |
+| guinea_mining_restoration_indices_2015_2025_landsat.csv | 572 | 3ef775a0af02be5a385c82b989c1d1a5e8c636dad4c67c6b6c61d3a4a30a7bf8 | gee_uid, gee_glic, gee_gshp, NDVI/BSI/NDWI/MNDWI/NDMI/NBR 2015/2020/2025 and change fields |
+| guinea_mining_restoration_indices_mean_2020_2025.csv | 572 | d40a556cbb6b65b1a3ee622466bed34fd4a0d8f35fddf656477ebe65aa797f91 | guidLicens, guidShape, NDVI, BSI, NDMI, NDWI, MNDWI, NBR, change and interval fields |
+| global_mining_area_per_country_v2.csv | 145 | aab938005e61f62c9d182a8e5a69813530d405b134a808f92f5c1b626a912bbd | COUNTRY_NAME, ISO3_CODE, AREA, N_FEATURES |
+
+Notebook producer evidence located on Desktop:
+- 04_integrate_Maus_v2_raw_mining_footprint.ipynb: 33 cells, 16 code, 15 recorded execution counts, 20 saved outputs.
+- 05_build_restoration_priority_score_v1.ipynb: 33 cells, 17 code, 16 recorded execution counts, 31 saved outputs.
+
+### Read-only value coverage audit
+
+Participant terminal verified:
+- MAUS overlap: 572 rows, all guidLicense populated, 567 distinct; has_maus = Yes 35, No 537; 36 distinct non-empty maus_ov_ha strings (do not infer polygon count from this). About 6.12% of rows marked Yes, **not necessarily distinct licenses or unique operations**.
+- MineRestore **v1**: score_uid populated and distinct in 572/572; classes High 115, Medium 114, Low 343; evidence_tier_v1 has four distinct non-empty values, not yet enumerated.
+- Landsat historical: gee_glic and gee_gshp populated 572 rows, 567 distinct each; ndvi_2025 has 570 distinct non-empty strings, **not necessarily valid numeric observations**.
+
+### Scientific interpretation and stop rules
+
+- Original v1 572-row producer universe **must not** be confused with national MineRestore v2 22,430-shape snapshot.
+- Historical results are located; do not rerun footprint overlay, v1 restoration scores or Landsat indices.
+- Before cross-product publication, establish documented crosswalk for score_uid, guidLicense, gee_glic, guidShape/gee_gshp. Five excess repeated rows do not imply a known duplicate cause.
+- Do not infer specific environmental harms, active mining or ownership from has_maus, historical priority or NDVI alone.
+- Preserve original files privately. These facts are safe metadata and counts; raw source files and personal/licensed attributes are not committed.
+- Next development: read-only adapter for versioned scientific evidence, targeted Boké AOI selection, and separately documented new public API acquisition during hackathon.
