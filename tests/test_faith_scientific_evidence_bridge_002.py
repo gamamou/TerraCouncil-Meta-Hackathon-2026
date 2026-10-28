@@ -6,9 +6,17 @@ import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"src"))
-from faith_scientific_evidence_bridge_002 import SOURCES,inspect,build_report,sha256_bytes
+from faith_scientific_evidence_bridge_002 import SOURCES,inspect,build_report,sha256_bytes,load_input_manifest
 
 class TestFaithBridge002(unittest.TestCase):
+    def test_windows_powershell_utf8_bom_manifest(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/"FAITH-BRIDGE-INPUTS.json"
+            data={"MAUS_LEGACY_572":{"path":"example.csv"}}
+            p.write_text(json.dumps(data),encoding="utf-8-sig")
+            self.assertEqual(load_input_manifest(p),data)
+            p.write_text(json.dumps(data),encoding="utf-8")
+            self.assertEqual(load_input_manifest(p),data)
     def test_source_inventory(self):
         self.assertEqual(len(SOURCES),7)
         self.assertEqual(SOURCES["FSMI_HANSEN_640"]["expected_rows"],640)
