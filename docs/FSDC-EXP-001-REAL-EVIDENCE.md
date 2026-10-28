@@ -9,6 +9,11 @@
 - Source vérifiée : https://www.gacguinee.com/fr/media-releases/gac-supports-boke
 - Statut : SOURCE_REPORTED_NOT_INDEPENDENTLY_AUDITED. La publication est archivée et indique que GAC a cessé ses activités en Guinée en août 2025. Ne pas extrapoler en 2026 ou en déduire que des projets précis ont été financés, ni lier à l'AOI WorldCover sans croisement géospatial indépendant.
 
+**Nouvelle source scientifique publiée (contexte régional, PAS mesure PM10 de l’AOI)** :
+- Kolie et al., 2024, *Environmental Management*, doi: 10.1007/s00267-024-02066-1, PMID 39527266, https://pubmed.ncbi.nlm.nih.gov/39527266/.
+- Le résumé porte sur des zones minières de Boké et de Kérouané ; collecte déclarée entre octobre 2022 et janvier 2023. Il rapporte notamment une préoccupation sur des niveaux élevés de PM10 lors d’opérations minières.
+- **Le résumé ne donne pas de concentration PM10 chiffrée localisable dans le rectangle TerraCouncil.** L’étude doit donc rester dans une couche de preuve scientifique documentaire régionale, avec statut PEER_REVIEWED_ABSTRACT_NOT_AOI_GEOREFERENCED ; lire ses tableaux et coordonnées d’échantillonnage avant une quantification, sans transférer à Boké des mesures de Kérouané.
+
 **Nouvelle source secondaire retrouvée dans Google Drive (NON ADMISSIBLE tant que non confirmée)** :
 - Fichier utilisateur "Guinea Research", tableau de bailleurs : entrée 2022 CECIDE / Global Greengrants Fund, montant listé **10 811 USD**, description d'un projet de suivi FODEL et d'engagements environnementaux dans la région de Boké.
 - Source compilée : https://docs.google.com/spreadsheets/d/1rGQOe5D24kwTd-axXs4dlxkKWDukve-5DIyjA1yaB70/edit
@@ -19,7 +24,7 @@
 
 ## Changement vérifiable de l'application
 
-- data/fsdc_contextual_candidates_boke_2026.json : registry avec 2 entrées documentaires explicitement distinguées par statut et périmètre ; provenance et limitations.
+- data/fsdc_contextual_candidates_boke_2026.json : registry avec 3 entrées documentaires/scientifiques explicitement distinguées par statut et périmètre ; provenance et limitations.
 - src/fsdc_evidence_expansion.py : compare plan baseline et document régional quand la question vise Boké + domaine minier / gouvernance / finance. Les registres documentaires ne sont pas injectés comme observations AOI et ne remplacent pas une validation scientifique.
 - GET /api/fsdc-evidence-comparison?question=... : diagnostic authentifié sans appel Meta.
 - Edge : **FSDC — Comparer de nouvelles preuves** affiche les sources, les restrictions et le nombre de nouveaux éléments.
@@ -32,10 +37,10 @@
    - Aucun fait FODEL nécessaire à cette question, donc aucune fausse contextualisation financière.
 2. Question B : « Quels financements FODEL et quelle occupation du sol à Boké ? »
    - Baseline scientifique AOI : WorldCover uniquement.
-   - Après découverte : déclaration régionale GAC 2022 contextualisant la gouvernance financière ; entrée compilée CECIDE affichée comme non confirmée.
-   - **Nouvelles mesures scientifiques AOI : 0. Nouveaux faits régionaux documentés : 1. Nouveau débat Spark/Wonder : NON exécuté.** Les conclusions précédentes restent historiquement inchangées.
+   - Après découverte : déclaration historique régionale GAC 2022 et résumé scientifique Kolie et al. 2024 ; entrée compilée CECIDE affichée comme non confirmée.
+   - **Nouvelles mesures scientifiques AOI : 0. Nouvelles sources régionales documentées : 2. Nouveau débat Spark/Wonder : NON exécuté.** Les conclusions précédentes restent historiquement inchangées.
 3. Question C : « Quelles concentrations PM10 à Boké ? »
-   - ABSTAIN, aucun nouveau PM10 physique.
+   - Toujours ABSTAIN pour une **concentration numérique PM10 sur l’AOI** ; mais une étude scientifique régionale de 2024 apparaît dans le contexte, sans valeur locale publiée dans son résumé.
 
 ## PowerShell vérification locale
 
