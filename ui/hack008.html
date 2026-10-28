@@ -62,7 +62,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label class="audiofile">Charger des MP3 locaux pour écoute d'archive (facultatif)
 <input id="audio-files" type="file" accept=".mp3,audio/mpeg" multiple></label>
 <div id="audio-playlist"></div>
-<div class="actions"><button id="pdf-button" type="button" disabled>Télécharger la note décisionnelle PDF</button><button id="oral-button" type="button" disabled>Télécharger le scénario oral français</button><span id="pdf-status" class="muted">PDF et scénario oral disponibles après une session complète.</span></div>
+<div class="actions"><button id="pdf-button" type="button" disabled>Télécharger la note décisionnelle PDF</button><button id="oral-button" type="button" disabled>Télécharger le scénario oral français</button><button id="manifest-button" type="button" disabled>Projet oral modifiable (JSON)</button><span id="pdf-status" class="muted">PDF et scénario oral disponibles après une session complète.</span></div>
 </section>
 <section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section>
 </div></main>
@@ -135,6 +135,21 @@ async function loadSessionPlayback(){
 }
 $("session-audio").addEventListener("change",loadSessionPlayback);
 $("session-timing").addEventListener("change",loadSessionPlayback);
+$("manifest-button").onclick=async()=>{
+ if(!activeRunId)return;
+ const b=$("manifest-button");b.disabled=true;
+ try{
+   const r=await fetch("/api/oral-manifest?id="+encodeURIComponent(activeRunId),opts);
+   if(!r.ok){const d=await r.json();throw Error(d.detail||d.error||"Projet indisponible");}
+   const url=URL.createObjectURL(await r.blob());
+   const a=document.createElement("a");a.href=url;
+   a.download="TerraCouncil-"+activeRunId+"-oral-draft.json";
+   document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),2000);
+   $("pdf-status").textContent="Projet oral téléchargé : modifiez seulement text_to_review, puis validez dans VS Code.";
+ }catch(e){$("pdf-status").textContent="Projet oral indisponible : "+e.message;}
+ finally{b.disabled=!activeRunId;}
+};
 $("oral-button").onclick=async()=>{
  if(!activeRunId)return;
  const b=$("oral-button");b.disabled=true;
@@ -223,7 +238,7 @@ async function loadSaved(){
       if(!res.ok)throw Error("Session introuvable");
       const trace=await res.json();render(trace);
       activeRunId=trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?ses.run_id:null;
-      $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;
+      $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;$("manifest-button").disabled=!activeRunId;
       $("pdf-status").textContent=activeRunId?"PDF de cette session disponible sans appel Meta.":"PDF non disponible : session incomplète.";
       describe("Session restaurée : "+ses.run_id+" · Aucun nouvel appel Meta.");
       $("progress").scrollIntoView({behavior:"smooth",block:"start"});
@@ -249,7 +264,7 @@ async function poll(id){
 }
 $("run").onclick=async()=>{
  if(busy||!$("share").checked||!$("billing").checked)return;
- busy=true;activeRunId=null;$("pdf-button").disabled=true;$("oral-button").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
+ busy=true;activeRunId=null;$("pdf-button").disabled=true;$("oral-button").disabled=true;$("manifest-button").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
  try{
  const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
   body:JSON.stringify({question:$("question").value,consent:true,reviewed_sharing:true})});
