@@ -1,0 +1,176 @@
+{
+  "schema_version": "TERRA_FAITH_SOURCE_CATALOG_002",
+  "source_system": "Base44 SustainAfrica Mining Restoration Intelligence Platform",
+  "review_date": "2026-10-28",
+  "review_mode": "READ_ONLY_SOURCE_CODE_AND_MATERIALIZED_FILES",
+  "council_readiness": "NOT_ADMITTED_FOR_BOKE",
+  "sources": [
+    {
+      "id": "FSMI_HANSEN_640",
+      "path": "public/data/fsmi/maus_evidence_640_v101.csv",
+      "observed_rows": 640,
+      "scope": "128 MAUS Guinea footprints × inside/0_1km/1_5km/5_10km/10_20km",
+      "metrics": [
+        "Hansen loss rates threshold30/50",
+        "raster valid fraction",
+        "JRC exploratory area",
+        "Dynamic World descriptive tree/shrub"
+      ],
+      "qa": {
+        "FULL": 312,
+        "NEAR_FULL": 254,
+        "REVIEW": 74
+      },
+      "role_topics": [
+        "land",
+        "mining",
+        "restoration"
+      ],
+      "scientific_limit": "No authorized MAUS-to-permit/company attribution or causal inference"
+    },
+    {
+      "id": "FSMI_CHENG_CLASSES",
+      "path": "public/fmri/guinea-cheng-landuse-index.json",
+      "observed_polygons": 707,
+      "source_sites": 199,
+      "period": "2017–2022",
+      "role_topics": [
+        "mining",
+        "land",
+        "restoration"
+      ],
+      "scientific_limit": "Counts only, no hectares, display geometry simplified, company attribution unverified",
+      "licence_state": "Upstream DOI and commercial rights must be independently reviewed"
+    },
+    {
+      "id": "CPDM_FOOTPRINT_REFS",
+      "path": "public/fmri/guinea-observed-footprint-screening.json",
+      "observed_rows": 1012,
+      "snapshot_id": "20260716_232803_UTC",
+      "role_topics": [
+        "mining",
+        "governance"
+      ],
+      "scientific_limit": "Historical footprint-reference rows; geometry absent; no 1012 independent verified spatial joins"
+    },
+    {
+      "id": "FSMI_CAMS_REGIONAL",
+      "path": "public/fmri/guinea-cams-air-quality-september-2026.json",
+      "sample_points": 10,
+      "period": "2026-09-01/2026-09-30",
+      "model": "CAMS global ~45 km via Open-Meteo",
+      "fields": [
+        "pm2_5",
+        "pm10",
+        "dust",
+        "aerosol_optical_depth"
+      ],
+      "role_topics": [
+        "dust",
+        "climate"
+      ],
+      "scientific_limit": "No ground sensor, no validated site AOI, no mine emissions attribution"
+    },
+    {
+      "id": "FSMI_WIND_HOURLY",
+      "path": "public/fmri/guinea-hourly-wind-september-2026.json",
+      "sample_points": 10,
+      "period": "2026-09",
+      "role_topics": [
+        "dust",
+        "climate"
+      ],
+      "scientific_limit": "Modeled regional 10 m wind/precipitation, not onsite AERMOD inputs"
+    },
+    {
+      "id": "FSMI_WORLDPOP_OSM",
+      "path": "public/fmri/guinea-worldpop-buildings-buffers.json",
+      "sample_points": 10,
+      "population_year": 2020,
+      "osm_year": 2024,
+      "role_topics": [
+        "population",
+        "communities",
+        "land"
+      ],
+      "scientific_limit": "Modeled people and mapped buildings, not impact or exposure; points noncanonical"
+    },
+    {
+      "id": "FSMI_OHSOME_OSM",
+      "path": "public/fmri/guinea-ohsome-territorial-aggregates.json",
+      "sample_points": 10,
+      "snapshot": "2024-01-01",
+      "role_topics": [
+        "population",
+        "logistics",
+        "water"
+      ],
+      "scientific_limit": "OSM feature counts are not completeness-assured or site verified"
+    },
+    {
+      "id": "FSMI_NASA_POWER_PREFECTURES",
+      "path": "public/data/fsmi/guinea_34_nasa_power_2001_2025_v01.json",
+      "reference_points": 34,
+      "period": "2001–2025",
+      "role_topics": [
+        "climate",
+        "water",
+        "agriculture"
+      ],
+      "scientific_limit": "Approximate centroids only, not prefecture areal averages"
+    },
+    {
+      "id": "FSMI_FEI_KANKAN",
+      "path": "public/data/fsmi/fei_kankan_regional_reference_v01.json",
+      "scope": "Kankan only",
+      "role_topics": [
+        "climate",
+        "water",
+        "agriculture"
+      ],
+      "scientific_limit": "Computed unreviewed Kankan metrics; do not transplant to Boké"
+    },
+    {
+      "id": "FSMI_KANKAN_LANDSCAPE",
+      "path": "public/data/fsmi/guinea_kankan_landscape_metrics_v01.json",
+      "scope": "Kankan only",
+      "role_topics": [
+        "land",
+        "forest",
+        "agriculture"
+      ],
+      "scientific_limit": "Unreviewed Hansen/JRC/Dynamic World, not Boké or mining impact"
+    },
+    {
+      "id": "FSMI_AERMOD_REFERENCE",
+      "path": "public/fmri/fsmi095-official-aermod-benchmark.json",
+      "scope": "US EPA Martin's Creek reference",
+      "verified_reference_ranks": 587,
+      "verified_high_values": 6,
+      "role_topics": [
+        "dust",
+        "technical_feasibility"
+      ],
+      "scientific_limit": "Official SO2 engine benchmark ≠ Guinea PM mine plume"
+    },
+    {
+      "id": "MAUS_LEGACY_572",
+      "path": "USER_LOCAL_OLD_WORKFLOW/maus_v2_overlap_by_license.csv",
+      "observed_rows": 572,
+      "recorded_has_maus_yes": 35,
+      "role_topics": [
+        "mining",
+        "governance"
+      ],
+      "scientific_limit": "Old 572-row population, not national 22430 CPDM or Boké"
+    }
+  ],
+  "admission_rules": {
+    "geography": "Require exact approved AOI, do not substitute Guinea/Kankan/approximate regional point for Boké",
+    "license": "Never assume public display grants relicensing",
+    "status": "No positive scientific promotion solely by reading Base44 source",
+    "causality": "Historical coverage and modeled conditions are not confirmed mining impacts",
+    "identity": "35 legacy rows, 1012 CPDM reference rows, 128 MAUS fids, 707 Cheng observations are distinct"
+  },
+  "next_work": "Locate trusted local/authorized source export, pin hashes, source-to-site identity bridge, prepare evidence in existing HACK-016 planner"
+}
