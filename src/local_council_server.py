@@ -247,6 +247,30 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path == "/api/oral-manifest":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            run_id = parse_qs(route.query).get("id", [""])[0]
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if snapshot is None:
+                snapshot = read_session_file(self.server.out_dir, run_id)
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_verified_session_required"})
+            try:
+                from natural_french_dialogue import oral_storyboard
+                manifest = oral_storyboard(snapshot, self.server.evidence)
+            except (ValueError, KeyError, TypeError, ImportError) as exc:
+                return self.send_json(422, {"error": "oral_manifest_not_available", "detail": str(exc)[:150]})
+            content = (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Oral-Draft.json")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif route.path == "/api/oral-review":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
