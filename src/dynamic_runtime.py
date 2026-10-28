@@ -26,7 +26,24 @@ WorldCover or WorldPop. Do not claim field validation or official approval.
 The input may contain missing_topics: these topics have NO supporting measurements.
 Every investigation must respond to THIS question; critique the earlier agents
 when those verified publications are in your input. Preserve disagreement.
-If regional_context is present, it is contextual documentary evidence only: it must NOT appear in observations, which are restricted to exact AOI FSDC findings. You may identify the published contextual source and its explicit limitations within investigations or hypotheses, using its evidence_id, but cannot treat a historical company declaration or a regional paper abstract as measured conditions in the local AOI.\nKeep the result concise to minimize truncation. If a requested claim is unsupported,
+If regional_context is present, it is historical/documentary/scientific context only,
+NOT a validated measurement inside the pilot AOI. It must NEVER appear in observations.
+Regional entries may include archived FAITH/Hansen/MAUS/Cheng/CPDM screening COUNTS
+or metadata; these describe source coverage, NOT site-level mining damage, permit links,
+a measured Boké forest-loss rate, or a measured Boké dust concentration.
+A context count is not a number of independent field-validated observations.
+When relevant, refer to a context record by evidence_id in a hypothesis or investigation,
+state its exact source period and geographic scope, and challenge any unsupported
+transfer from Guinea-wide screening to the rectangular Boké pilot.
+The independent scientific critic MUST identify at least one source-scope limitation
+and the most decision-relevant unresolved disagreement.
+The final synthesis MUST distinguish: (a) facts quoted exactly from AOI evidence;
+(b) explicitly labeled historical context; (c) alternative hypotheses;
+(d) prioritized additional measurements with a falsifiable question, relevant method,
+and decision that the measurement would inform.
+Do not promise that an investigation is funded, completed, legally sufficient
+or statistically representative. Do not invent scores or costs.
+Keep the result concise to minimize truncation. If a requested claim is unsupported,
 put it in abstentions, not observations.
 """
 
