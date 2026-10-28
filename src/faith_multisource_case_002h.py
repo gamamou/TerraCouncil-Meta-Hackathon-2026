@@ -14,6 +14,7 @@ from dynamic_council import plan_question
 from fsdc_evidence_expansion import attach_regional_context
 from faith_boke_context_guard_002e import inspect_context
 from faith_chirps_aoi_guard_002i import check as check_chirps
+from faith_environmental_context_002k import attach_environmental_context
 
 QUESTION = "Comment concilier extraction miniere, poussiere, foret, eau et communautes a Boke ?"
 CHIRPS_ROLE = "HASHED_IN_ORIGINAL_010HI_J_NOT_YET_EXTRACTED_AS_AOI_FINDING"
@@ -22,8 +23,8 @@ def case_file(hi_path, qa_path, question=QUESTION):
     observations=expand(hi_path,qa_path)
     chirps=check_chirps(hi_path,qa_path)
     observations.extend(chirps["accepted"])
-    plan=attach_regional_context(
-        plan_question(question,observations,geography="Boké, Guinea"))
+    plan=attach_environmental_context(attach_regional_context(
+        plan_question(question,observations,geography="Boké, Guinea")))
     climate=inspect_context()
     if climate["inside_exploratory_rectangle"] or climate["council_evidence"]:
         raise ValueError("FAITH climate context erroneously admitted to AOI")
@@ -33,7 +34,8 @@ def case_file(hi_path, qa_path, question=QUESTION):
         "plan":plan,
         "evidence_count":len(plan["evidence"]),
         "ao_i_source_families":["WorldPop 2026","ESA WorldCover 2021"] + (["CHIRPS"] if chirps["accepted"] else []),
-        "regional_documentary_context_count":len(plan.get("regional_context",[])),
+        "regional_documentary_context_count":len(plan.get("regional_context",[]))-plan.get("environmental_context_count",0),
+        "environmental_scientific_context_count":plan.get("environmental_context_count",0),
         "climate_reference":{
             "origin":"Historic FAITH FSMI NASA POWER computation",
             "geography":"Boke approximate prefectural point, NOT pilot rectangle",
@@ -69,6 +71,7 @@ def main():
        "aoi_indicators":result["evidence_count"],
        "independent_aoi_datasets":result["independent_aoi_dataset_count"],
        "regional_context_sources":result["regional_documentary_context_count"],
+       "historical_environmental_context_sources":result["environmental_scientific_context_count"],
        "missing_topics":result["plan"]["missing_topics"],
        "chirps":result["chirps_status"],
        "chirps_accepted_count":result["chirps_accepted_count"],
