@@ -57,6 +57,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-009 Chamber, source visualization, audio and scientific PDF](docs/HACK-009-CHAMBER-PDF-AUDIO.md)
 - [HACK-010 Executive PDF & natural French audio](docs/HACK-010-EXECUTIVE-PDF-NATURAL-VOICE.md)
 - [HACK-011 Reviewed oral narration & synchronized chamber](docs/HACK-011-AUDIO-REVIEW-CHAMBER.md)
+- [HACK-012 visibly redesigned Executive Brief V3](docs/HACK-012-EXECUTIVE-V3.md)
 
 ## Submission transparency
 
@@ -99,3 +100,7 @@ The localhost app can now generate a refined French executive PDF with scientifi
 ## HACK-011 — Source-bound oral editorial approval
 
 A new review gate keeps the actual verified HACK-008 model messages immutable and requires an explicitly approved, session-fingerprint-matched French oral manuscript before ElevenLabs speech synthesis. The new UI provides editable JSON drafts and verifies audio SHA-256 before synchronized playback. No new Meta calls are required. Source and mock tests committed; user-side end-to-end execution and paid speech generation remain pending. A short editorial reconstruction is **not** a verbatim model transcript or scientific endorsement.
+
+## HACK-012 PDF export correction
+
+Verified that the user's October 28 PDF still had the previous five-page visual treatment. The new `src/executive_brief_v3.py` introduces a substantially distinct navy cover, an executive decision page, prioritization matrix and audit appendix. `/api/pdf` now uses a new V3 server-side path and distinct response filename; the interface identifies the export as **V3**, avoiding silent V2 file reuse. No further model calls needed. User-side Windows PDF visual validation is pending.
