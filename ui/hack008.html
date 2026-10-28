@@ -21,7 +21,7 @@ label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;ve
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
 hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 @media(max-width:850px){main{display:block}}
-.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}</style></head>
+.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}</style></head>
 <body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
 <h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Explorat oire · Non validé sur le terrain</span></header>
 <main><aside>
@@ -51,6 +51,12 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <section id="chamber"><div class="top"><h2>4. Chambre audiovisuelle et rapport</h2><span class="badge">HACK-009</span></div>
 <p class="muted">Les quatre interventions écrites de la session sont conservées ci-dessus. Le graphique ci-dessous représente seulement les classes WorldCover 2021 observées, pas un impact minier.</p>
 <div id="landcover-chart" class="card"><strong>Analyse visuelle · WorldCover 2021</strong><div id="landcover-bars"></div><small class="muted">Périmètre rectangulaire de Boké · Valeurs préliminaires, non validées sur le terrain</small></div>
+<h3>Lecture synchronisée de la session</h3>
+<p class="muted">Utilisez le MP3 et son fichier d'horodatage générés après relecture du scénario français. Les deux fichiers doivent correspondre à la session ouverte.</p>
+<label>Audio de la délibération actuelle<input id="session-audio" type="file" accept=".mp3,audio/mpeg"></label>
+<label>Horodatage des interventions<input id="session-timing" type="file" accept=".json,application/json"></label>
+<p id="audio-match" class="muted">Aucun audio de session synchronisé.</p>
+<div id="session-audio-player"></div><div id="active-speaker" class="active-turn">Agent actif : en attente</div>
 <h3>Écouter une archive audio</h3>
 <div class="warn">Les fichiers MP3 de l'expérimentation ElevenLabs antérieure ne correspondent PAS aux quatre interventions HACK-008. Ils ne seront jamais présentés comme leur enregistrement. Une nouvelle narration vocale devra être produite, vérifiée et associée à cette session avant lecture synchronisée.</div>
 <label class="audiofile">Charger des MP3 locaux pour écoute d'archive (facultatif)
@@ -66,7 +72,7 @@ const TOKEN="__SESSION_TOKEN__";
 const $=id=>document.getElementById(id);
 const add=(tag,parent,txt,cls)=>{let n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;parent.appendChild(n);return n};
 const opts={headers:{"X-Terra-Token":TOKEN}};
-let busy=false, activeRunId=null;
+let busy=false, activeRunId=null, loadedAudioUrl=null;
 function showBars(evidence){
  const record=(evidence||[]).find(e=>String(e.dataset).includes("WorldCover 2021"));
  const target=$("landcover-bars");target.replaceChildren();
@@ -93,6 +99,34 @@ $("audio-files").addEventListener("change",function(){
    player.addEventListener("loadedmetadata",()=>{});
  }
 });
+async function loadSessionPlayback(){
+ const audio=$("session-audio").files[0],timing=$("session-timing").files[0];
+ const status=$("audio-match"),holder=$("session-audio-player");
+ holder.replaceChildren();
+ if(loadedAudioUrl){URL.revokeObjectURL(loadedAudioUrl);loadedAudioUrl=null;}
+ if(!audio||!timing){status.textContent="Sélectionnez le MP3 et le fichier d'horodatage correspondants.";return;}
+ try{
+  const data=JSON.parse(await timing.text());
+  if(!activeRunId||data.session_id!==activeRunId)throw Error("Audio d'une autre session : chargement refusé.");
+  if(data.audio_filename!==audio.name)throw Error("Le MP3 ne correspond pas au manifeste d'horodatage.");
+  if(!Array.isArray(data.timeline)||!data.timeline.length)throw Error("Horodatage absent.");
+  const turns=data.timeline;
+  if(turns.some(t=>!Number.isFinite(t.start_seconds)||!Number.isFinite(t.end_seconds)||t.end_seconds<t.start_seconds||t.turn<1||t.turn>4))
+   throw Error("Horodatage non valide.");
+  const player=document.createElement("audio");player.controls=true;player.preload="metadata";
+  loadedAudioUrl=URL.createObjectURL(audio);player.src=loadedAudioUrl;holder.appendChild(player);
+  player.addEventListener("timeupdate",()=>{
+   const t=player.currentTime;
+   const active=turns.find(v=>t>=v.start_seconds&&t<v.end_seconds);
+   const name=active?active.speaker:"Transition ou pause";
+   $("active-speaker").textContent="Intervenant actif : "+name;
+   document.querySelectorAll("[data-turn]").forEach(el=>el.classList.toggle("speaking",Boolean(active&&el.dataset.turn===String(active.turn))));
+  });
+  status.textContent="Audio de cette session prêt. Synchronisation selon les horodatages ElevenLabs, pas une transcription verbatim.";
+ }catch(err){status.textContent="Audio refusé : "+err.message;}
+}
+$("session-audio").addEventListener("change",loadSessionPlayback);
+$("session-timing").addEventListener("change",loadSessionPlayback);
 $("oral-button").onclick=async()=>{
  if(!activeRunId)return;
  const b=$("oral-button");b.disabled=true;
@@ -131,8 +165,8 @@ function render(trace){
 $("runstate").textContent=trace.status;
 const host=$("progress");host.replaceChildren();
 add("p",host,"Appels tentés : "+(trace.calls_attempted||0)+" / 4","muted");
-for(const step of trace.steps||[]){
- let card=add("div",host,"","card");add("h3",card,step.role+" · "+step.model);
+for(const [stepIndex,step] of (trace.steps||[]).entries()){
+ let card=add("div",host,"","card");card.dataset.turn=String(stepIndex+1);add("h3",card,step.role+" · "+step.model);
  add("p",card,"Statut : "+step.status+" · Vérification : "+(step.verification_status||"en attente"),"muted");
  if(step.checked_publication){
   renderItems(card,step.checked_publication.observations,"Observations FSDC");
