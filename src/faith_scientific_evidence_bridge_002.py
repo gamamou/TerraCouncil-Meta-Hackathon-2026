@@ -162,6 +162,13 @@ def build_report(inputs):
                       "Boke AOI selection and source-rights review required before Council evidence.",
                       "Do not merge 572 legacy MAUS rows with 1012 national footprint references."]}
 
+def load_input_manifest(path):
+    """Accept plain UTF-8 and Windows PowerShell UTF-8 with BOM."""
+    data=json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    if not isinstance(data,dict):
+        raise ValueError("Input manifest must be a JSON object")
+    return data
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--manifest",help="Local JSON map {asset_id:{path,sha256?}}")
@@ -174,7 +181,7 @@ def main():
     if not args.manifest or not args.out:ap.error("--manifest and --out required")
     out=Path(args.out).expanduser()
     if out.exists():ap.error("Report exists; overwrite forbidden")
-    report=build_report(json.loads(Path(args.manifest).read_text(encoding="utf-8")))
+    report=build_report(load_input_manifest(args.manifest))
     out.parent.mkdir(parents=True,exist_ok=True)
     with out.open("x",encoding="utf-8") as f:
         json.dump(report,f,ensure_ascii=False,indent=2)
