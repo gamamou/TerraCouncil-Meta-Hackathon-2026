@@ -35,7 +35,7 @@ class ProductionJourneyTests(unittest.TestCase):
     def test_scientific_fidelity_and_audio_review_preserved(self):
         self.assertIn("plan.dust_protocol",HTML)
         self.assertIn("dynamic-voice-consent",HTML)
-        self.assertIn("Une relecture humaine",HTML)
+        self.assertIn("validation humaine",HTML)
         self.assertIn("id=\"dynamic-matrix\"",HTML)
 
 if __name__=="__main__":unittest.main()
