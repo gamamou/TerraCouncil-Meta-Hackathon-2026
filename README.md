@@ -52,6 +52,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-004 real Boké screened-data bridge](docs/HACK-004-REAL-BOKE-DATA.md)
 - [HACK-005 one-call Meta Spark live pilot](docs/HACK-005-LIVE-PILOT.md)
 - [HACK-006 verified Wonder critique / Spark revision](docs/HACK-006-CONTINUE-DEBATE.md)
+- [HACK-007 Interactive Scientific Council](docs/HACK-007-INTERACTIVE-COUNCIL.md)
 
 ## Submission transparency
 
@@ -74,3 +75,7 @@ The new `src/live_pilot.py` supports one **explicitly authorized** real Meta Spa
 ## HACK-006 continuation status
 
 The participant's first live Spark call passed HACK-003 structural gates. HACK-006 code now supports separate, explicitly authorized Wonder critique and Spark revision stages, with re-verification of saved local traces. **Neither the Wonder nor revised Spark call has yet been executed live.** Science remains exploratory and human review is required.
+
+## HACK-007 interface checkpoint
+
+The participant has completed three live Meta calls (Spark first position, Wonder critique and Spark revision) with structural citation checks. `src/build_council_ui.py` now builds a **local interactive HTML replay** from these three saved private traces and the same FSDC evidence, rechecking fingerprints and source findings. The new UI and tests are committed; **the final HTML has not yet been built or inspected on the participant's Windows computer**. The new-question input is intentionally not connected to Meta and does not pretend to answer. Human scientific review is still required.
