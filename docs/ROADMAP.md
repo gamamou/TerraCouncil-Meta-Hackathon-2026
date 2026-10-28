@@ -114,3 +114,7 @@ Variable-length, source-bound ElevenLabs v4 speech is now wired to completed HAC
 ## HACK-016G — Scientific Pronunciation
 
 Dynamic spoken inputs now include deterministic, source-preserving pronunciations for whitelisted scientific acronyms (PM10, PM2.5, AERMOD, FSDC, ESG). Unknown measurements and English still block, preventing manufactured scientific interpretations. The Edge panel offers a no-cost voice preview before separately authorized ElevenLabs. See docs/HACK-016G-SCIENTIFIC-PRONUNCIATION.md. Windows checks pending.
+
+## HACK-016H — Dynamic readiness
+
+A local first-run diagnostic identifies missing Meta keys, current dynamic session archive path, distinct legacy session counts and question-specific data gaps. Edge offers no-cost source-grounded test questions and clears paid-consent checkboxes on page load. No paid calls are made by readiness; key presence does not prove provider availability. See docs/HACK-016H-READINESS.md. Windows regression pending.
