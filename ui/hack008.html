@@ -38,11 +38,17 @@ details.science-details>.card{border:0;background:transparent}
 .legacy-hidden,#run,#share,#billing{display:none!important}
 #dynamic-readiness-box{margin:12px 0}
 @media(max-width:860px){main{display:block;padding:0 12px}.panel{margin-bottom:10px}section{padding:15px}}
+
+.advanced-actions{display:inline-block;margin:8px 4px;vertical-align:middle}
+.advanced-actions summary{font-size:13px}.advanced-actions button{font-size:12px;padding:7px 11px;margin:5px}
+.agent-panel .card{padding:8px 11px;margin:6px 0}
+.agent-panel .card small{font-size:11px}
+@media(max-width:860px){.agent-panel{display:none}}
 </style></head>
 <body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC</div>
 <h1>TerraCouncil — Conseil scientifique</h1><span class="badge">Boké · Analyse exploratoire</span></header>
 <main><aside>
-<div class="panel"><h2>Les agents du Conseil</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
+<div class="panel agent-panel"><h2>Les agents du Conseil</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
 <div class="card">Mining & Industry<br><small>Première perspective exécutée</small></div>
 <div class="card">Environment & Climate<br><small>Deuxième perspective exécutée</small></div>
 <div class="card">Scientific Critic<br><small>Muse Wonder — critique</small></div>
@@ -56,8 +62,8 @@ details.science-details>.card{border:0;background:transparent}
 <p class="muted">Le Conseil confronte des points de vue à des observations scientifiques préliminaires. Il ne délivre pas d'autorisation d'investissement.</p>
 <textarea id="question" maxlength="1800" aria-label="Question au conseil">Quelles investigations scientifiques et garanties faut-il prioriser avant une décision de développement minier dans le périmètre étudié de Boké ?</textarea>
 <div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
-<label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
-<label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
+<label class="legacy-hidden"><input id="share" type="checkbox">Autorisation ancien parcours</label>
+<label class="legacy-hidden"><input id="billing" type="checkbox">Coût ancien parcours</label>
 <button id="dynamic-preview" class="primary-action" type="button">Examiner les preuves disponibles</button><details class="science-details" id="fsdc-expansion"><summary>Recherches documentaires complémentaires</summary><div class="card">
 <h3>FSDC — Comparer de nouvelles preuves</h3>
 <p class="muted">Compare les observations locales du pilote et des documents régionaux réels. Les déclarations historiques ne sont jamais traitées comme mesures sur l'emprise géospatiale.</p>
@@ -74,17 +80,17 @@ details.science-details>.card{border:0;background:transparent}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" class="primary-action" type="button" disabled>Lancer le débat</button><button id="dynamic-history" type="button">Mes délibérations</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><button id="dynamic-metrics" type="button" disabled>Indicateurs FSDC</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><details class="advanced-actions"><summary>Contrôles et exports</summary><button id="dynamic-audit" type="button" disabled>Vérifier la fidélité</button><button id="dynamic-brief" type="button" disabled>Exporter le dossier</button><button id="dynamic-metrics" type="button" disabled>Indicateurs détaillés</button></details></div><p class="muted">Les conclusions et le dialogue oral restent soumis à une validation humaine.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
-<div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Relire le scénario</button><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
+<div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Relire le scénario</button><button id="dynamic-voice-check" type="button" disabled>Vérifier l’audio</button>
 <button id="dynamic-voice-generate" type="button" disabled>Produire l’audio</button>
 <button id="dynamic-voice-listen" type="button" disabled>Écouter le débat</button></div>
 <p id="dynamic-voice-state" role="status" class="muted">Ouvrez une session dynamique terminée.</p>
 <div id="dynamic-voice-player"></div></div></div>
 </div>
 <p class="muted tiny legacy-hidden">Pilote HACK-008</p>
-<button id="run" disabled>Déclencher le Conseil scientifique</button>
+<button class="legacy-hidden" id="run" disabled>Ancien pilote</button>
 <p id="feedback" class="muted" role="status"></p></section>
 <details class="legacy-archive"><summary>Archives et fonctions historiques</summary><section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
 <section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
