@@ -66,3 +66,13 @@ Observed test report supplied directly by the participant: **Ran 7 tests in 0.11
 The `--list` command separately completed, enumerating all seven source families with the expected scientific status codes.
 
 **Acceptance scope:** local software/tests and registry listing ONLY. No real Base44/FSMI science asset imported, no source hash checked by this bridge, no Boké AOI promotion, no Meta calls or scientific debate during this acceptance.
+
+## First real-source local acceptance (28 October 2026)
+
+The user's actual Windows PowerShell output confirms a successful read-only ingestion of the pre-existing 572-row MAUS v1 overlap CSV after locally removing UTF-8 BOM from the private input manifest. The bridge reported `AUDITED_ASSETS=1`, `SCIENTIFIC_STATUS=RECOVERY_INTAKE_NOT_SCIENCE_ADMISSION`, and `COUNCIL_EVIDENCE_GENERATED=0`. The recovery report was stored privately under Documents; no file contents were committed. This does **not** establish scientific admissibility or a completed live council input.
+
+The permanent BOM-handling patch and its regression test were separately committed after the download used for this run. They were not part of this executed local acceptance.
+
+## Cross-studio inventory linked
+
+The new machine-readable `config/faith_fsmi_existing_sources_002.json` catalogs 12 source rails already present or documented in FSMI, with precise file paths, real source universes and explicit Boké geography/rights gates. These are provenance pointers, **not** data downloaded or incorporated into agent evidence. This work is hackathon source integration engineering; the original historical science remains attributed to FAITH.
