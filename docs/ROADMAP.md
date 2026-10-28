@@ -118,3 +118,7 @@ Dynamic spoken inputs now include deterministic, source-preserving pronunciation
 ## HACK-016H — Dynamic readiness
 
 A local first-run diagnostic identifies missing Meta keys, current dynamic session archive path, distinct legacy session counts and question-specific data gaps. Edge offers no-cost source-grounded test questions and clears paid-consent checkboxes on page load. No paid calls are made by readiness; key presence does not prove provider availability. See docs/HACK-016H-READINESS.md. Windows regression pending.
+
+## HACK-016J — Decision Matrix
+
+Using the first completed real Boké council, an evidence-linked investigations matrix and new V2 PDF are now available without another Meta call. Spark/Wonder prompts compare hypotheses more explicitly on future user-approved debates. No invented prices, probabilities, impact estimates or ranking; priority is NOT_ASSESSED until evidence exists. See docs/HACK-016J-DEBATE-QUALITY.md. Windows verification pending.
