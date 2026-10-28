@@ -42,6 +42,8 @@ def build_dynamic_pdf(trace,filename):
     data=brief_data(trace)
     from dynamic_decision_matrix import decision_matrix
     matrix=decision_matrix(trace)
+    from dynamic_quantification import quantify
+    quant=quantify(trace)
     output=Path(filename)
     if output.exists():raise ValueError("Report exists; do not overwrite")
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -54,7 +56,7 @@ def build_dynamic_pdf(trace,filename):
         return Paragraph(escape(str(t)),styles[style])
     content=[
       par("TERRACOUNCIL — FAITH / FSDC","Heading2"),
-      par("DOSSIER DÉCISIONNEL DYNAMIQUE — HACK-016D","Heading1"),
+      par("DOSSIER DÉCISIONNEL DYNAMIQUE — HACK-016K","Heading1"),
       par("Session "+data["session_id"],"TC16Note"),
       par("Question scientifique","Heading2"),par(data["question"]),
       par("Secteur : "+data["sector"]+" | Zone : "+data["geography"],"TC16Note"),
@@ -68,6 +70,27 @@ def build_dynamic_pdf(trace,filename):
         content.append(par(heading,"Heading3"))
         for item in data["final"][key]:
             content.append(par("• "+item["text"]))
+    content.append(PageBreak())
+    content.append(par("Indicateurs observés — quantification FSDC","Heading1"))
+    content.append(par("Extraction directe des valeurs contenues dans les preuves sauvegardées. "
+       "Aucun chiffre supplémentaire, tendance ou effet minier n'a été calculé.","TC16Note"))
+    if quant["metrics"]:
+        from reportlab.platypus import Table,TableStyle
+        cells=[[par("Indicateur","TC16Note"),par("Valeur","TC16Note"),par("Source / année","TC16Note")]]
+        for m in quant["metrics"]:
+            cells.append([par(m["metric"]),par(str(m["value"])+" %"),
+                par(m["evidence_id"]+" / "+m["observed_at"],"TC16Note")])
+        t=Table(cells,colWidths=[69*mm,24*mm,77*mm],repeatRows=1,hAlign="LEFT")
+        t.setStyle(TableStyle([("VALIGN",(0,0),(-1,-1),"TOP"),
+            ("BOTTOMPADDING",(0,0),(-1,-1),9),
+            ("LINEBELOW",(0,0),(-1,0),0.6,colors.HexColor("#aac0d4")),
+            ("ROWBACKGROUNDS",(0,1),(-1,-1),[colors.white,colors.HexColor("#eef3f8")])]))
+        content.append(t)
+    else:
+        content.append(par("Aucun indicateur numérique admissible identifié dans les constats de cette session."))
+    content.append(par("Limites : les valeurs décrivent uniquement l'emprise de l'observation. "
+      "Elles ne prouvent aucun changement temporel, impact minier ou exposition des populations.","TC16Note"))
+    content.append(par("SHA256 quantification : "+quant["metrics_sha256"],"TC16Note"))
     content.append(PageBreak())
     content.append(par("Matrice des investigations scientifiques","Heading1"))
     content.append(par("Options non classées et non approuvées. Coût, impact et faisabilité : non évalués.","TC16Note"))
