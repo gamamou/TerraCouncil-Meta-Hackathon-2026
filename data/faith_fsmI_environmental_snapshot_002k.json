@@ -1,0 +1,118 @@
+{
+  "schema_version": "TERRA_DATA_002K_ENVIRONMENTAL_SNAPSHOT",
+  "snapshot_date": "2026-10-28",
+  "source_system": "FAITH FSMI Base44, read-only observed existing source artifacts",
+  "generated_from": "Materialized files originally computed in FAITH/FSMI; no hackathon raster rerun",
+  "pilot_rectangle_epsg4326": [
+    -14.5,
+    10.5,
+    -14,
+    11
+  ],
+  "scope": "GUINEA_NATIONAL_OR_NONCANONICAL_SCREENING_NOT_BOKE_AOI",
+  "metadata_only": true,
+  "model_transmission_requires_review": true,
+  "source_entries": [
+    {
+      "id": "FAITH-MAUS-HANSEN-640",
+      "title": "Guinea MAUS/Hansen screening matrix",
+      "source_path": "public/data/fsmi/maus_evidence_640_v101.csv",
+      "status": "EXISTING_FAITH_SCIENCE_NOT_SITE_ADMITTED",
+      "period": "2001-2025",
+      "source_fids": 128,
+      "zone_rows": 640,
+      "zone_types": [
+        "inside",
+        "0_1km",
+        "1_5km",
+        "5_10km",
+        "10_20km"
+      ],
+      "hansen_qa": {
+        "FULL": 312,
+        "NEAR_FULL": 254,
+        "REVIEW": 74
+      },
+      "numeric_populated_rows": {
+        "hansen_loss_30pct_rate": 239,
+        "hansen_loss_50pct_rate": 178,
+        "dynamic_world_2025_trees_share_pct": 5,
+        "jrc_year_field_area_ha_exploratory": 5
+      },
+      "caveats": [
+        "A five-zone row is not an independent polygon or local observation",
+        "Hansen rates have missing values and status flags; do not calculate a representative Guinea or Boké rate from populated rows",
+        "MAUS/CPDM and company identity unverified",
+        "No causal attribution to mining",
+        "Geographic linkage to Boké pilot not established by this dataset alone"
+      ]
+    },
+    {
+      "id": "FAITH-CHENG-HISTORICAL-707",
+      "title": "Cheng historical land-cover classifications",
+      "source_path": "public/fmri/guinea-cheng-landuse-index.json",
+      "status": "CHENG_HISTORICAL_CLASSIFICATION_COUNTS_ONLY",
+      "period": "2017-2022",
+      "observations": 707,
+      "source_sites": 199,
+      "source_doi": "10.5281/zenodo.15726306",
+      "area_estimate_authorized": false,
+      "company_attribution_verified": false,
+      "caveats": [
+        "Counts of classifications, not hectares",
+        "Simplified display geometries do not prove AOI intersection",
+        "No verified association of Cheng classes with specific CPDM permits or firms"
+      ]
+    },
+    {
+      "id": "FAITH-CPDM-FOOTPRINT-REFS-1012",
+      "title": "Historical CPDM observed-footprint screening references",
+      "source_path": "public/fmri/guinea-observed-footprint-screening.json",
+      "status": "OBSERVED_FOOTPRINT_SCREENING_ONLY_NOT_FIELD_VERIFIED",
+      "snapshot_id": "20260716_232803_UTC",
+      "reference_records": 1012,
+      "geometry_in_payload": false,
+      "caveats": [
+        "Historical reference records are not 1012 independently validated MAUS/polygon overlaps",
+        "No available geometry to establish inclusion inside Boké AOI",
+        "No claim that permits are currently valid"
+      ]
+    },
+    {
+      "id": "FAITH-CHENG-CPDM-CHAIN",
+      "title": "Historical CPDM to Cheng party-context chain",
+      "source_path": "public/fmri/guinea-cheng-evidence-chain.json",
+      "status": "PARTY_CONTEXT_ONLY_NOT_CHENG_VERIFIED",
+      "snapshot_id": "20260716_232803_UTC",
+      "screened_shape_count": 1078,
+      "party_link_shapes": 71,
+      "verified_cheng_to_permit_count": 0,
+      "caveats": [
+        "71 party links are not Cheng polygon-permit matches",
+        "Zero verified Cheng-to-permit relationships",
+        "Historical cadastre status not legal verification"
+      ]
+    },
+    {
+      "id": "FAITH-CHENG-REGIONAL-PROXIMITY",
+      "title": "Cheng historical class proximity to 10 exploratory screening centers",
+      "source_path": "public/fmri/guinea-territorial-cheng-proximity.json",
+      "status": "PUBLIC_HISTORICAL_OBSERVATIONS_REGIONAL_BUFFER_SCREENING_ONLY",
+      "screening_points": 10,
+      "buffer_radii_km": [
+        1,
+        5,
+        10,
+        20
+      ],
+      "source_features_examined": 707,
+      "source_doi": "10.5281/zenodo.15726306",
+      "source_license": "CC BY-SA 4.0",
+      "caveats": [
+        "Screening centers derived from simplified cadastre bounding boxes",
+        "Not surveyed mine sites or validated community exposure",
+        "Approximate tangent-plane distances and noncanonical point identities"
+      ]
+    }
+  ]
+}
