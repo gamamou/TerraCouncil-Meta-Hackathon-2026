@@ -248,6 +248,36 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path in ("/api/dynamic-sessions","/api/dynamic-status"):
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            directory=self.server.out_dir / "Dynamic-HACK016"
+            if route.path=="/api/dynamic-sessions":
+                items=[]
+                for file in sorted(directory.glob("HACK016-*.json"),key=lambda x:x.stat().st_mtime,reverse=True)[:30]:
+                    if file.stat().st_size > 3000000: continue
+                    try:
+                        record=json.loads(file.read_text(encoding="utf-8"))
+                        if record.get("run_id")==file.stem:
+                            items.append({"run_id":record["run_id"],"status":record.get("status"),
+                                          "question":record.get("question"),"calls_attempted":record.get("calls_attempted",0)})
+                    except (OSError,ValueError): pass
+                return self.send_json(200,{"sessions":items})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"bad_run_id"})
+            filename=directory/(run_id+".json")
+            if not filename.is_file() or filename.stat().st_size > 3000000:
+                return self.send_json(404,{"error":"run_not_found"})
+            try:
+                trace=json.loads(filename.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id: raise ValueError("Session mismatch")
+            except (OSError,ValueError):
+                return self.send_json(422,{"error":"invalid_run_record"})
+            # Never expose the internal original raw model response in routine UI.
+            trace.pop("evidence_snapshot",None)
+            for step in trace.get("steps",[]):step.pop("raw_model_text",None)
+            return self.send_json(200,trace)
         elif route.path == "/api/chamber":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
@@ -378,6 +408,49 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/dynamic-run":
+            if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            if self.headers.get("Content-Type","").split(";")[0].strip()!="application/json":
+                return self.send_json(415,{"error":"json_required"})
+            try: count=int(self.headers.get("Content-Length","0"))
+            except ValueError: count=0
+            if not 1<=count<=4000:
+                return self.send_json(413,{"error":"invalid_request_size"})
+            try: request_data=json.loads(self.rfile.read(count))
+            except (ValueError,UnicodeDecodeError):
+                return self.send_json(400,{"error":"bad_json"})
+            if not isinstance(request_data,dict) or request_data.get("consent") is not True or request_data.get("share") is not True:
+                return self.send_json(403,{"error":"separate_paid_model_and_data_sharing_consent_required"})
+            try:
+                from dynamic_council import plan_question
+                from dynamic_runtime import execute_dynamic
+                plan=plan_question(request_data.get("question",""),self.server.evidence,
+                                   "Boké, Guinea",request_data.get("sector") or None)
+                if not plan["status"].startswith("READY_") or not plan["evidence"]:
+                    return self.send_json(422,{"error":"not_enough_question_relevant_data",
+                                               "status":plan["status"],"missing_topics":plan["missing_topics"]})
+                # Exact preview/execute binding: refuse stale or modified plans.
+                if plan["evidence_sha256"]!=request_data.get("evidence_sha256"):
+                    return self.send_json(409,{"error":"preview_changed_refresh_first"})
+                model_key=os.environ.get("MODEL_API_KEY","")
+                if not model_key:return self.send_json(409,{"error":"MODEL_API_KEY_missing"})
+                with self.server.job_lock:
+                    if self.server.running or getattr(self.server,"dynamic_running",False):
+                        return self.send_json(409,{"error":"another_model_run_in_progress"})
+                    self.server.dynamic_running=True
+                run_id="HACK016-"+dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S")+"-"+secrets.token_hex(4)
+                directory=self.server.out_dir/"Dynamic-HACK016"
+                def worker():
+                    try:
+                        execute_dynamic(plan,run_id,directory,model_key,caller=self.server.caller)
+                    finally:
+                        with self.server.job_lock:self.server.dynamic_running=False
+                threading.Thread(target=worker,daemon=True).start()
+                return self.send_json(202,{"run_id":run_id,"status":"START_REQUEST_ACCEPTED",
+                                           "max_model_calls":len(plan["proposers"])+2})
+            except (ValueError,KeyError,TypeError) as error:
+                return self.send_json(422,{"error":"dynamic_run_failed","detail":str(error)[:160]})
         if self.path == "/api/dynamic-preview":
             if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"origin_or_token_rejected"})
