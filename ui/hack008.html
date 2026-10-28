@@ -43,6 +43,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
 <button id="run" disabled>Déclencher le Conseil scientifique</button>
 <p id="feedback" class="muted" role="status"></p></section>
+<section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
 <section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
 <div id="progress" class="muted">Les interventions apparaîtront après le lancement autorisé.</div></section>
 <section><h2>3. Synthèse décisionnelle</h2>
@@ -148,6 +149,34 @@ async function context(){
  if(!d.api_key_available)describe("Clé Meta absente : chargez MODEL_API_KEY dans PowerShell avant de lancer le serveur.");
  }catch(e){describe(e.message);}
 }
+async function loadSaved(){
+ const host=$("saved-sessions");host.replaceChildren();
+ try{
+  const r=await fetch("/api/sessions",opts);
+  if(!r.ok)throw Error("Liste de sessions indisponible");
+  const data=await r.json();
+  if(!data.sessions.length){add("p",host,"Aucune session enregistrée.","muted");return;}
+  for(const ses of data.sessions){
+   const card=add("div",host,"","card");
+   add("small",card,ses.run_id+" · "+ses.status,"muted");
+   add("p",card,ses.question||"Question indisponible");
+   const button=add("button",card,"Ouvrir cette session");
+   button.type="button";button.onclick=async()=>{
+    try{
+      const res=await fetch("/api/status?id="+encodeURIComponent(ses.run_id),opts);
+      if(!res.ok)throw Error("Session introuvable");
+      const trace=await res.json();render(trace);
+      activeRunId=trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?ses.run_id:null;
+      $("pdf-button").disabled=!activeRunId;
+      $("pdf-status").textContent=activeRunId?"PDF de cette session disponible sans appel Meta.":"PDF non disponible : session incomplète.";
+      describe("Session restaurée : "+ses.run_id+" · Aucun nouvel appel Meta.");
+      $("progress").scrollIntoView({behavior:"smooth",block:"start"});
+    }catch(e){describe(e.message);}
+   };
+  }
+ }catch(e){add("p",host,e.message,"warn");}
+}
+$("refresh-sessions").onclick=loadSaved;
 async function poll(id){
  try{
   const r=await fetch("/api/status?id="+encodeURIComponent(id),opts);
@@ -173,5 +202,5 @@ $("run").onclick=async()=>{
  poll(d.run_id);
  }catch(e){busy=false;control();describe("Conseil non lancé : "+e.message);}
 };
-control();context();
+control();context();loadSaved();
 </script></body></html>
