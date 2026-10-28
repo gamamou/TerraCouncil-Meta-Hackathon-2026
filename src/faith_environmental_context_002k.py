@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 from dynamic_council import classify, plan_fingerprint
+from faith_dust_context_002l1 import attach_dust_context
 
 SNAPSHOT=Path(__file__).resolve().parents[1]/"data"/"faith_fsmI_environmental_snapshot_002k.json"
 EXPECTED_IDS={
@@ -85,4 +86,4 @@ def attach_environmental_context(plan, snapshot_path=SNAPSHOT):
     result["regional_context_sha256"]=hashlib.sha256(
         _canonical(result["regional_context"]).encode("utf-8")).hexdigest()
     result["plan_sha256"]=plan_fingerprint(result)
-    return result
+    return attach_dust_context(result)
