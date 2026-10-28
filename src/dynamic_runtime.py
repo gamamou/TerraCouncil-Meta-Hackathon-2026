@@ -26,7 +26,7 @@ WorldCover or WorldPop. Do not claim field validation or official approval.
 The input may contain missing_topics: these topics have NO supporting measurements.
 Every investigation must respond to THIS question; critique the earlier agents
 when those verified publications are in your input. Preserve disagreement.
-Keep the result concise to minimize truncation. If a requested claim is unsupported,
+If regional_context is present, it is contextual documentary evidence only: it must NOT appear in observations, which are restricted to exact AOI FSDC findings. You may identify the published contextual source and its explicit limitations within investigations or hypotheses, using its evidence_id, but cannot treat a historical company declaration or a regional paper abstract as measured conditions in the local AOI.\nKeep the result concise to minimize truncation. If a requested claim is unsupported,
 put it in abstentions, not observations.
 """
 
@@ -50,6 +50,8 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
       "source_ids":[x["evidence_id"] for x in plan["evidence"]],
       "evidence_sha256":plan["evidence_sha256"],
       "plan_sha256":plan.get("plan_sha256"),
+      "regional_context":plan.get("regional_context",[]),
+      "regional_context_sha256":plan.get("regional_context_sha256"),
       "evidence_snapshot":plan["evidence"],"planned_calls":len(plan["proposers"])+2,
       "calls_attempted":0,"status":"STARTED",
       "human_review_required":True,"steps":[]}
@@ -61,7 +63,8 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
     common={"question":plan["question"],"sector":plan["sector"],
             "geography":plan["geography"],"topics":plan["topics"],
             "missing_topics":plan["missing_topics"],
-            "evidence_sha256":plan["evidence_sha256"],"evidence":plan["evidence"]}
+            "evidence_sha256":plan["evidence_sha256"],"evidence":plan["evidence"],
+            "regional_context":plan.get("regional_context",[])}
     def call(role,model,payload):
         item={"role":role,"model":model,"status":"REQUEST_STARTED_DO_NOT_RETRY"}
         data["steps"].append(item)
