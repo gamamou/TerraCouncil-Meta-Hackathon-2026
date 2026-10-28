@@ -493,7 +493,7 @@ $("dynamic-brief").onclick=async()=>{
   if(!r.ok)throw Error("Brief indisponible");
   const url=URL.createObjectURL(await r.blob());
   const a=document.createElement("a");a.href=url;
-  a.download="TerraCouncil-"+dynamicActiveId+"-Dynamic-Brief-V1.pdf";
+  a.download="TerraCouncil-"+dynamicActiveId+"-Dynamic-Brief-V2.pdf";
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
  }catch(error){$("dynamic-state").textContent=error.message;}
