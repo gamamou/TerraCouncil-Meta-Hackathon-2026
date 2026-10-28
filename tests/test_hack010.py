@@ -52,7 +52,11 @@ class Hack010Tests(unittest.TestCase):
     def test_unrelated_debate_rejected(self):
         with TemporaryDirectory() as d:
             trace=self.create(Path(d))
-            trace["steps"][0]["checked_publication"]["investigations"][0]["text"]="A different plan"
+            for step in trace["steps"]:
+                step["checked_publication"]["hypotheses"] = []
+                step["checked_publication"]["investigations"] = [{"text":"A different plan", "label":"PROPOSED_INVESTIGATION_NOT_ESTABLISHED"}]
+                step["checked_publication"]["abstentions"] = []
+            trace["decision_support"] = trace["steps"][-1]["checked_publication"]
             with self.assertRaises(ValueError):
                 oral_storyboard(trace,evidence())
 
