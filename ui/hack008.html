@@ -44,7 +44,10 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div id="dynamic-plan" class="card">Aucun aperçu.</div><div class="card" id="dynamic-console">
 <h3>HACK-016B · Délibération dynamique</h3>
 <p class="muted">Les agents, les observations et les interventions sont déterminés par la question. Les sources proviennent uniquement du FSDC local. Les textes oraux et le PDF V3 ci-dessous concernent encore l'ancien pilote.</p>
-<p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p>
+<p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p><div class="card" id="dynamic-readiness-box">
+<div class="top"><h3>Diagnostic du Conseil dynamique</h3><button id="dynamic-readiness" type="button">Vérifier la configuration</button></div>
+<p class="muted">Vérifie les clés du serveur, les dossiers de sessions et les preuves accessibles sans lancer Meta.</p>
+<div id="dynamic-readiness-output" role="status"></div></div>
 <label><input id="dynamic-share" type="checkbox">J'autorise l'envoi des preuves sélectionnées à Meta.</label>
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
@@ -398,6 +401,36 @@ $("pdf-button").onclick=async()=>{
 };
 
 
+
+async function inspectDynamicReadiness(){
+ const target=$("dynamic-readiness-output");target.replaceChildren();
+ try{
+   const response=await fetch("/api/dynamic-readiness",opts);
+   const report=await response.json();
+   if(!response.ok)throw Error(report.detail||report.error);
+   add("p",target,"Clé Meta côté serveur : "+(report.meta_key_available?"présente":"ABSENTE")+
+        " · Sessions dynamiques : "+report.dynamic_session_count+
+        " · Sessions historiques : "+report.legacy_session_count);
+   add("p",target,"Dossier actif : "+report.session_directory,"tiny muted");
+   for(const note of report.notices)add("p",target,note,report.meta_key_available?"muted":"warn");
+   add("h3",target,"Questions pour éprouver les preuves disponibles");
+   for(const item of report.examples){
+     const card=add("div",target,"","card");
+     add("p",card,item.question);
+     add("small",card,item.status+" · Sources : "+(item.source_ids.join(", ")||"aucune")+
+       " · Dimensions absentes : "+(item.missing_topics.join(", ")||"aucune signalée"),"muted");
+     const button=add("button",card,"Utiliser cette question");
+     button.type="button";
+     button.onclick=()=>{
+       $("question").value=item.question;
+       $("question").dispatchEvent(new Event("input",{bubbles:true}));
+       $("dynamic-plan").textContent="Question sélectionnée : cliquez sur Aperçu dynamique des preuves et agents.";
+       $("question").scrollIntoView({behavior:"smooth",block:"center"});
+     };
+   }
+ }catch(error){add("p",target,"Diagnostic indisponible : "+error.message,"warn");}
+}
+$("dynamic-readiness").onclick=inspectDynamicReadiness;
 let dynamicPreview=null,dynamicBusy=false,dynamicActiveId=null;
 function dynamicControls(){
  $("dynamic-run").disabled=dynamicBusy||!dynamicPreview||
@@ -747,5 +780,5 @@ $("run").onclick=async()=>{
  poll(d.run_id);
  }catch(e){busy=false;control();describe("Conseil non lancé : "+e.message);}
 };
-control();context();loadSaved();
+control();context();loadSaved();inspectDynamicReadiness();
 </script></body></html>
