@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 from dynamic_council import plan_fingerprint
+from faith_dust_decision_protocol_002m import attach_protocol
 
 SOURCE=Path(__file__).resolve().parents[1]/"data"/"faith_dust_atmospheric_context_002l1.json"
 EXPECTED={
@@ -63,5 +64,6 @@ def attach_dust_context(plan,path=SOURCE):
     result["dust_aoi_concentration_admitted"]=False
     result["regional_context_sha256"]=hashlib.sha256(json.dumps(result["regional_context"],sort_keys=True,
                          ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
+    result=attach_protocol(result)
     result["plan_sha256"]=plan_fingerprint(result)
     return result
