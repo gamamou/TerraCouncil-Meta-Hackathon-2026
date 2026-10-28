@@ -28,7 +28,7 @@ This is a **dedicated public hackathon repository**. It is separate from Sustain
 - **HACK-001 (registry implementation committed Oct 27):** A sector/agent registry, local validator and preliminary Boké scenario definition. This is **not** yet a live scientific council or integrated FSDC retrieval.
 - **HACK-002 (prototype code committed Oct 27):** Evidence-gated Spark/Wonder API orchestration with direct HTTP client, independent critique and revision. No real Meta call, live FSDC connection, or scientific accuracy validation has yet been demonstrated.
 - **HACK-003 (verification prototype committed Oct 27):** Independent pre/post evidence checks, exact finding/citation matching, exploratory-only Boké tier and fail-closed Spark/Wonder pipeline. Code and synthetic tests are committed; real FSDC ingestion, scientific validation and live model runs remain pending.
-- **HACK-004 (planned):** Implement an integrated multimedia council experience and evaluate Muse Image for illustrative visual output; transparently reuse existing ElevenLabs audio where helpful.
+- **HACK-004 (in progress):** Implement an integrated multimedia council experience and evaluate Muse Image for illustrative visual output; transparently reuse existing ElevenLabs audio where helpful.
 
 Beyond the HACK-001 registry, these are **planned contributions, not completed features**. Only code and capabilities actually built during the event will be described as hackathon-built.
 
@@ -49,13 +49,18 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-001 registry architecture](docs/HACK-001-ARCHITECTURE.md)
 - [HACK-002 runtime and local test instructions](docs/HACK-002-RUNTIME.md)
 - [HACK-003 independent scientific verification](docs/HACK-003-INDEPENDENT-VERIFICATION.md)
+- [HACK-004 real Boké screened-data bridge](docs/HACK-004-REAL-BOKE-DATA.md)
 
 ## Submission transparency
 
 Our submission will explicitly call out prior foundations and focus the three-minute demo on the functions implemented within the hackathon window, evidenced by dated commits, model execution records and tests.
 
-**As of October 27, 2026:** HACK-001 registry, HACK-002 runtime, and HACK-003 independent verification prototype source/tests have been committed; no live Meta council execution, production FSDC integration or field-validated result is claimed. Development uses Python, VS Code, GitHub and direct Meta Model API (later milestones), **not Muse Code**.
+**As of October 27, 2026:** HACK-001 registry, HACK-002 runtime, HACK-003 independent verification, and HACK-004 source-aware Boké screening adapter have been committed; no live Meta council execution, production FSDC integration or field-validated result is claimed. Development uses Python, VS Code, GitHub and direct Meta Model API (later milestones), **not Muse Code**.
 
 ## Licensing
 
 No public code license has yet been selected. All rights reserved pending an explicit licensing decision. FAITH/FSDC assets are **not automatically licensed for redistribution**.
+
+## HACK-004 data integration status
+
+The new `src/import_boke_010hi.py` bridges pre-existing TerraCouncil 010HI/010HJ scientific screening into locally generated, **not field validated**, source-derived evidence records with strict hash consistency checks. Source inputs are not published in this repository. The code and isolated tests are committed; an actual model run with the local Boké input has **not** yet been completed or validated. See [HACK-004](docs/HACK-004-REAL-BOKE-DATA.md).
