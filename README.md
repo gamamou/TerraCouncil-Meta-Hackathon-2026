@@ -58,6 +58,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-010 Executive PDF & natural French audio](docs/HACK-010-EXECUTIVE-PDF-NATURAL-VOICE.md)
 - [HACK-011 Reviewed oral narration & synchronized chamber](docs/HACK-011-AUDIO-REVIEW-CHAMBER.md)
 - [HACK-012 visibly redesigned Executive Brief V3](docs/HACK-012-EXECUTIVE-V3.md)
+- [HACK-013 Immersive scientific chamber](docs/HACK-013-IMMERSIVE-CHAMBER.md)
 
 ## Submission transparency
 
@@ -104,3 +105,7 @@ A new review gate keeps the actual verified HACK-008 model messages immutable an
 ## HACK-012 PDF export correction
 
 Verified that the user's October 28 PDF still had the previous five-page visual treatment. The new `src/executive_brief_v3.py` introduces a substantially distinct navy cover, an executive decision page, prioritization matrix and audit appendix. `/api/pdf` now uses a new V3 server-side path and distinct response filename; the interface identifies the export as **V3**, avoiding silent V2 file reuse. No further model calls needed. User-side Windows PDF visual validation is pending.
+
+## HACK-013 — grounded audiovisual chamber
+
+The live local TerraCouncil app now has four manually browsable visual scenes derived from a completed and structurally verified HACK-008 session. During future approved session-specific ElevenLabs playback, the timestamped MP3 selects the corresponding scene and highlights the active scientific role. `src/chamber_visuals.py` derives figures and warnings only from original checked WorldPop/WorldCover evidence; `src/prepare_chamber.py` creates reviewable audio text **offline**. No new Meta or ElevenLabs calls were made during HACK-013. Edge playback with new audio and user-side tests remain pending. Audio remains a reviewed editorial reconstruction, never a verbatim original model recording.
