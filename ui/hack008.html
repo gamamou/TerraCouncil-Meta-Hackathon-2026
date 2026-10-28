@@ -633,7 +633,8 @@ $("dynamic-run").onclick=async()=>{
    const r=await fetch("/api/dynamic-run",{
      method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
      body:JSON.stringify({question:dynamicPreview.question,
-       evidence_sha256:dynamicPreview.evidence_sha256,share:true,consent:true})});
+       evidence_sha256:dynamicPreview.evidence_sha256,
+       plan_sha256:dynamicPreview.plan_sha256,share:true,consent:true})});
    const d=await r.json();
    if(!r.ok)throw Error(d.error||"Délibération non lancée");
    dynamicActiveId=d.run_id;
@@ -673,7 +674,7 @@ $("dynamic-preview").onclick=async()=>{
    const plan=await res.json();
    if(!res.ok)throw Error(plan.detail||plan.error);
    dynamicPreview={...plan,question:$("question").value};dynamicControls();
-   $("dynamic-meta").textContent="Plan prêt : "+plan.agents.length+" agents, "+plan.model_calls+" appels consommés pour cet aperçu.";
+   $("dynamic-meta").textContent="Plan prêt : "+plan.agents.length+" agents, 0 appel consommé pour cet aperçu. "+plan.planned_model_calls+" appels Meta au maximum si vous déclenchez le débat.";
    target.textContent="Statut : "+plan.status+
      " | Agents : "+plan.agents.join(", ")+
      " | Preuves FSDC : "+plan.source_ids.join(", ")+
