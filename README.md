@@ -55,6 +55,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-007 Interactive Scientific Council](docs/HACK-007-INTERACTIVE-COUNCIL.md)
 - [HACK-008 Local interactive Meta Council](docs/HACK-008-INTERACTIVE-LOCAL-COUNCIL.md)
 - [HACK-009 Chamber, source visualization, audio and scientific PDF](docs/HACK-009-CHAMBER-PDF-AUDIO.md)
+- [HACK-010 Executive PDF & natural French audio](docs/HACK-010-EXECUTIVE-PDF-NATURAL-VOICE.md)
 
 ## Submission transparency
 
@@ -89,3 +90,7 @@ New `src/local_council_server.py` and `ui/hack008.html` provide a localhost-only
 ## HACK-009 — session-bound scientific PDF and audiovisual chamber (source committed)
 
 The local interactive Council now supports reopening previously completed HACK-008 sessions at zero additional Meta cost, downloading a source-verified Scientific Decision Brief PDF (requires local ReportLab), visualizing preliminary WorldCover 2021 shares, and manually playing locally selected archival MP3s. Pre-hackathon ElevenLabs audio is **not** claimed as the audio of new HACK-008 model responses. New session-specific French TTS and synchronization are planned, not yet implemented. User-side PDF/Edge validation pending.
+
+## HACK-010 — executive French brief and session-bound natural voice
+
+The localhost app can now generate a refined French executive PDF with scientific audit annex, download a four-turn spoken French editorial script for mandatory human review, and play session-matched ElevenLabs v4 audio with synchronized active-speaker indicators when an authorized, separately generated MP3/timing JSON is loaded. Automatic TTS is **not** performed on page load or PDF export. Real HACK-008 audio generation and user-side PDF QA remain pending. All source provenance, data-status and human-review disclaimers remain mandatory.
