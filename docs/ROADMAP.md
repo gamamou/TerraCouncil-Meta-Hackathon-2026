@@ -122,3 +122,7 @@ A local first-run diagnostic identifies missing Meta keys, current dynamic sessi
 ## HACK-016J — Decision Matrix
 
 Using the first completed real Boké council, an evidence-linked investigations matrix and new V2 PDF are now available without another Meta call. Spark/Wonder prompts compare hypotheses more explicitly on future user-approved debates. No invented prices, probabilities, impact estimates or ranking; priority is NOT_ASSESSED until evidence exists. See docs/HACK-016J-DEBATE-QUALITY.md. Windows verification pending.
+
+## HACK-016K — Quantified Evidence
+
+Existing HACK-016 Boké sessions now expose literal quantified FSDC evidence values (ESA WorldCover 2021 cover shares) and a separate dynamic PDF V3, without invented impacts, trends or cost rankings. Edge provides Indicateurs FSDC; no new paid calls are required to view the archived council. See docs/HACK-016K-QUANTIFIED-REASONING.md. Windows validation pending.
