@@ -391,7 +391,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send_json(409, {"error": "already_approved", "script_sha256": manifest["script_sha256"]})
                 with target.open("x", encoding="utf-8") as output:
                     json.dump(manifest, output, ensure_ascii=False, indent=2)
-                    output.write("\\n")
+                    output.write(chr(10))
                 return self.send_json(201, {
                     "status": "EDITORIAL_APPROVED_NOT_FIELD_VALIDATED",
                     "session_id": run_id,
