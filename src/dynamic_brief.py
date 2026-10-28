@@ -30,7 +30,7 @@ def brief_data(trace):
     return {"session_id":trace["run_id"],"question":trace["question"],
             "sector":trace["sector"],"geography":trace["geography"],
             "evidence_sha256":trace["evidence_sha256"],
-            "sources":evidence,"steps":steps,
+            "sources":evidence,"regional_context":trace.get("regional_context",[]),"steps":steps,
             "final":trace["decision_support"],
             "missing_topics":trace.get("missing_topics",[])}
 
@@ -123,6 +123,18 @@ def build_dynamic_pdf(trace,filename):
         content.append(par(e["finding"]))
         content.append(par("Source : "+e["source"]+" | Date : "+e["observed_at"]+
              " | Validation : "+e["validation_status"],"TC16Note"))
+    if data["regional_context"]:
+        content.append(par("Contexte scientifique régional — distinct de l'AOI","Heading2"))
+        for entry in data["regional_context"]:
+            content.append(par(entry["evidence_id"]+" — "+entry["source_type"],"Heading3"))
+            content.append(par(entry["claim"]))
+            content.append(par("Portée : "+entry["scope"]+" | Statut : "+
+                  entry["validation_status"],"TC16Note"))
+            content.append(par("Lien original : "+entry["source_url"],"TC16Note"))
+            for limit in entry["limitations"][:2]:
+                content.append(par("Limite : "+limit,"TC16Note"))
+        content.append(par("Ces sources régionales ne constituent pas des mesures "
+           "sur l'emprise rectangulaire et ne démontrent aucun changement actuel.","TC16Note"))
     content.append(par("Empreinte FSDC SHA-256 : "+data["evidence_sha256"],"TC16Note"))
     content.append(par("Document generated solely from the saved dynamic scientific debate. "
        "Free-form agent proposals remain unvalidated and require independent review.","TC16Note"))
