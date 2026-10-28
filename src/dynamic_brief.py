@@ -40,6 +40,8 @@ def build_dynamic_pdf(trace,filename):
     from reportlab.lib import colors
     from reportlab.lib.units import mm
     data=brief_data(trace)
+    from dynamic_decision_matrix import decision_matrix
+    matrix=decision_matrix(trace)
     output=Path(filename)
     if output.exists():raise ValueError("Report exists; do not overwrite")
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -66,6 +68,21 @@ def build_dynamic_pdf(trace,filename):
         content.append(par(heading,"Heading3"))
         for item in data["final"][key]:
             content.append(par("• "+item["text"]))
+    content.append(PageBreak())
+    content.append(par("Matrice des investigations scientifiques","Heading1"))
+    content.append(par("Options non classées et non approuvées. Coût, impact et faisabilité : non évalués.","TC16Note"))
+    for option in matrix["options"]:
+        content.append(par(option["option_id"]+" — "+option["proposing_agent"],"Heading3"))
+        content.append(par(option["investigation"]))
+        content.append(par("Preuves : "+", ".join(option["evidence_ids"])+
+                           " | Priorité : non évaluée | Coût : indisponible","TC16Note"))
+        for caution in option["scientific_limits"][:1]:
+            content.append(par("Limite : "+caution,"TC16Note"))
+    content.append(par("Critique et désaccords — Wonder","Heading2"))
+    for issue in matrix["scientific_critic_issues"]:
+        content.append(par("• "+issue))
+    content.append(par("Classement comparatif : impossible sans données complémentaires.","TC16Note"))
+    content.append(par("SHA256 matrice : "+matrix["matrix_sha256"],"TC16Note"))
     content.append(PageBreak())
     content.append(par("Arguments et contre-expertise","Heading1"))
     for i,step in enumerate(data["steps"],1):
