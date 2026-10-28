@@ -79,7 +79,7 @@ def classify(question,sector=None):
             "classification":"RULE_BASED_PRELIMINARY"}
 
 def plan_fingerprint(plan):
-    fields={key:plan.get(key) for key in ("question","geography","sector","topics","proposers","evidence_sha256","missing_topics")}
+    fields={key:plan.get(key) for key in ("question","geography","sector","topics","proposers","evidence_sha256","missing_topics","regional_context_sha256")}
     return hashlib.sha256(json.dumps(fields,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
 
 def plan_question(question,records,geography="Boké, Guinea",sector=None,max_proposers=4):
