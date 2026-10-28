@@ -222,7 +222,9 @@ class Handler(BaseHTTPRequestHandler):
             request_data = json.loads(self.rfile.read(n))
         except (ValueError, UnicodeDecodeError):
             return self.send_json(400, {"error": "bad_json"})
-        question = request_data.get("question", "") if isinstance(request_data, dict) else ""
+        if not isinstance(request_data, dict):
+            return self.send_json(400, {"error": "json_object_required"})
+        question = request_data.get("question", "")
         if not isinstance(question, str) or not question.strip() or len(question) > QUESTION_LIMIT:
             return self.send_json(400, {"error": "question_invalid"})
         if request_data.get("consent") is not True or request_data.get("reviewed_sharing") is not True:
