@@ -13,6 +13,8 @@ SCHEMA=("You are a FAITH analytical role, NOT a stakeholder. "
  "Return STRICT JSON with exactly observations, hypotheses, investigations, abstentions. "
  "observations entries must have evidence_id and EXACT unchanged finding; "
  "all other fields must be nonempty string arrays. "
+ "Write hypotheses, investigations and abstentions in natural French suitable for later oral narration. "
+ "Keep the observation finding EXACTLY as provided even when it is English. "
  "Identify missing evidence; no invented impacts, approvals or numerical measurements.")
 
 def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
