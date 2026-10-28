@@ -13,12 +13,15 @@ from faith_indicator_expansion_002g import expand
 from dynamic_council import plan_question
 from fsdc_evidence_expansion import attach_regional_context
 from faith_boke_context_guard_002e import inspect_context
+from faith_chirps_aoi_guard_002i import check as check_chirps
 
 QUESTION = "Comment concilier extraction miniere, poussiere, foret, eau et communautes a Boke ?"
 CHIRPS_ROLE = "HASHED_IN_ORIGINAL_010HI_J_NOT_YET_EXTRACTED_AS_AOI_FINDING"
 
 def case_file(hi_path, qa_path, question=QUESTION):
     observations=expand(hi_path,qa_path)
+    chirps=check_chirps(hi_path,qa_path)
+    observations.extend(chirps["accepted"])
     plan=attach_regional_context(
         plan_question(question,observations,geography="Boké, Guinea"))
     climate=inspect_context()
@@ -29,8 +32,7 @@ def case_file(hi_path, qa_path, question=QUESTION):
         "question":question,
         "plan":plan,
         "evidence_count":len(plan["evidence"]),
-        "independent_aoi_dataset_count":2,
-        "ao_i_source_families":["WorldPop 2026","ESA WorldCover 2021"],
+        "ao_i_source_families":["WorldPop 2026","ESA WorldCover 2021"] + (["CHIRPS"] if chirps["accepted"] else []),
         "regional_documentary_context_count":len(plan.get("regional_context",[])),
         "climate_reference":{
             "origin":"Historic FAITH FSMI NASA POWER computation",
@@ -41,7 +43,9 @@ def case_file(hi_path, qa_path, question=QUESTION):
             "not_an_aoi_observation":True,
             "not_in_meta_input_without_review":True
         },
-        "chirps_status":CHIRPS_ROLE,
+        "chirps_status":chirps["status"],
+        "chirps_accepted_count":len(chirps["accepted"]),
+        "independent_aoi_dataset_count":2 + (1 if chirps["accepted"] else 0),
         "dust_local_numeric_concentration_admitted":False,
         "model_calls_executed":0,
         "external_requests_executed":0,
@@ -67,6 +71,7 @@ def main():
        "regional_context_sources":result["regional_documentary_context_count"],
        "missing_topics":result["plan"]["missing_topics"],
        "chirps":result["chirps_status"],
+       "chirps_accepted_count":result["chirps_accepted_count"],
        "faith_climate":"CONTEXT_OUTSIDE_AOI",
        "meta_calls":0,
        "out":str(dest)
