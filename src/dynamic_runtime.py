@@ -8,14 +8,27 @@ from pathlib import Path
 from council import SPARK,WONDER,meta_call
 from verification import verify_submission,evidence_hash
 
-SCHEMA=("You are a FAITH analytical role, NOT a stakeholder. "
- "Answer this exact question using ONLY supplied evidence. "
- "Return STRICT JSON with exactly observations, hypotheses, investigations, abstentions. "
- "observations entries must have evidence_id and EXACT unchanged finding; "
- "all other fields must be nonempty string arrays. "
- "Write hypotheses, investigations and abstentions in natural French suitable for later oral narration. "
- "Keep the observation finding EXACTLY as provided even when it is English. "
- "Identify missing evidence; no invented impacts, approvals or numerical measurements.")
+SCHEMA = """You are a FAITH scientific analytical perspective, not a human stakeholder.
+Return ONLY one valid JSON object. No markdown, code fences, explanations or extra fields.
+Its four REQUIRED keys and their shapes are:
+{
+ "observations": [{"evidence_id":"COPY_ID","finding":"COPY_EXACT_FINDING"}],
+ "hypotheses": ["une hypothèse incertaine en français"],
+ "investigations": ["une investigation proposée en français"],
+ "abstentions": ["une conclusion impossible avec ces preuves, en français"]
+}
+For observations COPY the exact finding string AND evidence_id from the evidence list
+supplied in this request, character-for-character. Include at least one matching
+observation. Do not paraphrase observations, not even to translate them.
+You may summarize uncertainties and proposals in French, but these are NOT verified facts.
+Never invent data or attribute causal mining impact or population exposure to
+WorldCover or WorldPop. Do not claim field validation or official approval.
+The input may contain missing_topics: these topics have NO supporting measurements.
+Every investigation must respond to THIS question; critique the earlier agents
+when those verified publications are in your input. Preserve disagreement.
+Keep the result concise to minimize truncation. If a requested claim is unsupported,
+put it in abstentions, not observations.
+"""
 
 def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
     if not plan["status"].startswith("READY_") or not plan["evidence"]:
@@ -36,6 +49,7 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
       "proposers":plan["proposers"],"missing_topics":plan["missing_topics"],
       "source_ids":[x["evidence_id"] for x in plan["evidence"]],
       "evidence_sha256":plan["evidence_sha256"],
+      "plan_sha256":plan.get("plan_sha256"),
       "evidence_snapshot":plan["evidence"],"planned_calls":len(plan["proposers"])+2,
       "calls_attempted":0,"status":"STARTED",
       "human_review_required":True,"steps":[]}
