@@ -89,13 +89,20 @@ def plan_question(question,records,geography="Boké, Guinea",sector=None,max_pro
                 "evidence":[],"missing_topics":[],"model_calls_planned":0}
     registry=load_registry()
     sector=decision["sector"]
+    if not decision["topics"]:
+        return {"schema_version":"HACK016.1","status":"ABSTAIN_UNRECOGNIZED_QUESTION_TOPICS",
+                "question":question,"geography":geography,"sector":sector,
+                "topics":[],"proposers":[],"evidence":[],
+                "evidence_sha256":evidence_hash([]),"missing_topics":[],
+                "model_calls_planned":0,"rejected":[],"limitations":[
+                "Question topic was not recognized; no unrelated evidence will be substituted."]}
     gate=gate_evidence(records,sector,geography)
     # For this strictly bounded PoC, zero evidence => ABSTAIN; no API call.
     available=[]
     for e in gate["evidence"]:
         corpus=(" ".join([e["dataset"],e["finding"],e["method"]])).casefold()
         supported=[topic for topic in decision["topics"] if _matched(corpus,DATA_HINTS[topic])]
-        if supported or not decision["topics"]:
+        if supported:
             available.append(e)
     # Where topics are recognized but the local registry lacks matching source
     # data, do not silently substitute unrelated evidence.
