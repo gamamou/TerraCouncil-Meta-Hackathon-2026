@@ -1,0 +1,340 @@
+{
+  "schema_version": "TERRA_DATA_GATEWAY_001",
+  "created_utc": "2026-10-28",
+  "purpose": "Recover existing FAITH analysis and data first; selectively re-fetch missing public inputs; add API candidates; build evidence-ready multisource dossiers for dynamic scientific council.",
+  "target_aoi": {
+    "id": "BOKE_PILOT_RECT",
+    "bbox_epsg4326": [
+      -14.5,
+      10.5,
+      -14,
+      11
+    ],
+    "note": "Exploratory rectangular AOI; not Boké prefecture boundary"
+  },
+  "evidence_statuses": [
+    "HISTORIC_RESULT_DOCUMENTED",
+    "LOCAL_SOURCE_TO_REVERIFY",
+    "DRIVE_FILE_UNINSPECTED",
+    "API_AVAILABLE_UNQUERIED",
+    "DOWNLOADED_UNVALIDATED",
+    "QA_PASSED_EXPLORATORY",
+    "QUARANTINED",
+    "MISSING"
+  ],
+  "recovered_works": [
+    {
+      "id": "FMI_CPDM_MAUS_HISTORIC",
+      "producer": "FAITH FMI/CPDM",
+      "state": "HISTORIC_RESULT_DOCUMENTED",
+      "metrics": [
+        "22430 cadastral shape rows",
+        "1012 rows with observed-footprint flag",
+        "1010 distinct shape_uid in FSMI projection"
+      ],
+      "canonical": "https://github.com/SustainAfrica/faith-mining-data-core/issues/439",
+      "required": "Recover exact geospatial permit-footprint identity join; DO NOT treat 1012 as independently verified intersections or operating mines"
+    },
+    {
+      "id": "MAUS_GIN_128",
+      "producer": "FAITH FSDC",
+      "state": "LOCAL_SOURCE_TO_REVERIFY",
+      "metrics": [
+        "128 Guinea Maus v2 reference polygons",
+        "231.34315495659 km2 declared total"
+      ],
+      "canonical": "https://github.com/SustainAfrica/faith-mining-data-core/blob/main/docs/data-sources/maus-global-mining-polygons-v2.md",
+      "required": "Locate GeoPackage and SHA256/geometry checks; 128-reference load explicitly created zero permit links"
+    },
+    {
+      "id": "CHENG_MIN085_087",
+      "producer": "FAITH Mining",
+      "state": "HISTORIC_RESULT_DOCUMENTED",
+      "metrics": [
+        "7-class ontology open pit, waste dumping, disturbed, water, facility, bare, vegetation",
+        "feature stack NDVI NDBI MNDWI BSI ΔH"
+      ],
+      "canonical": "https://github.com/SustainAfrica/faith-mining-data-core/blob/main/docs/mining/min085/functional-land-use-source-ontology-v0.1.md",
+      "required": "Locate materialized Guinea class results if any; scientific source Zenodo 10.5281/zenodo.15726306; rights unknown for commercial reuse; only method contracts confirmed"
+    },
+    {
+      "id": "TERRA_010HI_HJ",
+      "producer": "TERRA prehackathon",
+      "state": "LOCAL_SOURCE_TO_REVERIFY",
+      "metrics": [
+        "WorldPop 2026",
+        "WorldCover 2021",
+        "CHIRPS referenced but not fully bridged"
+      ],
+      "canonical": "src/import_boke_010hi.py",
+      "required": "Resolve original JSON and raster SHA consistency and CHIRPS evidence"
+    },
+    {
+      "id": "FAITH_DYNAMICWORLD_HANSEN_TMF_WAPOR",
+      "producer": "FAITH Drive",
+      "state": "DRIVE_FILE_UNINSPECTED",
+      "metrics": [
+        "land-cover",
+        "forest",
+        "water use"
+      ],
+      "canonical": "https://drive.google.com/drive/folders/12IY3bsJlNH2wORjO1ppOzc44cKy21SlN",
+      "required": "CRS/bounds/bands/temporal QA; candidate GeoTIFFs are not admitted observations"
+    },
+    {
+      "id": "FSMI_DUST_AERMOD",
+      "producer": "FAITH FSMI",
+      "state": "HISTORIC_RESULT_DOCUMENTED",
+      "metrics": [
+        "PM10/PM2.5 method specifications and possible earlier tests"
+      ],
+      "required": "Locate real run inputs, met, emissions, receptors, outputs and licenses; no PM concentrations assumed"
+    }
+  ],
+  "api_sources": [
+    {
+      "id": "NASA_POWER_DAILY",
+      "domain": [
+        "climate",
+        "water",
+        "agriculture",
+        "dust_context"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "POINT",
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "requires_key": false,
+      "applicable": [
+        "T2M",
+        "PRECTOTCORR",
+        "WS10M",
+        "RH2M"
+      ],
+      "note": "Grid point not AOI aggregate, variable availability and units must be confirmed per API response"
+    },
+    {
+      "id": "OPENAQ_V3",
+      "domain": [
+        "air_quality",
+        "communities"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "STATION_DISCOVERY",
+      "url": "https://docs.openaq.org/api/operations/locations_get_v3_locations_get",
+      "requires_key": true,
+      "applicable": [
+        "PM10",
+        "PM2.5"
+      ],
+      "note": "25 km maximum radius for /locations coordinates; data coverage may be zero; not a site-specific air reading until station/measurement QA"
+    },
+    {
+      "id": "COPERNICUS_WEKEO",
+      "domain": [
+        "climate",
+        "atmosphere",
+        "satellite",
+        "land"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "HDA_ACCOUNT_REQUIRED",
+      "url": "https://wekeo.copernicus.eu/",
+      "requires_key": true,
+      "note": "Connector adapter pending auth and dataset-level terms"
+    },
+    {
+      "id": "COPERNICUS_CAMS",
+      "domain": [
+        "dust",
+        "atmosphere"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "DATASET_SELECTION_REQUIRED",
+      "url": "https://ads.atmosphere.copernicus.eu/",
+      "requires_key": true,
+      "note": "Regional modeled concentrations not monitor data or attributable mine impact"
+    },
+    {
+      "id": "EARTH_SEARCH_STAC",
+      "domain": [
+        "satellite",
+        "land",
+        "water",
+        "mining"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "STAC",
+      "url": "https://earth-search.aws.element84.com/v1",
+      "requires_key": false,
+      "note": "Requires collection, spatial/temporal search and licensing checks"
+    },
+    {
+      "id": "OSM_GEOFABRIK",
+      "domain": [
+        "communities",
+        "infrastructure",
+        "water"
+      ],
+      "state": "API_AVAILABLE_UNQUERIED",
+      "mode": "DOWNLOAD_OR_OVERPASS",
+      "url": "https://download.geofabrik.de/africa/guinea.html",
+      "requires_key": false,
+      "note": "ODbL attribution and snapshot required"
+    },
+    {
+      "id": "FAO_WAPOR",
+      "domain": [
+        "agriculture",
+        "water"
+      ],
+      "state": "DRIVE_FILE_UNINSPECTED",
+      "mode": "EXISTING_FAITH_DRIVE_OR_API",
+      "url": "https://data.apps.fao.org/wapor/",
+      "requires_key": false,
+      "note": "Use previously staged Guinea rasters first"
+    },
+    {
+      "id": "CHIRPS",
+      "domain": [
+        "climate",
+        "agriculture",
+        "water"
+      ],
+      "state": "LOCAL_SOURCE_TO_REVERIFY",
+      "mode": "FILES",
+      "url": "https://data.chc.ucsb.edu/products/CHIRPS/v3.0/",
+      "requires_key": false,
+      "note": "Recover old CHIRPS evidence before re-download"
+    }
+  ],
+  "stakeholder_indicator_matrix": [
+    {
+      "agent": "mining_industry",
+      "indicators": [
+        "observed footprint polygons",
+        "functional mine classes",
+        "permit context",
+        "roads",
+        "dust scenarios"
+      ],
+      "producers": [
+        "MAUS",
+        "Cheng",
+        "CPDM",
+        "OSM",
+        "CAMS",
+        "AERMOD"
+      ]
+    },
+    {
+      "agent": "communities",
+      "indicators": [
+        "population estimates",
+        "mapped settlements",
+        "PM10 PM2.5 measured/modelled",
+        "water proximity"
+      ],
+      "producers": [
+        "WorldPop",
+        "OSM",
+        "OpenAQ",
+        "CAMS",
+        "JRC Water"
+      ]
+    },
+    {
+      "agent": "agriculture_land",
+      "indicators": [
+        "cropland cover",
+        "soil/water status",
+        "rainfall",
+        "ET"
+      ],
+      "producers": [
+        "WorldCover",
+        "DynamicWorld",
+        "CHIRPS",
+        "WaPOR",
+        "NASA POWER"
+      ]
+    },
+    {
+      "agent": "environment_climate",
+      "indicators": [
+        "forest loss",
+        "disturbance",
+        "dust",
+        "precipitation",
+        "habitat proxy"
+      ],
+      "producers": [
+        "Hansen",
+        "JRC TMF",
+        "CAMS",
+        "MERRA2",
+        "CHIRPS"
+      ]
+    },
+    {
+      "agent": "economics_finance",
+      "indicators": [
+        "local jobs",
+        "cost of mitigation",
+        "production"
+      ],
+      "producers": [
+        "company source",
+        "public statistics"
+      ],
+      "missing_rule": "Report unavailable; no numeric synthesis without observation"
+    },
+    {
+      "agent": "governance_compliance",
+      "indicators": [
+        "permit geometry",
+        "historical title context",
+        "compliance documentation"
+      ],
+      "producers": [
+        "CPDM",
+        "official registry"
+      ],
+      "missing_rule": "Snapshot != current legal validity"
+    },
+    {
+      "agent": "scientific_critic",
+      "indicators": [
+        "method differences",
+        "source independence",
+        "uncertainty",
+        "conflicting AOI values"
+      ],
+      "producers": [
+        "all admitted dossiers"
+      ],
+      "missing_rule": "Cannot invent disagreement"
+    }
+  ],
+  "stages": [
+    "RECOVER_EXISTING",
+    "LOCATE_MISSING",
+    "API_DISCOVERY",
+    "RAW_DOWNLOAD",
+    "QA_VALIDATION",
+    "INDICATOR_HARMONIZATION",
+    "MULTISOURCE_RECONCILIATION",
+    "QUESTION_EVIDENCE_SELECTION",
+    "AGENT_DEBATE",
+    "AUDIT_AND_EXPORT"
+  ],
+  "policy": {
+    "existing_result_priority": true,
+    "never_overwrite_canonical": true,
+    "reuse_before_download": true,
+    "model_calls_on_explicit_approval_only": true,
+    "api_calls_on_explicit_execute_only": true,
+    "no_implicit_commercial_license": true,
+    "source_independence_required_for_corroboration": true,
+    "missing_not_zero": true
+  }
+}
