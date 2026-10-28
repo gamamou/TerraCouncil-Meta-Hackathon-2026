@@ -21,9 +21,9 @@ label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;ve
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
 hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 @media(max-width:850px){main{display:block}}
-.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}</style></head>
+.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}.theater{background:#091b2d;border:1px solid #3e6677;border-radius:15px;padding:20px;margin:12px 0 18px}.theater-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px}.theater h3{font-size:19px;color:#d9eff3}.theater .focuscard{background:#142b3e;border-radius:10px;padding:14px;min-height:130px}.cuebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cuebar button{flex:1;min-width:140px;font-size:13px;padding:10px}.cuebar button.active{background:#117982;border-color:#7ce5d6}.cue-quote{color:#c9e0e9;font-size:13px;line-height:1.6}.cue-number{font-size:27px;font-weight:750;color:#82cfd4}.cue-foot{font-size:11px;color:#b0cad1}.speaker-glow{background:#1179824f;border:1px solid #6bd5c5;border-radius:10px;padding:12px}.cue-pulse{box-shadow:0 0 0 2px #67d3bd88}.playback-note{font-size:12px;color:#b2d0da;margin:10px 0}@media(max-width:850px){.theater-grid{grid-template-columns:1fr}}</style></head>
 <body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
-<h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Explorat oire · Non validé sur le terrain</span></header>
+<h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Exploratoire · Non validé sur le terrain</span></header>
 <main><aside>
 <div class="panel"><h2>Conseil FAITH</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
 <div class="card">Mining & Industry<br><small>Première perspective exécutée</small></div>
@@ -51,6 +51,16 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <section id="chamber"><div class="top"><h2>4. Chambre audiovisuelle et rapport</h2><span class="badge">HACK-009</span></div>
 <p class="muted">Les quatre interventions écrites de la session sont conservées ci-dessus. Le graphique ci-dessous représente seulement les classes WorldCover 2021 observées, pas un impact minier.</p>
 <div id="landcover-chart" class="card"><strong>Analyse visuelle · WorldCover 2021</strong><div id="landcover-bars"></div><small class="muted">Périmètre rectangulaire de Boké · Valeurs préliminaires, non validées sur le terrain</small></div>
+<div id="theater" class="theater">
+  <div class="top"><h3>Chambre de délibération · FAITH</h3><span id="scene-status" class="badge">Scènes non chargées</span></div>
+  <p class="playback-note">Naviguez dans les quatre scènes du débat. Dès qu'un audio approuvé de cette session est chargé, les scènes suivent automatiquement la voix.</p>
+  <div id="scene-buttons" class="cuebar"></div>
+  <div class="theater-grid">
+    <div class="focuscard"><div id="scene-speaker" class="tag">Sélectionnez une session enregistrée</div><h3 id="scene-title">Délibération</h3><p id="scene-focus" class="cue-quote">Les preuves et limites apparaîtront ici.</p><div id="scene-sources" class="cue-foot"></div></div>
+    <div class="focuscard"><div class="tag">PREUVES FSDC · EXPLORATOIRES</div><div id="scene-visual" class="cue-quote">Aucune conclusion d'impact minier.</div></div>
+  </div>
+  <div class="focuscard" style="margin-top:12px"><div class="tag">PRIORITÉ D'INVESTIGATION</div><div id="scene-action" class="cue-quote">Aucune.</div><div id="scene-caution" class="cue-foot"></div></div>
+</div>
 <h3>Lecture synchronisée de la session</h3>
 <p class="muted">Utilisez le MP3 et son fichier d'horodatage générés après relecture du scénario français. Les deux fichiers doivent correspondre à la session ouverte.</p>
 <label>Audio de la délibération actuelle<input id="session-audio" type="file" accept=".mp3,audio/mpeg"></label>
@@ -72,7 +82,7 @@ const TOKEN="__SESSION_TOKEN__";
 const $=id=>document.getElementById(id);
 const add=(tag,parent,txt,cls)=>{let n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;parent.appendChild(n);return n};
 const opts={headers:{"X-Terra-Token":TOKEN}};
-let busy=false, activeRunId=null, loadedAudioUrl=null;
+let busy=false, activeRunId=null, loadedAudioUrl=null, chamberData=null, currentScene=0;
 function showBars(evidence){
  const record=(evidence||[]).find(e=>String(e.dataset).includes("WorldCover 2021"));
  const target=$("landcover-bars");target.replaceChildren();
@@ -99,6 +109,55 @@ $("audio-files").addEventListener("change",function(){
    player.addEventListener("loadedmetadata",()=>{});
  }
 });
+function selectScene(index,followAudio=false){
+ if(!chamberData||!chamberData.cues[index])return;
+ currentScene=index;
+ const cue=chamberData.cues[index];
+ $("scene-status").textContent=followAudio?"Lecture synchronisée":"Navigation manuelle · sans appel IA";
+ $("scene-speaker").textContent=cue.title+" · "+cue.model;
+ $("scene-title").textContent=cue.heading;
+ $("scene-focus").textContent=cue.visual_summary;
+ $("scene-sources").textContent="Preuves : "+cue.source_ids.join(" · ")+" | Contrôle structurel uniquement";
+ $("scene-action").textContent=cue.investigations[0]||"Investigation supplémentaire à documenter.";
+ $("scene-caution").textContent="Limite : "+(cue.abstentions[0]||"Validation scientifique humaine nécessaire.");
+ const viz=$("scene-visual");viz.replaceChildren();
+ if(cue.focus.includes("population")&&chamberData.population.value!==null){
+   add("div",viz,new Intl.NumberFormat("fr-FR",{maximumFractionDigits:1}).format(chamberData.population.value),"cue-number");
+   add("div",viz,"Somme estimative des cellules WorldPop pour le périmètre étudié. Ce n'est pas le nombre de personnes affectées.","cue-foot");
+ }
+ if(cue.focus.includes("occupation_du_sol")){
+   const h=add("div",viz,"Occupation du sol — référence 2021","tag");
+   for(const item of chamberData.landcover.classes.slice(0,5)){
+     const row=add("div",viz,item.label+" : "+item.value.toLocaleString("fr-FR")+" %","landitem");
+     const track=add("div",row,"","landbar");
+     add("div",track,"","landfill").style.width=item.value+"%";
+   }
+   add("div",viz,"Valeurs d'une photographie de 2021, pas une évolution ni un impact minier.","cue-foot");
+ }
+ if(cue.focus.includes("limitations")&&!cue.focus.includes("population")){
+   add("p",viz,"Périmètre rectangulaire, incertitudes raster, validation de terrain absente.","cue-quote");
+ }
+ document.querySelectorAll("#scene-buttons button").forEach((el,i)=>el.classList.toggle("active",i===index));
+ document.querySelectorAll("[data-turn]").forEach(el=>el.classList.toggle("speaking",el.dataset.turn===String(index+1)));
+}
+async function loadChamber(runId){
+ chamberData=null;
+ $("scene-buttons").replaceChildren();
+ $("scene-status").textContent="Chargement…";
+ try{
+   const response=await fetch("/api/chamber?id="+encodeURIComponent(runId),opts);
+   const data=await response.json();
+   if(!response.ok)throw Error(data.detail||data.error||"Chambre indisponible");
+   if(data.session_id!==runId||data.model_calls!==0||data.cues.length!==4)
+       throw Error("Traces de séance incohérentes");
+   chamberData=data;
+   data.cues.forEach((cue,i)=>{
+     const b=add("button",$("scene-buttons"),String(i+1)+" · "+cue.title);
+     b.type="button";b.addEventListener("click",()=>selectScene(i,false));
+   });
+   selectScene(0,false);
+ }catch(err){$("scene-status").textContent="Chambre non disponible : "+err.message;}
+}
 async function loadSessionPlayback(){
  const audio=$("session-audio").files[0],timing=$("session-timing").files[0];
  const status=$("audio-match"),holder=$("session-audio-player");
@@ -126,6 +185,7 @@ async function loadSessionPlayback(){
   player.addEventListener("timeupdate",()=>{
    const t=player.currentTime;
    const active=turns.find(v=>t>=v.start_seconds&&t<v.end_seconds);
+   if(active&&currentScene!==active.turn-1)selectScene(active.turn-1,true);
    const name=active?active.speaker:"Transition ou pause";
    $("active-speaker").textContent="Intervenant actif : "+name;
    document.querySelectorAll("[data-turn]").forEach(el=>el.classList.toggle("speaking",Boolean(active&&el.dataset.turn===String(active.turn))));
@@ -237,6 +297,7 @@ async function loadSaved(){
       const res=await fetch("/api/status?id="+encodeURIComponent(ses.run_id),opts);
       if(!res.ok)throw Error("Session introuvable");
       const trace=await res.json();render(trace);
+      if(trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED") await loadChamber(ses.run_id);
       activeRunId=trace.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?ses.run_id:null;
       $("pdf-button").disabled=!activeRunId;$("oral-button").disabled=!activeRunId;$("manifest-button").disabled=!activeRunId;
       $("pdf-status").textContent=activeRunId?"PDF de cette session disponible sans appel Meta.":"PDF non disponible : session incomplète.";
@@ -253,6 +314,7 @@ async function poll(id){
   const r=await fetch("/api/status?id="+encodeURIComponent(id),opts);
   const d=await r.json();if(!r.ok)throw Error(d.error||"Erreur de suivi");
   render(d);
+  if(d.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED" && (!chamberData||chamberData.session_id!==id)) await loadChamber(id);
   if(["QUEUED","STARTED"].includes(d.status)||d.status.startsWith("RUNNING_")||d.status.startsWith("CHECKED_")){
     setTimeout(()=>poll(id),1100);
   }else{
