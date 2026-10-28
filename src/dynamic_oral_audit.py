@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 from dynamic_narration import build_dynamic_oral
+from scientific_pronunciation import spoken_pronunciation
 
 ENGLISH=re.compile(r"\b(the|should|with|evidence|missing|investigate|cannot|further|recommend|survey)\b",re.I)
 TECHNICAL=re.compile(r"[<>{}#@\\|*_]|https?://|www\.",re.I)
@@ -46,10 +47,10 @@ def verify_oral(trace,proposal=None):
         # Only the deterministic exact extraction is mechanically auditable.
         if voice!=expected["text_to_review"]:
             reasons.append("EDITORIAL_CHANGE_NEEDS_SEMANTIC_REVIEW")
-        if TECHNICAL.search(voice) or any(ch.isdigit() for ch in voice):
-            reasons.append("TECHNICAL_SYMBOLS_OR_NUMBERS")
-        if ENGLISH.search(voice):
-            reasons.append("SOURCE_MAY_NOT_BE_NATURAL_FRENCH")
+        try:
+            spoken_pronunciation(voice)
+        except ValueError as issue:
+            reasons.append("PRONUNCIATION_REVIEW_REQUIRED: "+str(issue))
         if len(voice)>1100:
             reasons.append("SPEAKER_TEXT_TOO_LONG")
         findings.append({"turn":idx,"role":expected["speaker"],
