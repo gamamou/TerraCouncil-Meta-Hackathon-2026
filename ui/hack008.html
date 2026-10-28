@@ -636,8 +636,10 @@ $("dynamic-run").onclick=async()=>{
        evidence_sha256:dynamicPreview.evidence_sha256,
        plan_sha256:dynamicPreview.plan_sha256,share:true,consent:true})});
    const d=await r.json();
-   if(!r.ok)throw Error(d.error||"Délibération non lancée");
+   if(!r.ok)throw Error((d.detail||d.error||"Délibération non lancée")+" : aucun appel supplémentaire ne sera lancé automatiquement");
    dynamicActiveId=d.run_id;
+   $("dynamic-share").checked=false;
+   $("dynamic-cost").checked=false;
    dynamicVoiceState=null;updateDynamicVoiceControls();
    $("dynamic-state").textContent="Session "+d.run_id+" : "+d.max_model_calls+" appels Meta maximum. Aucun retry automatique.";
    await dynamicPoll(d.run_id);
