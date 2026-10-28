@@ -37,8 +37,8 @@ def build_dynamic_oral(trace):
         spoken=spoken.strip()
         if any(char.isdigit() for char in spoken):
             problems.append({"turn":index+1,"reason":"DIGITS_REQUIRE_ORAL_NORMALIZATION"})
-        if any(word in (" the "," should "," with "," evidence "," missing ") for word in [
-             " "+investigation.lower()+" "," "+caution.lower()+" "]):
+        if any(word in (" "+(investigation+" "+caution).lower()+" ") for word in
+               (" the "," should "," with "," evidence "," missing "," investigate "," cannot ")) :
             problems.append({"turn":index+1,"reason":"SOURCE_MAY_BE_ENGLISH"})
         turns.append({
             "turn":index+1,"speaker":step["role"],"source_model":step["model"],
