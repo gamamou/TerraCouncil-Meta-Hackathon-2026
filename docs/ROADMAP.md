@@ -102,3 +102,7 @@ New question-specific Spark/Wonder sessions can be submitted from Edge after FSD
 ## HACK-016C/D dynamic outputs
 
 Source-grounded narration draft and new dynamic decision brief PDF from actual saved Spark/Wonder steps, not prewritten Boké text. Validates FSDC snapshots and exact cited observations; TTS remains gated pending translation fidelity. See docs/HACK-016C-D-DYNAMIC-OUTPUTS.md. Windows test pending.
+
+## HACK-016E automated fidelity
+
+A deterministic auditor now cross-checks dynamic oral drafts against actual session-specific Spark/Wonder publications, provenance, and evidence fingerprints. Edge displays per-intervention review issues. The audit cannot auto-approve paid ElevenLabs calls or certify scientific accuracy. See docs/HACK-016E-FIDELITY-GATE.md. User-side validation pending.
