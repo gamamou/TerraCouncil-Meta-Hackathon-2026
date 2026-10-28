@@ -289,6 +289,23 @@ class Handler(BaseHTTPRequestHandler):
             trace.pop("evidence_snapshot",None)
             for step in trace.get("steps",[]):step.pop("raw_model_text",None)
             return self.send_json(200,trace)
+        elif route.path == "/api/dynamic-quantification":
+            if self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            file=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not file.is_file() or file.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_quantification import quantify
+                trace=json.loads(file.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id:raise ValueError("Session mismatch")
+                result=quantify(trace)
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"quantification_unavailable","detail":str(error)[:150]})
+            return self.send_json(200,result)
         elif route.path == "/api/dynamic-decision-matrix":
             if self.headers.get("X-Terra-Token")!=self.server.token:
                 return self.send_json(403,{"error":"token_required"})
@@ -321,7 +338,7 @@ class Handler(BaseHTTPRequestHandler):
                 trace=json.loads(source.read_text(encoding="utf-8"))
                 if trace.get("run_id")!=run_id:
                     raise ValueError("Session ID mismatch")
-                target=folder/(run_id+"-Dynamic-Brief-V2.pdf")
+                target=folder/(run_id+"-Dynamic-Brief-V3.pdf")
                 if not target.exists():
                     build_dynamic_pdf(trace,target)
                 content=target.read_bytes()
@@ -329,7 +346,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(422,{"error":"dynamic_brief_unavailable","detail":str(e)[:150]})
             self.send_response(200)
             self.send_header("Content-Type","application/pdf")
-            self.send_header("Content-Disposition","attachment; filename=TerraCouncil-Dynamic-Brief-V2.pdf")
+            self.send_header("Content-Disposition","attachment; filename=TerraCouncil-Dynamic-Brief-V3.pdf")
             self.send_header("Cache-Control","no-store")
             self.send_header("Content-Length",str(len(content)))
             self.end_headers()
