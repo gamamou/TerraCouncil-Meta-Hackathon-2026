@@ -191,6 +191,31 @@ class Handler(BaseHTTPRequestHandler):
                 trace = self.server.jobs.get(run_id)
                 payload = json.loads(json.dumps(trace)) if trace else None
             self.send_json(200 if payload else 404, payload or {"error": "unknown_run"})
+        elif route.path == "/api/pdf":
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error": "token_required"})
+            run_id = parse_qs(route.query).get("id", [""])[0]
+            with self.server.job_lock:
+                trace = self.server.jobs.get(run_id)
+                snapshot = json.loads(json.dumps(trace)) if trace else None
+            if not snapshot or snapshot.get("status") != "COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error": "complete_verified_session_required"})
+            try:
+                from export_decision_pdf import validate_session, export_pdf
+                record = validate_session(snapshot, self.server.evidence)
+                target = self.server.out_dir / (run_id + "-Decision-Brief.pdf")
+                if not target.exists():
+                    export_pdf(record, target)
+                content = target.read_bytes()
+            except (ValueError, RuntimeError, OSError, ImportError, KeyError, TypeError) as exc:
+                return self.send_json(500, {"error": "pdf_generation_failed", "detail": str(exc)[:170]})
+            self.send_response(200)
+            self.send_header("Content-Type", "application/pdf")
+            self.send_header("Content-Disposition", "attachment; filename=TerraCouncil-Decision-Brief.pdf")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif route.path == "/api/context":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
