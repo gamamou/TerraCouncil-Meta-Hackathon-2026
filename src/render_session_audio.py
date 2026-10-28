@@ -15,6 +15,7 @@ import urllib.request
 import urllib.error
 
 from natural_french_dialogue import oral_storyboard, write_review_files
+from approve_oral_script import reviewed_manifest
 
 ENDPOINT = "https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format=mp3_44100_128"
 MAX_CHARACTERS = 2000
@@ -22,8 +23,11 @@ MAX_CHARACTERS = 2000
 def build_payload(manifest, spark_voice, wonder_voice):
     if not spark_voice or not wonder_voice or spark_voice == wonder_voice:
         raise ValueError("Two distinct voice IDs are needed for Spark and Wonder")
-    if manifest["recording_status"] != "NOT_GENERATED" or not manifest["human_review_required"]:
-        raise ValueError("Unexpected oral storyboard review state")
+    if (manifest["recording_status"] != "NOT_GENERATED"
+        or not manifest["human_review_required"]
+        or manifest.get("human_review_complete") is not True
+        or manifest.get("approval_type") != "USER_REVIEWED_EDITORIAL_RECONSTRUCTION"):
+        raise ValueError("A session-bound approved oral script is required before ElevenLabs")
     turns = manifest["turns"]
     if len(turns) != 4:
         raise ValueError("Exactly four reviewed interventions expected")
@@ -103,6 +107,7 @@ def main():
     p.add_argument("--session",required=True)
     p.add_argument("--evidence",required=True)
     p.add_argument("--out-dir",required=True)
+    p.add_argument("--approved-manifest",help="Approved script JSON from approve_oral_script.py")
     p.add_argument("--send-to-elevenlabs",action="store_true")
     p.add_argument("--i-reviewed-script",action="store_true")
     p.add_argument("--i-approve-cost-and-sharing",action="store_true")
@@ -114,6 +119,12 @@ def main():
         files=write_review_files(manifest,args.out_dir)
         print("STATUS: HUMAN_REVIEW_REQUIRED, NO_TTS_CALL")
         print("REVIEW_TEXT:",files[1]);print("REVIEW_MANIFEST:",files[0]);return
+    if not args.approved_manifest:
+        raise ValueError("Provide --approved-manifest from source-bound human review")
+    edited=json.loads(Path(args.approved_manifest).read_text(encoding="utf-8"))
+    manifest=reviewed_manifest(edited,session,evidence)
+    if manifest["script_sha256"] != edited.get("script_sha256"):
+        raise ValueError("Reviewed manifest digest changed. Approve edited version again.")
     spark_voice=os.environ.get("TERRA_VOICE_SPARK","")
     wonder_voice=os.environ.get("TERRA_VOICE_WONDER","")
     sound,timing=render_one(
