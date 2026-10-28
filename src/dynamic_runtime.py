@@ -69,7 +69,21 @@ def execute_dynamic(plan,run_id,directory,key,caller=meta_call):
         data["status"]="RUNNING_"+role.upper()
         save()  # before any external request
         try:
-            raw=caller(model,SCHEMA+"\nAnalytical role: "+role,payload,key)
+            role_instruction=(
+               "As scientific critic, explicitly compare the previous perspectives, "
+               "name their disagreements, and identify what missing evidence prevents "
+               "choosing between them. Put unproven effects in abstentions. "
+               if role=="scientific_critic" else
+               "As final synthesizer, prioritize the NEXT INVESTIGATIONS by "
+               "their logical prerequisites, not by invented costs or impact scores. "
+               "Preserve unresolved contradictions identified by Wonder. "
+               if role=="final_synthesis" else
+               "Examine this scientific question from the assigned sector-specific "
+               "perspective, identify what the cited observation can support and "
+               "propose a distinct testable investigation. Avoid conclusions outside "
+               "the source's time and geometry. "
+            )
+            raw=caller(model,SCHEMA+"\nAnalytical role: "+role+"\n"+role_instruction,payload,key)
             item["raw_model_text"]=raw
             report=verify_submission(raw,plan["evidence"],plan["evidence_sha256"])
             item["verification_status"]=report["status"]
