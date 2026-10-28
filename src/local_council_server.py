@@ -306,6 +306,28 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length",str(len(content)))
             self.end_headers()
             self.wfile.write(content)
+        elif route.path in ("/api/dynamic-voice-status","/api/dynamic-voice-audio","/api/dynamic-voice-timing"):
+            if self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            from dynamic_voice_workflow import get_status,read_asset
+            try:
+                if route.path=="/api/dynamic-voice-status":
+                    state=get_status(self.server.out_dir,run_id)
+                    state["key_available"]=bool(os.environ.get("ELEVENLABS_API_KEY"))
+                    return self.send_json(200,state)
+                kind="audio" if route.path.endswith("-audio") else "timing"
+                content=read_asset(self.server.out_dir,run_id,kind)
+            except (ValueError,OSError) as exc:
+                return self.send_json(409,{"error":"voice_not_ready","detail":str(exc)[:120]})
+            self.send_response(200)
+            self.send_header("Content-Type","audio/mpeg" if kind=="audio" else "application/json")
+            self.send_header("Cache-Control","no-store")
+            self.send_header("Content-Length",str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif route.path == "/api/dynamic-oral-audit":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"token_required"})
@@ -469,6 +491,52 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/dynamic-voice-start":
+            if not self.same_origin() or self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            if self.headers.get("Content-Type","").split(";")[0].strip()!="application/json":
+                return self.send_json(415,{"error":"json_required"})
+            try: count=int(self.headers.get("Content-Length","0"))
+            except ValueError: count=0
+            if not 1<=count<=1500:
+                return self.send_json(413,{"error":"invalid_request_size"})
+            try: body=json.loads(self.rfile.read(count))
+            except (ValueError,UnicodeDecodeError):
+                return self.send_json(400,{"error":"bad_json"})
+            if not isinstance(body,dict) or body.get("approve_cost_and_sharing") is not True:
+                return self.send_json(403,{"error":"separate_elevenlabs_cost_and_sharing_approval_required"})
+            run_id=body.get("run_id")
+            if not isinstance(run_id,str) or not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"bad_run_id"})
+            file=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not file.is_file() or file.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from dynamic_voice_workflow import get_status,synthesis
+                from dynamic_voice_plan import prepare_voice
+                trace=json.loads(file.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id:raise ValueError("Session mismatch")
+                voice_spark=os.environ.get("TERRA_VOICE_SPARK","")
+                voice_wonder=os.environ.get("TERRA_VOICE_WONDER","")
+                key=os.environ.get("ELEVENLABS_API_KEY","")
+                if not key: return self.send_json(409,{"error":"ELEVENLABS_API_KEY_missing"})
+                prepare_voice(trace,voice_spark,voice_wonder)
+                if get_status(self.server.out_dir,run_id)["state"]!="NOT_REQUESTED":
+                    return self.send_json(409,{"error":"already_attempted_no_automatic_retry"})
+                with self.server.job_lock:
+                    if getattr(self.server,"dynamic_voice_running",False):
+                        return self.send_json(409,{"error":"another_voice_generation_in_progress"})
+                    self.server.dynamic_voice_running=True
+                def voice_worker():
+                    try:
+                        synthesis(self.server.out_dir,trace,voice_spark,voice_wonder,key,consent=True)
+                    finally:
+                        with self.server.job_lock:self.server.dynamic_voice_running=False
+                threading.Thread(target=voice_worker,daemon=True).start()
+                return self.send_json(202,{"state":"ACCEPTED_SINGLE_ATTEMPT",
+                                           "session_id":run_id,"max_elevenlabs_calls":1})
+            except (ValueError,KeyError,TypeError,OSError) as exc:
+                return self.send_json(422,{"error":"voice_not_started","detail":str(exc)[:160]})
         if self.path == "/api/dynamic-run":
             if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"origin_or_token_rejected"})
