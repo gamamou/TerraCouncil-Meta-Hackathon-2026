@@ -41,7 +41,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
 <label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
 <label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
-<button id="run" disabled>Déclencher le Conseil scientifique</button>
+<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div id="dynamic-plan" class="card">Aucun aperçu.</div><button id="run" disabled>Déclencher le Conseil scientifique</button>
 <p id="feedback" class="muted" role="status"></p></section>
 <section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
 <section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
@@ -377,6 +377,22 @@ $("pdf-button").onclick=async()=>{
    $("pdf-status").textContent="Rapport exécutif V3 généré. Vérifiez la couverture bleu nuit et la matrice des priorités.";
  }catch(e){$("pdf-status").textContent="PDF indisponible : "+e.message;}
  finally{b.disabled=false;}
+};
+
+$("dynamic-preview").onclick=async()=>{
+ const target=$("dynamic-plan");target.textContent="Analyse locale de la question…";
+ try{
+   const res=await fetch("/api/dynamic-preview",{method:"POST",
+     headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+     body:JSON.stringify({question:$("question").value})});
+   const plan=await res.json();
+   if(!res.ok)throw Error(plan.detail||plan.error);
+   target.textContent="Statut : "+plan.status+
+     " | Agents : "+plan.agents.join(", ")+
+     " | Preuves FSDC : "+plan.source_ids.join(", ")+
+     " | Dimensions manquantes : "+plan.missing_topics.join(", ")+
+     " | 0 appel Meta. Le bouton de débat existant reste le pilote fixe.";
+ }catch(error){target.textContent="Aperçu indisponible : "+error.message;}
 };
 function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
 ["share","billing","question"].forEach(x=>$(x).addEventListener("input",control));
