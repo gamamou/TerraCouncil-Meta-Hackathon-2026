@@ -52,7 +52,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Matrice décisionnelle</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
 <div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Aperçu vocal sans appel payant</button><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
@@ -465,6 +465,27 @@ function displayDynamic(trace){
  add("p",host,"Nouvelle délibération sauvegardée. Son audio et son PDF dynamique ne sont pas encore générés.","tiny muted");
 }
 
+$("dynamic-matrix").onclick=async()=>{
+ if(!dynamicActiveId)return;
+ const host=$("dynamic-matrix-output");host.replaceChildren();
+ try{
+   const response=await fetch("/api/dynamic-decision-matrix?id="+encodeURIComponent(dynamicActiveId),opts);
+   const matrix=await response.json();
+   if(!response.ok)throw Error(matrix.detail||matrix.error);
+   add("h3",host,"Matrice des investigations — "+matrix.options.length+" options");
+   add("p",host,"Aucun classement artificiel. Impact, coût et faisabilité : non évalués.","warn");
+   for(const option of matrix.options){
+      const card=add("div",host,"","card");
+      add("h3",card,option.option_id+" · "+option.proposing_agent);
+      add("p",card,option.investigation);
+      add("small",card,"Preuves : "+option.evidence_ids.join(", ")+" · "+option.decision_status,"muted");
+      for(const limitation of option.scientific_limits.slice(0,1))
+        add("p",card,"Limite : "+limitation,"muted");
+   }
+   add("h3",host,"Critique scientifique Wonder");
+   for(const concern of matrix.scientific_critic_issues)add("p",host,concern,"muted");
+ }catch(error){add("p",host,"Matrice indisponible : "+error.message,"warn");}
+};
 $("dynamic-brief").onclick=async()=>{
  if(!dynamicActiveId)return;
  try{
@@ -617,6 +638,7 @@ async function dynamicPoll(id,initialChecks=0){
    $("dynamic-oral").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-audit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
+   $("dynamic-matrix").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    if(["STARTED"].includes(trace.status)||trace.status.startsWith("RUNNING_")){
      setTimeout(()=>dynamicPoll(id),1200);
    }else{dynamicBusy=false;dynamicControls();}
