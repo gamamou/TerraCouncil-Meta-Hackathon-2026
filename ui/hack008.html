@@ -41,7 +41,12 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
 <label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
 <label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
-<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div id="dynamic-plan" class="card">Aucun aperçu.</div><div class="card" id="dynamic-console">
+<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div class="card" id="fsdc-expansion">
+<h3>FSDC — Comparer de nouvelles preuves</h3>
+<p class="muted">Compare les observations locales du pilote et des documents régionaux réels. Les déclarations historiques ne sont jamais traitées comme mesures sur l'emprise géospatiale.</p>
+<button id="fsdc-compare" type="button">Comparer avant / après, sans appel Meta</button>
+<div id="fsdc-compare-output" role="status"></div>
+</div><div id="dynamic-plan" class="card">Aucun aperçu.</div><div class="card" id="dynamic-console">
 <h3>HACK-016B · Délibération dynamique</h3>
 <p class="muted">Les agents, les observations et les interventions sont déterminés par la question. Les sources proviennent uniquement du FSDC local. Les textes oraux et le PDF V3 ci-dessous concernent encore l'ancien pilote.</p>
 <p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p><div class="card" id="dynamic-readiness-box">
@@ -431,6 +436,32 @@ async function inspectDynamicReadiness(){
  }catch(error){add("p",target,"Diagnostic indisponible : "+error.message,"warn");}
 }
 $("dynamic-readiness").onclick=inspectDynamicReadiness;
+$("fsdc-compare").onclick=async()=>{
+ const host=$("fsdc-compare-output");host.replaceChildren();
+ try{
+  const q=$("question").value;
+  const r=await fetch("/api/fsdc-evidence-comparison?question="+encodeURIComponent(q),opts);
+  const data=await r.json();
+  if(!r.ok)throw Error(data.detail||data.error);
+  add("h3",host,"Avant : "+data.baseline.observation_ids.length+" observation(s) locale(s)");
+  add("p",host,"Sources AOI : "+(data.baseline.observation_ids.join(", ")||"aucune")+
+     " · Sources régionales nouvelles : "+data.contextual_sources_added,"muted");
+  for(const evidence of data.additional_regional_context){
+    const c=add("div",host,"","card");
+    add("strong",c,evidence.title);
+    add("p",c,evidence.claim);
+    add("p",c,evidence.period+" · "+evidence.validation_status+" · "+evidence.scope,"muted");
+    add("p",c,evidence.limitations.join(" "),"warn");
+    const link=add("a",c,"Consulter la source originale");
+    link.href=evidence.source_url;link.target="_blank";link.rel="noopener noreferrer";
+  }
+  for(const pending of data.unverified_candidates){
+    add("p",host,"Source secondaire à confirmer : "+pending.title,"warn");
+  }
+  add("p",host,"Nouvelles mesures physiques sur l'emprise : "+data.aoi_scientific_observations_added+
+  ". Débat re-généré : NON. Conclusions nouvelles : NON ÉVALUÉES. Aucun appel API.","muted");
+ }catch(error){add("p",host,"Comparaison impossible : "+error.message,"warn");}
+};
 let dynamicPreview=null,dynamicBusy=false,dynamicActiveId=null;
 function dynamicControls(){
  $("dynamic-run").disabled=dynamicBusy||!dynamicPreview||
