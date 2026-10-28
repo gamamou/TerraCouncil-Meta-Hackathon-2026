@@ -265,6 +265,30 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, KeyError, TypeError, ImportError) as exc:
                 return self.send_json(422, {"error": "chamber_unavailable", "detail": str(exc)[:180]})
             return self.send_json(200, data)
+        elif route.path in ("/api/voice-status", "/api/voice-audio", "/api/voice-timing"):
+            if self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403, {"error":"token_required"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            snapshot=read_session_file(self.server.out_dir,run_id)
+            if not snapshot or snapshot.get("status")!="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409, {"error":"complete_saved_session_required"})
+            from voice_workflow import status,read_audio
+            try:
+                if route.path=="/api/voice-status":
+                    state=status(self.server.out_dir,run_id)
+                    state["key_available"]=bool(os.environ.get("ELEVENLABS_API_KEY"))
+                    return self.send_json(200,state)
+                content=read_audio(self.server.out_dir,run_id,
+                    "audio" if route.path=="/api/voice-audio" else "timing")
+            except (ValueError,OSError) as exc:
+                return self.send_json(409,{"error":"voice_unavailable","detail":str(exc)[:120]})
+            media="audio/mpeg" if route.path=="/api/voice-audio" else "application/json; charset=utf-8"
+            self.send_response(200)
+            self.send_header("Content-Type",media)
+            self.send_header("Cache-Control","no-store")
+            self.send_header("Content-Length",str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif route.path == "/api/oral-draft":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "token_required"})
@@ -354,6 +378,56 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/voice-start":
+            if not self.same_origin() or self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            if self.headers.get("Content-Type","").split(";")[0].strip()!="application/json":
+                return self.send_json(415,{"error":"json_required"})
+            try:
+                n=int(self.headers.get("Content-Length","0"))
+            except ValueError:
+                n=0
+            if not 1<=n<=4000:
+                return self.send_json(413,{"error":"invalid_request_size"})
+            try:
+                request_data=json.loads(self.rfile.read(n))
+            except (ValueError,UnicodeDecodeError):
+                return self.send_json(400,{"error":"bad_json"})
+            if not isinstance(request_data,dict) or request_data.get("approve_cost_and_sharing") is not True:
+                return self.send_json(403,{"error":"separate_paid_voice_consent_required"})
+            run_id=request_data.get("run_id")
+            if not isinstance(run_id,str):
+                return self.send_json(400,{"error":"invalid_session"})
+            trace=read_session_file(self.server.out_dir,run_id)
+            if not trace or trace.get("status")!="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED":
+                return self.send_json(409,{"error":"complete_saved_session_required"})
+            from voice_workflow import status,verified_approval,attempt
+            try:
+                if status(self.server.out_dir,run_id)["state"]!="NOT_REQUESTED":
+                    return self.send_json(409,{"error":"voice_attempt_already_recorded_do_not_retry"})
+                verified_approval(self.server.out_dir,run_id,trace,self.server.evidence)
+                key=os.environ.get("ELEVENLABS_API_KEY","")
+                spark_voice=os.environ.get("TERRA_VOICE_SPARK","")
+                wonder_voice=os.environ.get("TERRA_VOICE_WONDER","")
+                if not key or not spark_voice or not wonder_voice:
+                    return self.send_json(409,{"error":"voice_credentials_missing_restart_server_with_key"})
+                # Single run at a time. No repeat if user double-clicks.
+                with self.server.job_lock:
+                    if getattr(self.server,"voice_running",False):
+                        return self.send_json(409,{"error":"voice_generation_in_progress"})
+                    self.server.voice_running=True
+                def worker():
+                    try:
+                        attempt(self.server.out_dir,run_id,trace,self.server.evidence,
+                                key,spark_voice,wonder_voice)
+                    finally:
+                        with self.server.job_lock:
+                            self.server.voice_running=False
+                threading.Thread(target=worker,daemon=True).start()
+                return self.send_json(202,{"state":"ATTEMPT_ACCEPTED","session_id":run_id,
+                                           "max_paid_voice_calls":1})
+            except (ValueError,TypeError,KeyError,OSError) as exc:
+                return self.send_json(422,{"error":"voice_not_started","detail":str(exc)[:150]})
         if self.path == "/api/oral-approve":
             if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403, {"error": "origin_or_token_rejected"})
