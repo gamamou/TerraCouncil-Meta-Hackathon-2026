@@ -63,3 +63,16 @@ Dans Edge, posez la question B et cliquez sur **FSDC — Comparer de nouvelles p
 Pour produire un **nouveau débat scientifiquement enrichi**, il faudra ajouter des preuves locales dont la géométrie recouvre réellement l'AOI et dont les observations respectent le contrat FSDC, ou étendre le moteur avec une voie de preuve documentaire sous contrôle explicite (sans usurper l'observation géospatiale). Puis exécuter une délibération avec consentement, comparer aux anciens résultats et mesurer les changements. Le présent jalon ne prétend PAS avoir atteint ce résultat.
 
 Les tests sont publiés mais pas encore exécutés dans VS Code sur l'ordinateur utilisateur.
+
+## Mise à jour : intégration documentaire dans le plan Spark / Wonder
+
+- `attach_regional_context` attache uniquement les sources publiées pertinentes à la question ; la compilation CECIDE reste **exclue** du contexte envoyé à Meta.
+- La nouvelle empreinte `plan_sha256` associe le contenu documentaire sélectionné à la question avant toute autorisation de coût et de transmission.
+- Les modèles reçoivent `regional_context` dans une section séparée et sont explicitement instruits de ne **jamais** l'insérer dans `observations`, réservé aux constats géospatiaux exacts FSDC.
+- Le PDF d'une **nouvelle** session indique les sources documentaires régionales et leur statut. Un ancien rapport n'est pas modifié.
+- Aucun appel Meta ni débat enrichi n'a été exécuté par le développement ; la comparaison sans modèle ne prouve donc aucun changement effectif des conclusions. Pour le vérifier, comparer les réponses de la première session à une nouvelle délibération explicitement autorisée.
+
+Questions utiles :
+1. `Que permettent de documenter les données d'occupation du sol à Boké ?` : WorldCover seul.
+2. `Quels impacts miniers sur l'occupation du sol à Boké ?` : WorldCover + contexte historique régional GAC et étude académique Kolie et al. Les agents doivent refuser toute causalité non démontrée pour l'AOI.
+3. `Quelles concentrations PM10 sont disponibles pour Boké ?` : source académique régionale identifiée, mais aucune valeur PM10 chiffrée admissible pour l'AOI ; abstention numérique maintenue.
