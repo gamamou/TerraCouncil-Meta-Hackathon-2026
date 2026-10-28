@@ -40,3 +40,9 @@
 ## Validation rule
 
 Never equate a checked-in registry or mocked tests with functioning agents or verified scientific conclusions. The Boké baseline is **NOT_FIELD_VALIDATED**.
+
+## HACK-005 (October 27) — first Meta live-call preparation
+
+- **Code committed:** opt-in single Spark 1.3 API call, private trace output and HACK-003 citation verifier, with six synthetic tests.
+- **Pending:** execute dry run with imported Boké screened records, review data-sharing rights, and perform first real model call from user's local runtime.
+- **Do not claim:** completed real scientific debate, confirmed environmental impacts or field-validated source data.
