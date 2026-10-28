@@ -769,7 +769,10 @@ $("dynamic-preview").onclick=async()=>{
    const plan=await res.json();
    if(!res.ok)throw Error(plan.detail||plan.error);
    dynamicPreview={...plan,question:$("question").value};dynamicControls();
-   $("dynamic-meta").textContent="Plan prêt : "+plan.agents.length+" agents, 0 appel consommé pour cet aperçu. "+plan.planned_model_calls+" appels Meta au maximum si vous déclenchez le débat.";
+   const scientificReady=plan.status.startsWith("READY_")&&plan.source_ids.length>0;
+   $("dynamic-meta").textContent=scientificReady
+     ? "Preuves disponibles : "+plan.source_ids.length+" observation(s) exploratoire(s). "+plan.planned_model_calls+" appels Meta au maximum après autorisation."
+     : "Débat indisponible pour cette question : aucune observation FSDC locale admissible ne correspond exactement au sujet. Les études et simulations contextuelles restent consultables, sans appel Meta.";
    if(plan.regional_context?.length){
       const container=$("fsdc-compare-output");
       container.replaceChildren();
@@ -798,7 +801,10 @@ $("dynamic-preview").onclick=async()=>{
        add("p",section,"Décision éclairée : "+item.decision_test,"muted");
      }
    }
-   add("p",target,"0 appel Meta pour cet aperçu. Le débat dynamique exige une autorisation séparée.","muted");
+   if(!scientificReady){
+     add("p",target,"Pour engager une délibération fondée sur les preuves actuelles, élargissez la question à l'occupation du sol, aux communautés et aux investigations sur les poussières. Une simulation régionale CAMS n'est pas une mesure locale admissible.","warn");
+   }
+   add("p",target,"Aucun appel Meta pour cet aperçu. Toute délibération exige une autorisation distincte.","muted");
  }catch(error){dynamicPreview=null;dynamicControls();target.textContent="Aperçu indisponible : "+error.message;}
 };
 function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
