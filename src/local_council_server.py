@@ -863,13 +863,31 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     p = argparse.ArgumentParser(description="TerraCouncil FAITH localhost interactive council")
-    p.add_argument("--evidence", required=True, help="Local Boké screened evidence JSON")
+    p.add_argument("--evidence", help="Local Boké screened evidence JSON (existing mode)")
+    p.add_argument("--hi", help="Original private 010HI_evidence.json (demo mode)")
+    p.add_argument("--qa", help="Original private 010HJ_spatial_qa.json (demo mode)")
     p.add_argument("--out-dir", default=str(Path.home() / "Documents" / "TerraCouncil-Hack008-Sessions"))
     p.add_argument("--port", type=int, default=8765)
     a = p.parse_args()
     if not 1024 <= a.port <= 65535:
         raise ValueError("Invalid local port")
-    records = json.loads(Path(a.evidence).read_text(encoding="utf-8"))
+    if a.evidence and (a.hi or a.qa):
+        raise ValueError("Choose either --evidence OR both --hi and --qa")
+    if a.hi or a.qa:
+        if not (a.hi and a.qa):
+            raise ValueError("Both original --hi and --qa are required")
+        from faith_indicator_expansion_002g import expand
+        from faith_chirps_aoi_guard_002i import check as check_chirps
+        records=expand(a.hi,a.qa)
+        chirps=check_chirps(a.hi,a.qa)
+        records.extend(chirps["accepted"])
+        print("TERRA-DEMO ORIGINAL DATA:",len(records),"indicator records from screened originals")
+        print("TERRA-DEMO CHIRPS STATUS:",chirps["status"])
+        print("TERRA-DEMO SOURCE RIGHTS: human review required before Meta transmission")
+    elif a.evidence:
+        records = json.loads(Path(a.evidence).read_text(encoding="utf-8-sig"))
+    else:
+        raise ValueError("Supply --evidence or both original --hi and --qa")
     gate = make_plan("Question préparatoire de Boké", records)
     if not gate["gate"]["evidence"]:
         raise ValueError("No usable screened Boké FSDC evidence; cannot start interactive app")
