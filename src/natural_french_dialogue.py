@@ -23,6 +23,24 @@ def oral_storyboard(trace, evidence):
     dataset_names=" ".join(x["dataset"] for x in validated["evidence"])
     if not ("WorldPop" in dataset_names and "WorldCover" in dataset_names):
         raise ValueError("Oral storyboard not supported for this scientific data combination")
+    # Refuse to apply this editorial storyboard to another conversation merely
+    # because it reuses the same datasets. Every cited investigation theme must
+    # actually be present in the scientific exchange.
+    corpus = " ".join(str(v.get("text", "")) for stage in validated["steps"]
+                      for key in ("hypotheses", "investigations", "abstentions")
+                      for v in stage["checked_publication"].get(key, [])).lower()
+    required_themes = (
+        ("population", "demograph"),
+        ("land-cover", "land cover"),
+        ("water", "hydrolog"),
+        ("mangrove",),
+        ("biodivers",),
+        ("climate",),
+        ("rectangular",),
+    )
+    for aliases in required_themes:
+        if not any(alias in corpus for alias in aliases):
+            raise ValueError("Oral storyboard needs manual source-specific drafting: " + aliases[0])
     # Carefully bounded to facts and scientifically qualified investigations
     # known to appear in this pilot. No figures invented, no investor verdict.
     scripts=[
