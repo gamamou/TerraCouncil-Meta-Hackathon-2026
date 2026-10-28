@@ -21,7 +21,7 @@ label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;ve
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
 hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 @media(max-width:850px){main{display:block}}
-</style></head>
+.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}</style></head>
 <body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
 <h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Explorat oire · Non validé sur le terrain</span></header>
 <main><aside>
@@ -47,6 +47,16 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <div id="progress" class="muted">Les interventions apparaîtront après le lancement autorisé.</div></section>
 <section><h2>3. Synthèse décisionnelle</h2>
 <div id="decision" class="muted">La synthèse ne sera affichée que si chaque intervention a franchi le vérificateur indépendant. Les hypothèses et investigations resteront non vérifiées scientifiquement.</div></section>
+<section id="chamber"><div class="top"><h2>4. Chambre audiovisuelle et rapport</h2><span class="badge">HACK-009</span></div>
+<p class="muted">Les quatre interventions écrites de la session sont conservées ci-dessus. Le graphique ci-dessous représente seulement les classes WorldCover 2021 observées, pas un impact minier.</p>
+<div id="landcover-chart" class="card"><strong>Analyse visuelle · WorldCover 2021</strong><div id="landcover-bars"></div><small class="muted">Périmètre rectangulaire de Boké · Valeurs préliminaires, non validées sur le terrain</small></div>
+<h3>Écouter une archive audio</h3>
+<div class="warn">Les fichiers MP3 de l'expérimentation ElevenLabs antérieure ne correspondent PAS aux quatre interventions HACK-008. Ils ne seront jamais présentés comme leur enregistrement. Une nouvelle narration vocale devra être produite, vérifiée et associée à cette session avant lecture synchronisée.</div>
+<label class="audiofile">Charger des MP3 locaux pour écoute d'archive (facultatif)
+<input id="audio-files" type="file" accept=".mp3,audio/mpeg" multiple></label>
+<div id="audio-playlist"></div>
+<div class="actions"><button id="pdf-button" type="button" disabled>Exporter le brief PDF de cette session</button><span id="pdf-status" class="muted">Disponible après délibération complète.</span></div>
+</section>
 <section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section>
 </div></main>
 <script>
@@ -55,7 +65,47 @@ const TOKEN="__SESSION_TOKEN__";
 const $=id=>document.getElementById(id);
 const add=(tag,parent,txt,cls)=>{let n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;parent.appendChild(n);return n};
 const opts={headers:{"X-Terra-Token":TOKEN}};
-let busy=false;
+let busy=false, activeRunId=null;
+function showBars(evidence){
+ const record=(evidence||[]).find(e=>String(e.dataset).includes("WorldCover 2021"));
+ const target=$("landcover-bars");target.replaceChildren();
+ if(!record){add("p",target,"Aucune mesure WorldCover recevable.","muted");return;}
+ const regex=/(Tree cover|Cropland|Built-up|Permanent water|Mangroves)\s+(\d+(?:\.\d+)?)%/g;
+ let match,count=0;
+ while((match=regex.exec(record.finding))!==null){
+   const pct=Number(match[2]);if(!Number.isFinite(pct)||pct<0||pct>100)continue;
+   count++;
+   const row=add("div",target,"","landitem");
+   add("div",row,match[1]+" — "+match[2]+" %");
+   const track=add("div",row,"","landbar");
+   const fill=add("div",track,"","landfill");fill.style.width=pct+"%";
+ }
+ if(!count)add("p",target,"Classes indisponibles dans la source.","muted");
+}
+$("audio-files").addEventListener("change",function(){
+ const list=$("audio-playlist");list.replaceChildren();
+ for(const file of [...this.files].filter(f=>f.type==="audio/mpeg"||f.name.toLowerCase().endsWith(".mp3")).slice(0,8)){
+   const card=add("div",list,"","card audiofile");
+   add("strong",card,"Archive locale : "+file.name);
+   const player=document.createElement("audio");player.controls=true;player.preload="none";
+   const url=URL.createObjectURL(file);player.src=url;card.appendChild(player);
+   player.addEventListener("loadedmetadata",()=>{});
+ }
+});
+$("pdf-button").onclick=async()=>{
+ if(!activeRunId)return;
+ const b=$("pdf-button");b.disabled=true;$("pdf-status").textContent="Préparation du PDF…";
+ try{
+   const r=await fetch("/api/pdf?id="+encodeURIComponent(activeRunId),opts);
+   if(!r.ok){const d=await r.json();throw Error(d.detail||d.error||"Erreur PDF");}
+   const url=URL.createObjectURL(await r.blob());
+   const a=document.createElement("a");a.href=url;a.download="TerraCouncil-"+activeRunId+"-Decision-Brief.pdf";
+   document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),2000);
+   $("pdf-status").textContent="Brief PDF généré à partir des traces vérifiées.";
+ }catch(e){$("pdf-status").textContent="PDF indisponible : "+e.message;}
+ finally{b.disabled=false;}
+};
 function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
 ["share","billing","question"].forEach(x=>$(x).addEventListener("input",control));
 function describe(text){$("feedback").textContent=text;}
@@ -92,6 +142,7 @@ async function context(){
  let d=await res.json();
  $("context").textContent=d.status+" · "+d.evidence.length+" observations · clé Meta : "+(d.api_key_available?"disponible":"absente");
  $("fingerprint").textContent="SHA-256 : "+d.evidence_sha256;
+ showBars(d.evidence);
  const host=$("evidence");
  for(const e of d.evidence){let c=add("div",host,e.finding,"card fact");add("small",c,e.evidence_id+" · "+e.validation_status,"muted");}
  if(!d.api_key_available)describe("Clé Meta absente : chargez MODEL_API_KEY dans PowerShell avant de lancer le serveur.");
@@ -105,13 +156,15 @@ async function poll(id){
   if(["QUEUED","STARTED"].includes(d.status)||d.status.startsWith("RUNNING_")||d.status.startsWith("CHECKED_")){
     setTimeout(()=>poll(id),1100);
   }else{
+    activeRunId=d.status==="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED"?id:null;
+    $("pdf-button").disabled=!activeRunId;
     busy=false;control();describe("Session terminée : "+d.status+". Trace conservée dans Documents. Aucun nouvel appel automatique.");
   }
  }catch(e){busy=false;control();describe("Suivi indisponible : "+e.message+". Vérifiez le terminal et les fichiers de session avant toute nouvelle tentative.");}
 }
 $("run").onclick=async()=>{
  if(busy||!$("share").checked||!$("billing").checked)return;
- busy=true;control();describe("Transmission autorisée. Lancement du Conseil…");
+ busy=true;activeRunId=null;$("pdf-button").disabled=true;control();describe("Transmission autorisée. Lancement du Conseil…");
  try{
  const r=await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
   body:JSON.stringify({question:$("question").value,consent:true,reviewed_sharing:true})});
