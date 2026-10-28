@@ -758,11 +758,24 @@ $("dynamic-preview").onclick=async()=>{
         add("p",card,"Portée : "+e.scope+" · "+e.validation_status+" ; ne remplace PAS les observations locales.","warn");
       }
    }
-   target.textContent="Statut : "+plan.status+
-     " | Agents : "+plan.agents.join(", ")+
-     " | Preuves FSDC : "+plan.source_ids.join(", ")+
-     " | Dimensions manquantes : "+plan.missing_topics.join(", ")+
-     " | 0 appel Meta. Le bouton de débat existant reste le pilote fixe.";
+   target.replaceChildren();
+   add("h3",target,"Plan scientifique HACK-016 — aperçu sans appel Meta");
+   add("p",target,"Statut : "+plan.status+" · "+plan.agents.length+" agents · "+plan.source_ids.length+" constats FSDC exploratoires.");
+   add("p",target,"Preuves du rectangle pilote : "+(plan.source_ids.join(", ")||"aucune"),"muted");
+   add("p",target,"Dimensions sans observation locale : "+(plan.missing_topics.join(", ")||"aucune"),"warn");
+   if(plan.dust_protocol?.length){
+     add("h3",target,"Poussières — protocole de délibération");
+     add("p",target,plan.dust_context_count+" références atmosphériques modélisées en contexte ; aucune concentration de mine mesurée sur site démontrée.","warn");
+     for(const item of plan.dust_protocol){
+       const section=add("div",target,"","card");
+       add("strong",section,item.id+" · "+item.domain);
+       add("p",section,item.question);
+       add("p",section,"Données à vérifier : "+item.missing_input,"muted");
+       add("p",section,"Méthode proposée : "+item.method,"muted");
+       add("p",section,"Décision éclairée : "+item.decision_test,"muted");
+     }
+   }
+   add("p",target,"0 appel Meta pour cet aperçu. Le débat dynamique exige une autorisation séparée.","muted");
  }catch(error){dynamicPreview=null;dynamicControls();target.textContent="Aperçu indisponible : "+error.message;}
 };
 function control(){ $("run").disabled=busy||!$("share").checked||!$("billing").checked||!$("question").value.trim();}
