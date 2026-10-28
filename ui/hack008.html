@@ -21,55 +21,72 @@ label{display:block;margin:12px 0}input[type=checkbox]{width:18px;height:18px;ve
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace;color:#c4d7e7}
 hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 @media(max-width:850px){main{display:block}}
-.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}.theater{background:#091b2d;border:1px solid #3e6677;border-radius:15px;padding:20px;margin:12px 0 18px}.theater-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px}.theater h3{font-size:19px;color:#d9eff3}.theater .focuscard{background:#142b3e;border-radius:10px;padding:14px;min-height:130px}.cuebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cuebar button{flex:1;min-width:140px;font-size:13px;padding:10px}.cuebar button.active{background:#117982;border-color:#7ce5d6}.cue-quote{color:#c9e0e9;font-size:13px;line-height:1.6}.cue-number{font-size:27px;font-weight:750;color:#82cfd4}.cue-foot{font-size:11px;color:#b0cad1}.speaker-glow{background:#1179824f;border:1px solid #6bd5c5;border-radius:10px;padding:12px}.cue-pulse{box-shadow:0 0 0 2px #67d3bd88}.playback-note{font-size:12px;color:#b2d0da;margin:10px 0}@media(max-width:850px){.theater-grid{grid-template-columns:1fr}}.hidden{display:none!important}.oraleditor{border:1px solid #3e6578;background:#10263a;border-radius:12px;padding:16px;margin:14px 0}.oraleditor textarea{min-height:95px}.oraleditor .turn{padding:10px 0;border-bottom:1px solid #3c536b}.oraleditor .counter{font-size:12px;color:#b7d0df}.oraleditor input[type=checkbox]{width:18px;height:18px}.stage-result{color:#b7d0df;margin-top:10px}.oraleditor button{margin-right:8px}</style></head>
-<body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC · META HACKATHON 2026</div>
-<h1>TerraCouncil AI — Scientific Decision Council</h1><span class="badge">Boké · Exploratoire · Non validé sur le terrain</span></header>
+.landbar{height:10px;background:#102035;border-radius:8px;overflow:hidden;margin-top:5px}.landfill{height:100%;background:#65b5cf}.landitem{margin:10px 0;font-size:13px}.audiofile{margin:10px 0}.audiofile input{width:100%}audio{width:100%;margin-top:8px} .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center} @media print{body{background:white;color:black}header,section,.panel,.card{background:white;color:#111;border-color:#aaa}button,textarea,input,audio{display:none} .muted{color:#444}}.speaking{border-color:#74cfce!important;box-shadow:0 0 0 2px #3d9f9b66}.active-turn{background:#153e4d;border:1px solid #75c9c2;border-radius:9px;padding:10px 14px;margin:12px 0}.theater{background:#091b2d;border:1px solid #3e6677;border-radius:15px;padding:20px;margin:12px 0 18px}.theater-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px}.theater h3{font-size:19px;color:#d9eff3}.theater .focuscard{background:#142b3e;border-radius:10px;padding:14px;min-height:130px}.cuebar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cuebar button{flex:1;min-width:140px;font-size:13px;padding:10px}.cuebar button.active{background:#117982;border-color:#7ce5d6}.cue-quote{color:#c9e0e9;font-size:13px;line-height:1.6}.cue-number{font-size:27px;font-weight:750;color:#82cfd4}.cue-foot{font-size:11px;color:#b0cad1}.speaker-glow{background:#1179824f;border:1px solid #6bd5c5;border-radius:10px;padding:12px}.cue-pulse{box-shadow:0 0 0 2px #67d3bd88}.playback-note{font-size:12px;color:#b2d0da;margin:10px 0}@media(max-width:850px){.theater-grid{grid-template-columns:1fr}}.hidden{display:none!important}.oraleditor{border:1px solid #3e6578;background:#10263a;border-radius:12px;padding:16px;margin:14px 0}.oraleditor textarea{min-height:95px}.oraleditor .turn{padding:10px 0;border-bottom:1px solid #3c536b}.oraleditor .counter{font-size:12px;color:#b7d0df}.oraleditor input[type=checkbox]{width:18px;height:18px}.stage-result{color:#b7d0df;margin-top:10px}.oraleditor button{margin-right:8px}
+/* TerraCouncil production navigation */
+header{background:#132638;padding:22px max(20px,calc((100vw - 1220px)/2))}
+main{max-width:1220px;grid-template-columns:260px minmax(0,1fr);gap:22px}
+section,.panel{border-radius:15px}
+.primary-action{background:#087988;border-color:#79c6ca;font-weight:700}
+.primary-action:not(:disabled):hover{background:#1096a4}
+#dynamic-console{background:transparent;border:0;padding:8px 0}
+#dynamic-plan{background:#142c3f}
+#dynamic-results:empty,#dynamic-sessions:empty,#dynamic-matrix-output:empty,#dynamic-oral-output:empty,#dynamic-metrics-output:empty{display:none}
+details.source-details,details.science-details,details.legacy-archive{background:#152a3c;border:1px solid #35536b;border-radius:10px;padding:10px 14px;margin:12px 0}
+details.tech-details{border-radius:10px}
+details summary{cursor:pointer;color:#bfe6ed;font-weight:650}
+details.science-details>.card{border:0;background:transparent}
+.legacy-hidden,#run,#share,#billing{display:none!important}
+#dynamic-readiness-box{margin:12px 0}
+@media(max-width:860px){main{display:block;padding:0 12px}.panel{margin-bottom:10px}section{padding:15px}}
+</style></head>
+<body><header><div class="tag">SUSTAINAFRICA · FAITH / FSDC</div>
+<h1>TerraCouncil — Conseil scientifique</h1><span class="badge">Boké · Analyse exploratoire</span></header>
 <main><aside>
-<div class="panel"><h2>Conseil FAITH</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
+<div class="panel"><h2>Les agents du Conseil</h2><p>Les agents analysent des perspectives, sans représenter officiellement des personnes ou institutions.</p>
 <div class="card">Mining & Industry<br><small>Première perspective exécutée</small></div>
 <div class="card">Environment & Climate<br><small>Deuxième perspective exécutée</small></div>
 <div class="card">Scientific Critic<br><small>Muse Wonder — critique</small></div>
 <div class="card">Final Synthesis<br><small>Muse Spark — révision</small></div>
 <p class="muted tiny">Agriculture, énergie, communautés et gouvernance : capacités du registre FAITH, non exécutées dans ce parcours de 4 appels.</p></div>
-<div class="panel"><h2>Fondation FSDC</h2><div id="context">Chargement des observations…</div><div id="evidence"></div></div>
-<div class="panel"><h2>Traçabilité</h2><p class="tiny muted">Le serveur est local. Les résultats et états des appels sont conservés dans Documents ; aucune clé API ne transite dans la page.</p><div id="fingerprint" class="tiny muted" style="overflow-wrap:anywhere"></div></div>
+<div class="panel"><h2>Fondation scientifique</h2><div id="context">Chargement des observations…</div><details class="source-details"><summary>Voir les données et leur provenance</summary><div id="evidence"></div></details></div>
+<details class="panel tech-details"><summary>Informations techniques</summary><p class="tiny muted">Le serveur est local. Les résultats et états des appels sont conservés dans Documents ; aucune clé API ne transite dans la page.</p><div id="fingerprint" class="tiny muted" style="overflow-wrap:anywhere"></div></details>
 </aside>
 <div>
-<section><div class="top"><h2>1. Poser une question</h2><span class="badge">Meta Model API · Direct</span></div>
+<section><div class="top"><h2>1. Poser votre question</h2><span class="badge">Conseil FAITH</span></div>
 <p class="muted">Le Conseil confronte des points de vue à des observations scientifiques préliminaires. Il ne délivre pas d'autorisation d'investissement.</p>
 <textarea id="question" maxlength="1800" aria-label="Question au conseil">Quelles investigations scientifiques et garanties faut-il prioriser avant une décision de développement minier dans le périmètre étudié de Boké ?</textarea>
 <div class="warn">Les observations WorldPop 2026 et WorldCover 2021 concernent un périmètre rectangulaire. Elles ne démontrent ni impacts miniers, ni exposition des populations, ni évolution récente de l'occupation du sol.</div>
 <label><input id="share" type="checkbox">J'ai vérifié les licences et j'autorise la transmission des observations dérivées à Meta.</label>
 <label><input id="billing" type="checkbox">J'autorise cette délibération de quatre appels Meta au maximum, potentiellement facturés.</label>
-<button id="dynamic-preview" type="button">Aperçu dynamique des preuves et agents</button><div class="card" id="fsdc-expansion">
+<button id="dynamic-preview" class="primary-action" type="button">Examiner les preuves disponibles</button><details class="science-details" id="fsdc-expansion"><summary>Recherches documentaires complémentaires</summary><div class="card">
 <h3>FSDC — Comparer de nouvelles preuves</h3>
 <p class="muted">Compare les observations locales du pilote et des documents régionaux réels. Les déclarations historiques ne sont jamais traitées comme mesures sur l'emprise géospatiale.</p>
 <button id="fsdc-compare" type="button">Comparer avant / après, sans appel Meta</button>
 <div id="fsdc-compare-output" role="status"></div>
-</div><div id="dynamic-plan" class="card">Aucun aperçu.</div><div class="card" id="dynamic-console">
-<h3>HACK-016B · Délibération dynamique</h3>
-<p class="muted">Les agents, les observations et les interventions sont déterminés par la question. Les sources proviennent uniquement du FSDC local. Les textes oraux et le PDF V3 ci-dessous concernent encore l'ancien pilote.</p>
-<p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p><div class="card" id="dynamic-readiness-box">
+</div></details><div id="dynamic-plan" class="card">Examinez les preuves avant de lancer un débat.</div><div class="card" id="dynamic-console">
+<h3>2. Le débat scientifique</h3>
+<p class="muted">Spark présente les analyses, Wonder examine les objections, puis le Conseil dégage les investigations à mener.</p>
+<p id="dynamic-meta" class="muted">Prévisualisez les preuves avant de lancer les agents.</p><details class="science-details" id="dynamic-readiness-box"><summary>Diagnostic de connexion (facultatif)</summary><div class="card">
 <div class="top"><h3>Diagnostic du Conseil dynamique</h3><button id="dynamic-readiness" type="button">Vérifier la configuration</button></div>
 <p class="muted">Vérifie les clés du serveur, les dossiers de sessions et les preuves accessibles sans lancer Meta.</p>
-<div id="dynamic-readiness-output" role="status"></div></div>
+<div id="dynamic-readiness-output" role="status"></div></div></details>
 <label><input id="dynamic-share" type="checkbox">J'autorise l'envoi des preuves sélectionnées à Meta.</label>
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
-<div class="actions"><button id="dynamic-run" type="button" disabled>Déclencher le débat dynamique</button><button id="dynamic-history" type="button">Historique dynamique</button></div>
+<div class="actions"><button id="dynamic-run" class="primary-action" type="button" disabled>Lancer le débat</button><button id="dynamic-history" type="button">Mes délibérations</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>Narration spécifique à cette délibération</h3><button id="dynamic-oral" type="button" disabled>Voir le scénario oral dynamique</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Matrice décisionnelle</button><button id="dynamic-metrics" type="button" disabled>Indicateurs FSDC</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>Écoute vocale de cette délibération</h3>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-audit" type="button" disabled>Contrôle automatique de fidélité</button><button id="dynamic-brief" type="button" disabled>Télécharger le brief dynamique</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><button id="dynamic-metrics" type="button" disabled>Indicateurs FSDC</button></div><p class="muted">Extraits des positions réelles ; contrôle éditorial requis avant voix synthétique.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
-<div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Aperçu vocal sans appel payant</button><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
-<button id="dynamic-voice-generate" type="button" disabled>Générer la voix une seule fois</button>
+<div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Relire le scénario</button><button id="dynamic-voice-check" type="button" disabled>État de l'audio</button>
+<button id="dynamic-voice-generate" type="button" disabled>Produire l’audio</button>
 <button id="dynamic-voice-listen" type="button" disabled>Écouter le débat</button></div>
 <p id="dynamic-voice-state" role="status" class="muted">Ouvrez une session dynamique terminée.</p>
 <div id="dynamic-voice-player"></div></div></div>
 </div>
-<p class="muted tiny">Pilote HACK-008 conservé séparément :</p>
+<p class="muted tiny legacy-hidden">Pilote HACK-008</p>
 <button id="run" disabled>Déclencher le Conseil scientifique</button>
 <p id="feedback" class="muted" role="status"></p></section>
-<section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
+<details class="legacy-archive"><summary>Archives et fonctions historiques</summary><section><div class="top"><h2>Sessions sauvegardées</h2><button id="refresh-sessions" type="button">Retrouver mes sessions</button></div><p class="muted">Réouvrir un débat enregistré et son PDF sans aucun nouvel appel Meta.</p><div id="saved-sessions"></div></section>
 <section><div class="top"><h2>2. Débat et vérification</h2><span id="runstate" class="badge">Aucune nouvelle session</span></div>
 <div id="progress" class="muted">Les interventions apparaîtront après le lancement autorisé.</div></section>
 <section><h2>3. Synthèse décisionnelle</h2>
@@ -120,7 +137,7 @@ hr{border:none;border-top:1px solid #3d526a;margin:16px 0}
 <div id="audio-playlist"></div>
 <div class="actions"><button id="pdf-button" type="button" disabled>Télécharger le rapport exécutif V3 (PDF)</button><button id="oral-button" type="button" disabled>Télécharger le scénario oral français</button><button id="manifest-button" type="button" disabled>Projet oral modifiable (JSON)</button><span id="pdf-status" class="muted">PDF et scénario oral disponibles après une session complète.</span></div>
 </section>
-<section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section>
+<section><h2>Intégrité scientifique</h2><p>Le vérificateur contrôle les identifiants des sources et la reproduction exacte des observations. Il n'établit ni la vérité intrinsèque des données, ni une causalité, ni l'exhaustivité des analyses. Revue humaine obligatoire.</p></section></details>
 </div></main>
 <script>
 "use strict";
