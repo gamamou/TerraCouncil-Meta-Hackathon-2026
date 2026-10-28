@@ -53,6 +53,7 @@ No API credentials, private data, restricted-source datasets, proprietary FAITH/
 - [HACK-005 one-call Meta Spark live pilot](docs/HACK-005-LIVE-PILOT.md)
 - [HACK-006 verified Wonder critique / Spark revision](docs/HACK-006-CONTINUE-DEBATE.md)
 - [HACK-007 Interactive Scientific Council](docs/HACK-007-INTERACTIVE-COUNCIL.md)
+- [HACK-008 Local interactive Meta Council](docs/HACK-008-INTERACTIVE-LOCAL-COUNCIL.md)
 
 ## Submission transparency
 
@@ -79,3 +80,7 @@ The participant's first live Spark call passed HACK-003 structural gates. HACK-0
 ## HACK-007 interface checkpoint
 
 The participant has completed three live Meta calls (Spark first position, Wonder critique and Spark revision) with structural citation checks. `src/build_council_ui.py` now builds a **local interactive HTML replay** from these three saved private traces and the same FSDC evidence, rechecking fingerprints and source findings. The new UI and tests are committed; **the final HTML has not yet been built or inspected on the participant's Windows computer**. The new-question input is intentionally not connected to Meta and does not pretend to answer. Human scientific review is still required.
+
+## HACK-008 local interactive council (source committed; live browser validation pending)
+
+New `src/local_council_server.py` and `ui/hack008.html` provide a localhost-only question interface and an explicitly authorized **maximum 4-call** Meta debate (2 simulated stakeholder perspectives via Spark, Wonder critic, Spark revised synthesis). Every stage must pass independent FSDC structural checks. Local private checkpoints, zero default calls, no automatic retries. The first HACK-008 browser/API run is **not yet verified**, and no full 8-agent council is claimed.
