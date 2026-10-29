@@ -48,8 +48,8 @@ def expand_unambiguous_numbers(text):
         if not (1900<=y<=2100 and 1<=month<=12):
             raise ValueError("Invalid year-month date")
         return months[month]+" "+integer_words(y)
-    text=re.sub(r"(?<![\\w-])(20\\d{2})-(20\\d{2})(?![\\w-])",window,text)
-    text=re.sub(r"(?<![\\w-])(20\\d{2})-(0[1-9]|1[0-2])(?![\\w-])",year_month,text)
+    text=re.sub(r"(?<![\w-])(20\d{2})-(20\d{2})(?![\w-])",window,text)
+    text=re.sub(r"(?<![\w-])(20\d{2})-(0[1-9]|1[0-2])(?![\w-])",year_month,text)
     # Slashed dates/codes or remaining digit ranges require contextual handling.
     if re.search(r"\d\s*[/−–-]\s*\d",text):
         raise ValueError("Numeric dates, ranges or ratios require contextual interpretation")
