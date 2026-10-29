@@ -20,6 +20,7 @@ UNSAFE=re.compile(r"[<>{}#@\\|*_]|https?://|www\.",re.I)
 ENGLISH=re.compile(r"\b(the|should|with|without|evidence|missing|investigate|cannot|further|recommend|survey)\b",re.I)
 NUMBER=re.compile(r"\d")
 MAX_TURN=1100
+MAX_SPOKEN_TURN=2000
 
 def spoken_pronunciation(text):
     if not isinstance(text,str) or not text.strip():
@@ -42,7 +43,7 @@ def spoken_pronunciation(text):
         applied.append({"original":"NUMERIC_TOKENS","spoken":"DETERMINISTIC_FRENCH","occurrences":1})
     if NUMBER.search(current):
         raise ValueError("Unresolved scientific numerical token")
-    if len(current)>MAX_TURN:
+    if len(current)>MAX_SPOKEN_TURN:
         raise ValueError("Oral expansion exceeds length limit")
     return {"spoken_text":current,"normalizations":applied,"method":"WHITELISTED_LITERAL_PRONUNCIATION"}
 
