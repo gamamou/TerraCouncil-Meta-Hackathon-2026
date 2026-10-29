@@ -571,12 +571,14 @@ $("dynamic-brief").onclick=async()=>{
 };
 
 let dynamicVoiceState=null, dynamicAudioUrl=null;
+let automaticOralReadyFor=null;
 function updateDynamicVoiceControls(){
  const ready=Boolean(dynamicActiveId);
  $("dynamic-voice-check").disabled=!ready;
  $("dynamic-voice-preview").disabled=!ready;
  $("dynamic-voice-generate").disabled=!ready||!dynamicVoiceState||
    dynamicVoiceState.state!=="NOT_REQUESTED"||!dynamicVoiceState.key_available||
+   automaticOralReadyFor!==dynamicActiveId||
    !$("dynamic-voice-consent").checked||!$("dynamic-voice-sharing").checked;
  $("dynamic-voice-listen").disabled=!ready||!dynamicVoiceState||dynamicVoiceState.state!=="READY";
 }
@@ -584,14 +586,30 @@ $("dynamic-voice-consent").addEventListener("change",updateDynamicVoiceControls)
 $("dynamic-voice-sharing").addEventListener("change",updateDynamicVoiceControls);
 async function checkDynamicVoice(){
  if(!dynamicActiveId)return;
+ const session=dynamicActiveId;
+ automaticOralReadyFor=null;
+ updateDynamicVoiceControls();
  try{
-  const r=await fetch("/api/dynamic-voice-status?id="+encodeURIComponent(dynamicActiveId),opts);
-  const data=await r.json();
-  if(!r.ok)throw Error(data.detail||data.error);
-  dynamicVoiceState=data;updateDynamicVoiceControls();
-  $("dynamic-voice-state").textContent="État : "+data.state+
-     (data.key_available?" · clé vocale chargée":" · clé vocale absente");
- }catch(e){$("dynamic-voice-state").textContent=e.message;dynamicVoiceState=null;updateDynamicVoiceControls();}
+  const [statusResponse,oralResponse]=await Promise.all([
+   fetch("/api/dynamic-voice-status?id="+encodeURIComponent(session),opts),
+   fetch("/api/dynamic-voice-auto-status?id="+encodeURIComponent(session),opts)
+  ]);
+  const data=await statusResponse.json(), oral=await oralResponse.json();
+  if(!statusResponse.ok)throw Error(data.detail||data.error);
+  if(!oralResponse.ok)throw Error(oral.detail||oral.error);
+  if(dynamicActiveId!==session)return;
+  dynamicVoiceState=data;
+  automaticOralReadyFor=oral.state==="READY_FOR_SEPARATELY_CONSENTED_VOICE"?session:null;
+  updateDynamicVoiceControls();
+  $("dynamic-voice-state").textContent="Audio : "+data.state+
+   (data.key_available?" · clé vocale chargée":" · clé vocale absente")+
+   " · préparation automatique : "+oral.state+
+   (automaticOralReadyFor?" · aucune relecture systématique requise":" · génération bloquée : source ou prononciation à vérifier");
+ }catch(e){
+  if(dynamicActiveId!==session)return;
+  $("dynamic-voice-state").textContent="Préparation vocale non vérifiée : "+e.message;
+  dynamicVoiceState=null;automaticOralReadyFor=null;updateDynamicVoiceControls();
+ }
 }
 $("dynamic-voice-preview").onclick=async()=>{
  const out=$("dynamic-voice-player");out.replaceChildren();
