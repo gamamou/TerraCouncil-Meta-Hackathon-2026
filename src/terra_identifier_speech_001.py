@@ -30,7 +30,7 @@ def normalize_identifiers(text):
         return (integer_words(dt.day)+" "+months[dt.month]+" "+integer_words(dt.year)+
                 ", "+integer_words(dt.hour)+" heures "+integer_words(dt.minute)+
                 " minutes "+integer_words(dt.second)+" secondes, U T C")
-    rendered=re.sub(r"(?<![\\w])\\d{8}_\\d{6}_UTC(?![\\w])",timestamp,text)
+    rendered=re.sub(r"(?<![\w])\d{8}_\d{6}_UTC(?![\w])",timestamp,text)
     rendered=TOKEN.sub(replace,rendered)
     if ANY_UNDERSCORE.search(rendered):
         raise ValueError("Unsafe technical identifier requires review")
