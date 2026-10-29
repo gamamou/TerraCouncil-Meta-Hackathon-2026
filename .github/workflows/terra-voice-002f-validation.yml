@@ -42,6 +42,7 @@ jobs:
           python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_boke_calendar_001.py' -v
           python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_decimal_precision_001.py' -v
           python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_spoken_length_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_agent_voice_registry_001.py' -v
       - name: Confirm provider secrets not required
         run: |
           test -z "$MODEL_API_KEY"
