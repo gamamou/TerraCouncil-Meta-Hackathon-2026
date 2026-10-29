@@ -36,12 +36,24 @@ def get_status(root,session_id):
     return {"state":state,"session_id":session_id,
             "script_sha256":saved.get("script_sha256")}
 
-def synthesis(root,trace,voice_spark,voice_wonder,key,consent=False,caller=None):
+def synthesis(root,trace,voice_spark,voice_wonder,key,consent=False,caller=None,approved_plan=None):
     if consent is not True:
         raise ValueError("Explicit ElevenLabs cost and sharing consent is required")
     if not key:
         raise ValueError("Missing ElevenLabs credentials")
-    plan=prepare_voice(trace,voice_spark,voice_wonder)
+    if approved_plan is None:
+        plan=prepare_voice(trace,voice_spark,voice_wonder)
+    else:
+        from terra_voice_storage_002b import load_verified_approval
+        plan=load_verified_approval(root,trace,voice_spark,voice_wonder)
+        if plan != approved_plan:
+            raise ValueError("Approved script changed before dispatch")
+        plan={**plan,
+              "payload":{"inputs":plan["inputs"],"model_id":plan["model_id"],"language_code":plan["language_code"]},
+              "turns":[{"speaker":step["role"]} for step in trace["steps"]],
+              "script_sha256":plan["approval_sha256"],
+              "editorial_type":"HUMAN_APPROVED_EDITORIAL_RECONSTRUCTION",
+              "scientific_validation":"STRUCTURAL_ONLY_NOT_FIELD_VALIDATED"}
     paths=local_paths(root,plan["session_id"])
     paths["base"].mkdir(parents=True,exist_ok=True)
     # Exclusive claim across browser clicks and process restarts.
@@ -82,7 +94,7 @@ def synthesis(root,trace,voice_spark,voice_wonder,key,consent=False,caller=None)
              "scientific_validation":plan["scientific_validation"],
              "audio_sha256":hashlib.sha256(audio).hexdigest(),
              "audio_filename":paths["audio"].name,"timeline":timeline,
-             "generation":"SOURCE_EXTRACTIVE_SEPARATELY_AUTHORIZED",
+             "generation":"HUMAN_APPROVED_SEPARATELY_AUTHORIZED" if approved_plan is not None else "SOURCE_EXTRACTIVE_SEPARATELY_AUTHORIZED",
              "model":"eleven_v4"}
         paths["audio"].write_bytes(audio)
         paths["timing"].write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
