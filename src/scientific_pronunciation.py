@@ -5,6 +5,7 @@ measurement values, comparisons, temporal facts or source assertions.
 An unknown number, formula, English fragment or unsafe symbol fails closed.
 """
 import re
+from terra_french_numbers_001 import expand_unambiguous_numbers
 
 # Spellings are conventional pronunciation expansions, not new measurements.
 TOKEN_RULES=(
@@ -35,7 +36,10 @@ def spoken_pronunciation(text):
         if count:
             applied.append({"original":source,"spoken":replacement,"occurrences":count})
     if NUMBER.search(current):
-        raise ValueError("Scientific numerical value requires human-verified pronunciation")
+        current=expand_unambiguous_numbers(current)
+        applied.append({"original":"NUMERIC_TOKENS","spoken":"DETERMINISTIC_FRENCH","occurrences":1})
+    if NUMBER.search(current):
+        raise ValueError("Unresolved scientific numerical token")
     if len(current)>MAX_TURN:
         raise ValueError("Oral expansion exceeds length limit")
     return {"spoken_text":current,"normalizations":applied,"method":"WHITELISTED_LITERAL_PRONUNCIATION"}
