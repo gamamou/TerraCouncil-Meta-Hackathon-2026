@@ -676,7 +676,6 @@ $("dynamic-audit").onclick=async()=>{
  }catch(error){add("p",out,"Audit impossible : "+error.message,"warn");}
 };
 
-$("dynamic-oral-edit").insertAdjacentHTML("afterend",""); // Review action is added in the worksheet panel.
 async function openVoiceApprovalReview(){
  const area=$("dynamic-oral-edit-output");
  area.replaceChildren();
@@ -701,10 +700,6 @@ async function openVoiceApprovalReview(){
    editor.setAttribute("aria-label","Texte oral approuvé de l'intervention "+turn.turn);
    const detail=add("details",card,"");
    add("summary",detail,"Afficher l'intervention scientifique originale");
-   const source=await (async()=>{
-    // Original is fetched from the existing source-verifying worksheet endpoint.
-    return null;
-   })();
    const checkboxes=[];
    for(const [key,label] of [
     ["reviewed_against_original","J'ai comparé le texte avec l'original complet."],
