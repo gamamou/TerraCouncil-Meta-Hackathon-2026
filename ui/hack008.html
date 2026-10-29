@@ -80,7 +80,7 @@ details.science-details>.card{border:0;background:transparent}
 <label><input id="dynamic-cost" type="checkbox">J'autorise cette nouvelle délibération et ses appels Meta potentiellement facturés.</label>
 <div class="actions"><button id="dynamic-run" class="primary-action" type="button" disabled>Lancer le débat</button><button id="dynamic-history" type="button">Mes délibérations</button></div>
 <p id="dynamic-state" class="muted" role="status"></p>
-<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><details class="advanced-actions"><summary>Contrôles et exports</summary><button id="dynamic-audit" type="button" disabled>Vérifier la fidélité</button><button id="dynamic-brief" type="button" disabled>Exporter le dossier</button><button id="dynamic-metrics" type="button" disabled>Indicateurs détaillés</button></details></div><p class="muted">Les conclusions et le dialogue oral restent soumis à une validation humaine.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
+<div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-oral-edit" type="button" disabled>Version orale courte</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><details class="advanced-actions"><summary>Contrôles et exports</summary><button id="dynamic-audit" type="button" disabled>Vérifier la fidélité</button><button id="dynamic-brief" type="button" disabled>Exporter le dossier</button><button id="dynamic-metrics" type="button" disabled>Indicateurs détaillés</button></details></div><p class="muted">Les conclusions et le dialogue oral restent soumis à une validation humaine.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-oral-edit-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
 <div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Relire le scénario</button><button id="dynamic-voice-check" type="button" disabled>Vérifier l’audio</button>
@@ -675,6 +675,31 @@ $("dynamic-audit").onclick=async()=>{
   add("p",out,"Validation scientifique de terrain : non. Synthèse ElevenLabs : non autorisée par cet audit. Aucun appel externe.","warn");
  }catch(error){add("p",out,"Audit impossible : "+error.message,"warn");}
 };
+$("dynamic-oral-edit").onclick=async()=>{
+ const area=$("dynamic-oral-edit-output");area.replaceChildren();
+ if(!dynamicActiveId)return;
+ try{
+   const r=await fetch("/api/dynamic-oral-worksheet?id="+encodeURIComponent(dynamicActiveId),opts);
+   const d=await r.json();
+   if(!r.ok)throw Error(d.detail||d.error);
+   add("h3",area,"Relecture du dialogue — "+d.turns.length+" interventions");
+   add("p",area,"Extraits proposés depuis les interventions réelles. Ils peuvent omettre des arguments ; leur fidélité doit être approuvée avant toute synthèse vocale.","warn");
+   for(const turn of d.turns){
+     const card=add("div",area,"","card");
+     add("strong",card,turn.turn+". "+turn.speaker);
+     const suggestion=add("textarea",card,turn.suggested_extract||"");
+     suggestion.value=turn.suggested_extract||"";
+     suggestion.rows=4;
+     suggestion.setAttribute("aria-label","Proposition orale à relire, intervention "+turn.turn);
+     if(turn.editorial_flags.length)add("p",card,turn.editorial_flags.join(" · "),"warn");
+     const detail=add("details",card,"");
+     add("summary",detail,"Comparer à l'intervention scientifique originale");
+     add("p",detail,turn.original_full_text,"muted");
+     add("small",card,"Preuves : "+turn.source_evidence_ids.join(", "),"muted");
+   }
+   add("p",area,"Cette relecture locale n'est pas une approbation scientifique ni une autorisation ElevenLabs. Aucun appel externe.","tiny muted");
+ }catch(error){add("p",area,"Relecture indisponible : "+error.message,"warn");}
+};
 $("dynamic-oral").onclick=async()=>{
  const area=$("dynamic-oral-output");area.replaceChildren();
  if(!dynamicActiveId)return;
@@ -706,6 +731,7 @@ async function dynamicPoll(id,initialChecks=0){
    displayDynamic(trace);
    updateDynamicVoiceControls();
    $("dynamic-oral").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
+   $("dynamic-oral-edit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-audit").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-brief").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
    $("dynamic-matrix").disabled=trace.status!=="COMPLETED_STRUCTURALLY_CHECKED_HUMAN_REVIEW_REQUIRED";
