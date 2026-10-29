@@ -58,8 +58,8 @@ def expand_unambiguous_numbers(text):
         if raw.count(".")+raw.count(",")>1:raise ValueError("Ambiguous numeric grouping")
         if "." in raw or "," in raw:
             a,b=re.split(r"[.,]",raw)
-            if not a or not b or len(b)>2:
-                raise ValueError("Decimal precision requires contextual review")
+            if not a or not b or len(b)>8:
+                raise ValueError("Decimal precision exceeds supported eight digits")
             if len(a)>1 and a[0]=="0":raise ValueError("Leading zeros require review")
             return integer_words(int(a))+" virgule "+" ".join(UNITS[int(ch)] for ch in b)
         if len(raw)>1 and raw[0]=="0":raise ValueError("Leading zeros require review")
