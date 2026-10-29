@@ -624,7 +624,7 @@ $("dynamic-voice-generate").onclick=async()=>{
  try{
   const r=await fetch("/api/dynamic-voice-start",{method:"POST",
     headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
-    body:JSON.stringify({run_id:dynamicActiveId,approve_cost_and_sharing:true,approve_data_sharing:$("dynamic-voice-sharing").checked})});
+    body:JSON.stringify({run_id:dynamicActiveId,approve_cost_and_sharing:true,approve_data_sharing:$("dynamic-voice-sharing").checked,oral_mode:"automatic_source_bound"})});
   const d=await r.json();
   if(!r.ok)throw Error(d.detail||d.error);
   $("dynamic-voice-consent").checked=false;
