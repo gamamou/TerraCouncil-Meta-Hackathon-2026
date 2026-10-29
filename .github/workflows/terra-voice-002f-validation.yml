@@ -38,6 +38,7 @@ jobs:
           python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_auto_ui_001.py' -v
           python -X utf8 -m unittest discover -s tests -p 'test_terra_french_numbers_001.py' -v
           python -X utf8 -m unittest discover -s tests -p 'test_terra_identifier_speech_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_segmentation_001.py' -v
       - name: Confirm provider secrets not required
         run: |
           test -z "$MODEL_API_KEY"
