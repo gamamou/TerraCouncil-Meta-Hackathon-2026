@@ -12,6 +12,7 @@ from scientific_pronunciation import spoken_pronunciation
 from terra_voice_segmentation_001 import segment_spoken_turns
 from inspect_boke_audio_plan import assess
 from render_session_audio import ENDPOINT
+from terra_agent_voice_registry_001 import load_voice_map, voice_mapping_template
 
 def run(args):
     source=Path(args.session)
@@ -25,6 +26,10 @@ def run(args):
     if audit["plan_sha256"]!=plan["plan_sha256"]:
         raise ValueError("Source plan mismatch")
     print("SOURCE:",audit["session_id"],"BATCHES:",plan["batch_count"],"CHARACTERS:",plan["total_characters"])
+    roles=[t["speaker"] for t in draft["turns"]]
+    if args.print_voice_template:
+        print(json.dumps(voice_mapping_template(roles),ensure_ascii=False,indent=2))
+        return
     if not args.send:
         print("DRY_RUN; 0 paid calls; no data sent. To run requires explicit cost/sharing flags.")
         return
@@ -33,10 +38,11 @@ def run(args):
     if plan["batch_count"]>4:
         raise ValueError("Unexpected batch count: check changed plan and cost")
     key=os.environ.get("ELEVENLABS_API_KEY")
-    spark=os.environ.get("TERRA_VOICE_SPARK")
-    wonder=os.environ.get("TERRA_VOICE_WONDER")
-    if not all((key,spark,wonder)) or spark==wonder:
-        raise ValueError("Missing key or two distinct voice IDs in environment")
+    if not key:
+        raise ValueError("Missing ELEVENLABS_API_KEY")
+    if not args.voices:
+        raise ValueError("Missing --voices JSON mapping for each scientific role")
+    role_voices=load_voice_map(args.voices,roles)
     output=Path(args.output)
     output.mkdir(parents=True,exist_ok=True)
     identity=hashlib.sha256((audit["session_id"]+plan["plan_sha256"]).encode()).hexdigest()[:12]
@@ -52,8 +58,7 @@ def run(args):
         payload_inputs=[]
         for item in batch["inputs"]:
             turn=draft["turns"][item["turn"]-1]
-            model=str(turn.get("source_model",""))
-            voice=wonder if "wonder" in model.lower() else spark
+            voice=role_voices[turn["speaker"]]
             payload_inputs.append({"text":item["text"],"voice_id":voice})
         payload={"inputs":payload_inputs,"model_id":"eleven_v4","language_code":"fr"}
         with claim.open("x",encoding="utf-8") as f:
@@ -98,6 +103,8 @@ if __name__=="__main__":
     p.add_argument("--session",required=True)
     p.add_argument("--output",required=True)
     p.add_argument("--send",action="store_true")
+    p.add_argument("--voices",help="Private role-to-voice-ID JSON file")
+    p.add_argument("--print-voice-template",action="store_true")
     p.add_argument("--approve-cost-and-sharing",action="store_true")
     a=p.parse_args()
     try:run(a)
