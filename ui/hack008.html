@@ -577,10 +577,11 @@ function updateDynamicVoiceControls(){
  $("dynamic-voice-preview").disabled=!ready;
  $("dynamic-voice-generate").disabled=!ready||!dynamicVoiceState||
    dynamicVoiceState.state!=="NOT_REQUESTED"||!dynamicVoiceState.key_available||
-   !$("dynamic-voice-consent").checked;
+   !$("dynamic-voice-consent").checked||!$("dynamic-voice-sharing").checked;
  $("dynamic-voice-listen").disabled=!ready||!dynamicVoiceState||dynamicVoiceState.state!=="READY";
 }
 $("dynamic-voice-consent").addEventListener("change",updateDynamicVoiceControls);
+$("dynamic-voice-sharing").addEventListener("change",updateDynamicVoiceControls);
 async function checkDynamicVoice(){
  if(!dynamicActiveId)return;
  try{
