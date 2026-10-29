@@ -675,6 +675,90 @@ $("dynamic-audit").onclick=async()=>{
   add("p",out,"Validation scientifique de terrain : non. Synthèse ElevenLabs : non autorisée par cet audit. Aucun appel externe.","warn");
  }catch(error){add("p",out,"Audit impossible : "+error.message,"warn");}
 };
+
+$("dynamic-oral-edit").insertAdjacentHTML("afterend",""); // Review action is added in the worksheet panel.
+async function openVoiceApprovalReview(){
+ const area=$("dynamic-oral-edit-output");
+ area.replaceChildren();
+ const session=dynamicActiveId;
+ if(!session)return;
+ try{
+  const response=await fetch("/api/dynamic-voice-review-template?id="+encodeURIComponent(session),opts);
+  const draft=await response.json();
+  if(!response.ok)throw Error(draft.detail||draft.error);
+  add("h3",area,"Approbation du dialogue oral — "+draft.turns.length+" interventions");
+  add("p",area,"Comparer chaque proposition au texte scientifique original avant de confirmer. Cette approbation ne déclenche aucun paiement ni génération vocale.","warn");
+  if(draft.saved_approval?.state==="APPROVED_FOR_VOICE_PREPARATION"){
+   add("p",area,"Une approbation est déjà enregistrée. Aucune modification silencieuse n'est autorisée.","warn");
+   return;
+  }
+  const items=[];
+  for(const turn of draft.turns){
+   const card=add("div",area,"","card");
+   add("strong",card,"Intervention "+turn.turn+" · "+turn.source_model);
+   const editor=add("textarea",card,"");
+   editor.value=turn.suggested_extract||"";
+   editor.setAttribute("aria-label","Texte oral approuvé de l'intervention "+turn.turn);
+   const detail=add("details",card,"");
+   add("summary",detail,"Afficher l'intervention scientifique originale");
+   const source=await (async()=>{
+    // Original is fetched from the existing source-verifying worksheet endpoint.
+    return null;
+   })();
+   const checkboxes=[];
+   for(const [key,label] of [
+    ["reviewed_against_original","J'ai comparé le texte avec l'original complet."],
+    ["semantic_fidelity_confirmed","Je confirme la fidélité du sens, des limites et des désaccords."],
+    ["pronunciation_checked","J'ai vérifié le français oral et les termes scientifiques."]
+   ]){
+    const line=add("label",card,"");
+    const box=document.createElement("input");
+    box.type="checkbox";
+    line.appendChild(box);
+    line.appendChild(document.createTextNode(label));
+    checkboxes.push([key,box]);
+   }
+   items.push({turn,editor,checkboxes,detail});
+  }
+  const sourceResponse=await fetch("/api/dynamic-oral-worksheet?id="+encodeURIComponent(session),opts);
+  const sourceDoc=await sourceResponse.json();
+  if(!sourceResponse.ok)throw Error(sourceDoc.detail||sourceDoc.error);
+  if(sourceDoc.worksheet_sha256!==draft.worksheet_sha256)throw Error("Source review changed");
+  for(const item of items){
+   const original=sourceDoc.turns.find(t=>t.turn===item.turn.turn);
+   if(!original)throw Error("Missing original intervention");
+   add("p",item.detail,original.original_full_text,"muted");
+   add("small",item.detail,"Références : "+original.source_evidence_ids.join(", "),"muted");
+  }
+  const reviewerLabel=add("label",area,"Nom du responsable de la relecture");
+  const reviewer=document.createElement("input");
+  reviewer.type="text";reviewer.maxLength=120;reviewer.placeholder="Identité du relecteur";reviewer.style.cssText="width:100%;padding:10px";
+  reviewerLabel.appendChild(reviewer);
+  const button=add("button",area,"Approuver les six interventions (sans générer l'audio)");
+  button.type="button";
+  const message=add("p",area,"","muted");
+  button.onclick=async()=>{
+   if(dynamicActiveId!==session){message.textContent="Session modifiée : réouvrir la relecture.";return;}
+   const payload=JSON.parse(JSON.stringify(draft));
+   payload.turns=items.map(item=>{
+    const t={...item.turn,approved_text:item.editor.value.trim()};
+    for(const [key,check] of item.checkboxes)t[key]=check.checked;
+    return t;
+   });
+   button.disabled=true;
+   try{
+    const res=await fetch("/api/dynamic-voice-review-save",{
+      method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+      body:JSON.stringify({run_id:session,reviewer:reviewer.value,review:payload})
+    });
+    const saved=await res.json();
+    if(!res.ok)throw Error(saved.detail||saved.error);
+    message.textContent="Approbation enregistrée : "+saved.approval_sha256+". Aucun appel ElevenLabs.";
+   }catch(e){message.textContent="Non approuvé : "+e.message;button.disabled=false;}
+  };
+ }catch(error){add("p",area,"Relecture indisponible : "+error.message,"warn");}
+}
+
 $("dynamic-oral-edit").onclick=async()=>{
  const area=$("dynamic-oral-edit-output");area.replaceChildren();
  if(!dynamicActiveId)return;
@@ -698,6 +782,8 @@ $("dynamic-oral-edit").onclick=async()=>{
      add("small",card,"Preuves : "+turn.source_evidence_ids.join(", "),"muted");
    }
    add("p",area,"Cette relecture locale n'est pas une approbation scientifique ni une autorisation ElevenLabs. Aucun appel externe.","tiny muted");
+   const approvalButton=add("button",area,"Relecture et approbation du scénario");
+   approvalButton.type="button";approvalButton.onclick=openVoiceApprovalReview;
  }catch(error){add("p",area,"Relecture indisponible : "+error.message,"warn");}
 };
 $("dynamic-oral").onclick=async()=>{
