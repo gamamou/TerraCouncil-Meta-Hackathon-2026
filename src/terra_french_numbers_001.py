@@ -35,7 +35,22 @@ def integer_words(n):
 def expand_unambiguous_numbers(text):
     if IDENTIFIER.search(text):
         raise ValueError("Technical identifier requires contextual speech rendering")
-    # Slashed dates/codes or digit ranges require contextual handling.
+    # Explicit calendar windows only; ratios and other hyphenated numbers remain blocked.
+    months=("","janvier","février","mars","avril","mai","juin","juillet","août",
+            "septembre","octobre","novembre","décembre")
+    def window(m):
+        y1,y2=int(m[1]),int(m[2])
+        if not (1900<=y1<=2100 and 1900<=y2<=2100 and y2==y1+1):
+            raise ValueError("Ambiguous year range")
+        return integer_words(y1)+" à "+integer_words(y2)
+    def year_month(m):
+        y,month=int(m[1]),int(m[2])
+        if not (1900<=y<=2100 and 1<=month<=12):
+            raise ValueError("Invalid year-month date")
+        return months[month]+" "+integer_words(y)
+    text=re.sub(r"(?<![\\w-])(20\\d{2})-(20\\d{2})(?![\\w-])",window,text)
+    text=re.sub(r"(?<![\\w-])(20\\d{2})-(0[1-9]|1[0-2])(?![\\w-])",year_month,text)
+    # Slashed dates/codes or remaining digit ranges require contextual handling.
     if re.search(r"\d\s*[/−–-]\s*\d",text):
         raise ValueError("Numeric dates, ranges or ratios require contextual interpretation")
     def repl(m):
