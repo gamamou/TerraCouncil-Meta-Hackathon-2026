@@ -6,6 +6,7 @@ An unknown number, formula, English fragment or unsafe symbol fails closed.
 """
 import re
 from terra_french_numbers_001 import expand_unambiguous_numbers
+from terra_identifier_speech_001 import normalize_identifiers
 
 # Spellings are conventional pronunciation expansions, not new measurements.
 TOKEN_RULES=(
@@ -25,12 +26,13 @@ def spoken_pronunciation(text):
         raise ValueError("Empty narrated text")
     if len(text)>MAX_TURN:
         raise ValueError("Excessive turn size")
+    text, identifier_audit = normalize_identifiers(text)
     if UNSAFE.search(text):
         raise ValueError("Unsupported technical symbols")
     if ENGLISH.search(text):
         raise ValueError("Possible English source speech needs independent review")
     current=text
-    applied=[]
+    applied=list(identifier_audit)
     for pattern,replacement,source in TOKEN_RULES:
         current,count=pattern.subn(replacement,current)
         if count:
