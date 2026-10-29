@@ -445,6 +445,25 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError,KeyError,TypeError,OSError) as error:
                 return self.send_json(422,{"error":"worksheet_unavailable","detail":str(error)[:160]})
             return self.send_json(200,report)
+        elif route.path == "/api/dynamic-voice-review-template":
+            if not self.same_origin() or self.headers.get("X-Terra-Token") != self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            run_id=parse_qs(route.query).get("id",[""])[0]
+            if not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"invalid_session"})
+            source=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not source.is_file() or source.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from terra_voice_approval_002 import prepare_review
+                from terra_voice_storage_002b import read_approval_status
+                trace=json.loads(source.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id: raise ValueError("Session mismatch")
+                template=prepare_review(trace)
+                template["saved_approval"]=read_approval_status(self.server.out_dir,run_id)
+                return self.send_json(200,template)
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"review_template_unavailable","detail":str(error)[:160]})
         elif route.path == "/api/dynamic-oral":
             if self.headers.get("X-Terra-Token") != self.server.token:
                 return self.send_json(403,{"error":"token_required"})
@@ -591,6 +610,36 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(404, {"error": "not_found"})
     def do_POST(self):
+        if self.path == "/api/dynamic-voice-review-save":
+            if not self.same_origin() or self.headers.get("X-Terra-Token")!=self.server.token:
+                return self.send_json(403,{"error":"origin_or_token_rejected"})
+            if self.headers.get("Content-Type","").split(";")[0].strip()!="application/json":
+                return self.send_json(415,{"error":"json_required"})
+            try: count=int(self.headers.get("Content-Length","0"))
+            except ValueError: count=0
+            if not 1<=count<=25000:
+                return self.send_json(413,{"error":"invalid_request_size"})
+            try: body=json.loads(self.rfile.read(count))
+            except (ValueError,UnicodeDecodeError):
+                return self.send_json(400,{"error":"bad_json"})
+            if not isinstance(body,dict) or not isinstance(body.get("review"),dict):
+                return self.send_json(400,{"error":"review_object_required"})
+            run_id=body.get("run_id")
+            if not isinstance(run_id,str) or not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
+                return self.send_json(400,{"error":"bad_run_id"})
+            source=self.server.out_dir/"Dynamic-HACK016"/(run_id+".json")
+            if not source.is_file() or source.stat().st_size>3000000:
+                return self.send_json(404,{"error":"session_not_found"})
+            try:
+                from terra_voice_storage_002b import save_approval
+                trace=json.loads(source.read_text(encoding="utf-8"))
+                if trace.get("run_id")!=run_id: raise ValueError("Session mismatch")
+                saved=save_approval(self.server.out_dir,trace,body["review"],body.get("reviewer",""))
+                return self.send_json(201,saved)
+            except FileExistsError:
+                return self.send_json(409,{"error":"approval_already_saved_no_overwrite"})
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                return self.send_json(422,{"error":"approval_rejected","detail":str(error)[:160]})
         if self.path == "/api/dynamic-voice-start":
             if not self.same_origin() or self.headers.get("X-Terra-Token")!=self.server.token:
                 return self.send_json(403,{"error":"origin_or_token_rejected"})
