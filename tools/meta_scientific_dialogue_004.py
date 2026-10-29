@@ -68,7 +68,7 @@ def relation_issues(original,relations):
         if link.get("relation") not in allowed:issues.append(f"LINK_{index}_TYPE")
         quote=link.get("source_excerpt")
         # Check purported excerpt against either linked source; otherwise reject.
-        if not isinstance(quote,str) or not quote.strip() or not (quote in original[a-1]["original_text"] or quote in original[b-1]["original_text"]) if type(a)==int and type(b)==int and 1<=a<=6 and 1<=b<=6 else True:
+        if not (type(a)==int and type(b)==int and 1<=a<=6 and 1<=b<=6 and isinstance(quote,str) and quote.strip() and (quote in original[a-1]["original_text"] or quote in original[b-1]["original_text"])):
             issues.append(f"LINK_{index}_UNSUPPORTED_EXCERPT")
     return issues
 def numeric_issues(source,candidate):
