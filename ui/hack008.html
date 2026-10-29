@@ -643,12 +643,13 @@ $("dynamic-voice-listen").onclick=async()=>{
    fetch("/api/dynamic-voice-timing?id="+encodeURIComponent(sessionId),opts)]);
   if(!a.ok||!t.ok)throw Error("Fichiers audio indisponibles");
   const bytes=await a.arrayBuffer(), manifest=await t.json();
-  if(manifest.session_id!==sessionId || manifest.editorial_type!=="EDITORIAL_RECONSTRUCTION_NOT_VERBATIM")
+  if(manifest.session_id!==sessionId || !["EDITORIAL_RECONSTRUCTION_NOT_VERBATIM","HUMAN_APPROVED_EDITORIAL_RECONSTRUCTION"].includes(manifest.editorial_type))
      throw Error("Association source/session invalide");
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
     .map(x=>x.toString(16).padStart(2,"0")).join("");
   if(digest!==manifest.audio_sha256)throw Error("Empreinte audio incorrecte");
   if(!Array.isArray(manifest.timeline)||!manifest.timeline.length)throw Error("Horodatages absents");
+  if(manifest.timeline.some(x=>!Number.isFinite(x.start_seconds)||!Number.isFinite(x.end_seconds)||x.start_seconds<0||x.end_seconds<x.start_seconds||!Number.isInteger(x.turn)||x.turn<1||x.turn>6))throw Error("Horodatages invalides");
   if(dynamicAudioUrl)URL.revokeObjectURL(dynamicAudioUrl);
   dynamicAudioUrl=URL.createObjectURL(new Blob([bytes],{type:"audio/mpeg"}));
   const player=document.createElement("audio");player.controls=true;player.preload="metadata";
