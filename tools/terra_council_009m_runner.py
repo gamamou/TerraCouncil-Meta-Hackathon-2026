@@ -42,12 +42,29 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument("--agenda",required=True)
     p.add_argument("--output",required=True)
+    p.add_argument("--manifest",required=True)
+    p.add_argument("--source",required=True)
     p.add_argument("--model",default="muse-wonder-1.0")
     p.add_argument("--execute",action="store_true")
     p.add_argument("--authorize-meta",action="store_true")
     a=p.parse_args()
     agenda=json.loads(Path(a.agenda).read_text(encoding="utf-8-sig"))
     steps=validate(agenda)
+    manifest=json.loads(Path(a.manifest).read_text(encoding="utf-8-sig"))
+    source=json.loads(Path(a.source).read_text(encoding="utf-8-sig"))
+    if manifest.get("schema")!="TERRA_COUNCIL_009F_EVIDENCE_V1" or manifest.get("decision_authorized") is not False:
+        raise ValueError("Exploratory 009F manifest required")
+    if source.get("schema")!="TERRA_COUNCIL_009I_V1" or source.get("status")!="SCIENTIFIC_REVIEW_REQUIRED":
+        raise ValueError("Completed 009I debate required")
+    claims=manifest.get("claims",[])
+    ids={c.get("evidence_id") for c in claims if c.get("admissibility")=="ADMISSIBLE_FOR_EXPLORATORY_DEBATE" and c.get("original_validation_status")=="SCREENED_NOT_FIELD_VALIDATED"}
+    if not claims or len(ids)!=len(claims) or ids!=set(agenda["evidence_ids"]):
+        raise ValueError("Exploratory evidence mismatch")
+    if manifest.get("question")!=agenda.get("question"):
+        raise ValueError("Question mismatch")
+    scientific_context=[{"evidence_id":c["evidence_id"],"finding":c["finding"],
+                         "limitations":c.get("limitations"),"method":c.get("method"),
+                         "admissibility":c["admissibility"]} for c in claims]
     print(json.dumps({"status":"READY","steps":len(steps),"meta_calls":0,"audio_calls":0}),flush=True)
     if not a.execute:return
     if not a.authorize_meta:raise SystemExit("--authorize-meta required")
@@ -66,7 +83,9 @@ def main():
         output.write_text(json.dumps(state,ensure_ascii=False,indent=2),encoding="utf-8")
         try:
             data={"question":agenda["question"],"agents":agenda["active_experts"],
-                  "evidence_ids":agenda["evidence_ids"],"step":step,"prior":turns}
+                  "evidence":scientific_context,"step":step,"prior":turns,
+                  "source_009I_relevant":[{"role":t["role"],"phase":t["phase"],"text":t["text"][:600]}
+                    for t in source["turns"] if t["role"]==step["role"]][-2:]}
             answer=meta_call(a.model,RULES,data)
             turns.append(check(answer,step,set(agenda["evidence_ids"])))
         except Exception as error:
