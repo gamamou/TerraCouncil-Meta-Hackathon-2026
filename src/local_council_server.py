@@ -687,7 +687,13 @@ class Handler(BaseHTTPRequestHandler):
                 voice_wonder=os.environ.get("TERRA_VOICE_WONDER","")
                 key=os.environ.get("ELEVENLABS_API_KEY","")
                 if not key: return self.send_json(409,{"error":"ELEVENLABS_API_KEY_missing"})
-                approved_plan=load_verified_approval(self.server.out_dir,trace,voice_spark,voice_wonder)
+                auto_mode=body.get("oral_mode")=="automatic_source_bound"
+                if auto_mode:
+                    from terra_voice_auto_001 import automatic_oral_plan
+                    automatic_oral_plan(trace,voice_spark,voice_wonder)
+                    approved_plan=None
+                else:
+                    approved_plan=load_verified_approval(self.server.out_dir,trace,voice_spark,voice_wonder)
                 if get_status(self.server.out_dir,run_id)["state"]!="NOT_REQUESTED":
                     return self.send_json(409,{"error":"already_attempted_no_automatic_retry"})
                 with self.server.job_lock:
