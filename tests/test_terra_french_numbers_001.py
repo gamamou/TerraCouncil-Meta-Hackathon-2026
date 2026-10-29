@@ -17,5 +17,5 @@ class FrenchSpeechTests(unittest.TestCase):
     spoken_pronunciation("Observation "+x)
  def test_unsupported_symbols_still_blocked(self):
   with self.assertRaises(ValueError):
-   spoken_pronunciation("Trace mining_alpha")
+   spoken_pronunciation("Trace mining_2026")
 if __name__=="__main__":unittest.main()
