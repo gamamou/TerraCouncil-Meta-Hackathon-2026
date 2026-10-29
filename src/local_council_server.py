@@ -652,7 +652,7 @@ class Handler(BaseHTTPRequestHandler):
             try: body=json.loads(self.rfile.read(count))
             except (ValueError,UnicodeDecodeError):
                 return self.send_json(400,{"error":"bad_json"})
-            if not isinstance(body,dict) or body.get("approve_cost_and_sharing") is not True:
+            if not isinstance(body,dict) or (body.get("approve_cost_and_sharing") is not True or body.get("approve_data_sharing") is not True):
                 return self.send_json(403,{"error":"separate_elevenlabs_cost_and_sharing_approval_required"})
             run_id=body.get("run_id")
             if not isinstance(run_id,str) or not re.fullmatch(r"HACK016-[A-Za-z0-9_-]{10,80}",run_id):
@@ -662,14 +662,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(404,{"error":"session_not_found"})
             try:
                 from dynamic_voice_workflow import get_status,synthesis
-                from dynamic_voice_plan import prepare_voice
+                from terra_voice_storage_002b import load_verified_approval
                 trace=json.loads(file.read_text(encoding="utf-8"))
                 if trace.get("run_id")!=run_id:raise ValueError("Session mismatch")
                 voice_spark=os.environ.get("TERRA_VOICE_SPARK","")
                 voice_wonder=os.environ.get("TERRA_VOICE_WONDER","")
                 key=os.environ.get("ELEVENLABS_API_KEY","")
                 if not key: return self.send_json(409,{"error":"ELEVENLABS_API_KEY_missing"})
-                prepare_voice(trace,voice_spark,voice_wonder)
+                approved_plan=load_verified_approval(self.server.out_dir,trace,voice_spark,voice_wonder)
                 if get_status(self.server.out_dir,run_id)["state"]!="NOT_REQUESTED":
                     return self.send_json(409,{"error":"already_attempted_no_automatic_retry"})
                 with self.server.job_lock:
@@ -678,7 +678,7 @@ class Handler(BaseHTTPRequestHandler):
                     self.server.dynamic_voice_running=True
                 def voice_worker():
                     try:
-                        synthesis(self.server.out_dir,trace,voice_spark,voice_wonder,key,consent=True)
+                        synthesis(self.server.out_dir,trace,voice_spark,voice_wonder,key,consent=True,approved_plan=approved_plan)
                     finally:
                         with self.server.job_lock:self.server.dynamic_voice_running=False
                 threading.Thread(target=voice_worker,daemon=True).start()
