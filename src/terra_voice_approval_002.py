@@ -12,8 +12,8 @@ from terra_voice_editorial_001 import editorial_worksheet
 
 SCHEMA = "TERRA_VOICE_002_APPROVAL"
 MAX_TURN_CHARS = 1800
-BLOCKED = re.compile(r"[<>{}#@\\\\|*_]|https?://|www\\.", re.I)
-ENGLISH = re.compile(r"\\b(the|should|with|without|evidence|missing|investigate|cannot|further|recommend|survey)\\b", re.I)
+BLOCKED = re.compile(r"[<>{}#@\\|*_]|https?://|www\.", re.I)
+ENGLISH = re.compile(r"\b(the|should|with|without|evidence|missing|investigate|cannot|further|recommend|survey)\b", re.I)
 
 def digest(value):
     raw = json.dumps(value, ensure_ascii=False, sort_keys=True,
