@@ -1,0 +1,11 @@
+{
+  "schema": "TERRA_COUNCIL_010D_GPT_REFERENCE_V1",
+  "origin": "ChatGPT GPT-6 in-conversation manual draft, not an OpenAI API call",
+  "role": "esg",
+  "scientific_source_text": "Merci, Président. Je rejoins mines et environnement : d'abord remplacer l'AOI rectangulaire de dépistage par un périmètre d'étude explicite et justifié. Côté ESG, je priorise les garanties procédurales, sans aucun constat de conformité : protocoles écrits avant campagne, couverture des saisons contrastées, localisations et méthodes traçables, données brutes conservées et accessibles à une revue indépendante, et critères de décision définis avant les résultats. Les repères restent exploratoires : somme WorldPop 2026 de 354811.474, ni recensement ni personnes affectées, et couvert arboré WorldCover 2021 de 50.613 %, sans inventaire de biodiversité. Sans ces garanties, aucune décision de développement ne serait étayée.",
+  "spoken_text": "Merci, Président. Je rejoins les collègues des mines et de l'environnement : notre première exigence est de définir un périmètre d'étude clair et justifié.\n\nPour l'ESG, ma priorité est la gouvernance des preuves. Avant les campagnes, il faut fixer les protocoles et les critères de décision, puis mener les observations sur des saisons contrastées. Nous devons conserver les données brutes, documenter les méthodes et les localisations, et permettre une revue indépendante.\n\nUne précaution est essentielle : nos données restent exploratoires. L'estimation WorldPop de 2026 n'est ni un recensement ni un nombre de personnes affectées. Et la cartographie du couvert arboré de 2021 ne remplace pas un inventaire de biodiversité.\n\nNous ne pouvons donc conclure à aucune conformité. Sans ces garanties, une décision de développement ne serait pas étayée.",
+  "status": "HUMAN_SCIENTIFIC_REVIEW_REQUIRED",
+  "scientific_approval": false,
+  "audio_authorized": false,
+  "notes": "Not a blind or replicated statistical model benchmark; compare same source and review all essential propositions."
+}
