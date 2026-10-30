@@ -86,7 +86,7 @@ def run(data,question,api_key,output,caller=meta_call):
    if not isinstance(response,str) or not response.strip():
     raise ValueError("Empty Meta answer")
    cited_uids=set(re.findall(r"GUIDSHAPE:[A-Za-z0-9-]+",response))
-   cited_sol=set(re.findall(r"SOL-CAT-\\d{5}",response))
+   cited_sol=set(re.findall(r"SOL-CAT-\d{5}",response))
    record["calls"].append({"stage":label,"model":model,"response":response,
       "cited_site_ids":sorted(cited_uids),"invalid_site_ids":sorted(cited_uids-valid_uids),
       "cited_solution_ids":sorted(cited_sol),"invalid_solution_ids":sorted(cited_sol-valid_solutions)})
