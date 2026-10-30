@@ -8,7 +8,7 @@ from pathlib import Path
 from terra_council_010d_pipeline import (read,EXTRACT,AUDIT,call,
     validate_claims,verify_audit)
 
-ROLES={"chair":"president","president":"president","mining":"mining",
+ROLES={"chair":"president","scientific_chair":"president","president":"president","mining":"mining",
        "environment":"environment","water_climate":"environment"}
 ROLE_PROMPTS={
  "president":"""Tu es le President scientifique, facilitateur impartial.
