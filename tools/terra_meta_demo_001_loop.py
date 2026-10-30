@@ -35,11 +35,11 @@ def parse(raw):
  value=raw.strip()
  if not value:raise InvalidModelAction(raw,"Meta returned an empty action")
  if value.startswith("```"):
-  value=re.sub(r"^\x60{3}(?:json)?\\s*|\\s*\x60{3}$","",value,flags=re.I).strip()
+  value=re.sub(r"^\x60{3}(?:json)?\s*|\s*\x60{3}$","",value,flags=re.I).strip()
  try:
   parsed=json.loads(value)
  except json.JSONDecodeError:
-  match=re.search(r"\\{",value)
+  match=re.search(r"\{",value)
   if not match:raise InvalidModelAction(raw,"No JSON object found")
   try:parsed,_=json.JSONDecoder().raw_decode(value[match.start():])
   except json.JSONDecodeError as exc:raise InvalidModelAction(raw,"Malformed JSON: "+str(exc)) from None
