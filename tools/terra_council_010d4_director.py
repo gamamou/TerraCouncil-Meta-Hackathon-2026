@@ -6,8 +6,8 @@ No automatic scientific approval, no ElevenLabs or retries.
 """
 import argparse,hashlib,json,os,re
 from pathlib import Path
-from terra_council_010d_pipeline import read,validate_claims,call
-from terra_council_010d3_dialogue import packet_source,path,previous_context
+from terra_council_010d_pipeline import read,validate_claims,call,source_info
+from terra_council_010d3_dialogue import path,previous_context
 
 STOPWORDS={"nous","vous","avec","pour","dans","plus","toute","avant","apres","cette",
 "comme","sans","sont","doit","etre","dont","leur","les","des","une","aux",
@@ -29,8 +29,7 @@ def topic_hits(s):
  return sorted([t for t,words in TOPICS.items() if any(norm(w) in x for w in words)])
 def words(s):return set(re.findall(r"[a-zà-ÿ]{4,}",norm(s)))-STOPWORDS
 def plan_context(workdir,packets,claims_path):
- role,src,sha=packet_source(packets,4)
- if role!="esg":raise ValueError("Turn 4 is not ESG")
+ src,sha=source_info(packets)
  prior=previous_context(workdir,4)
  audits=[]
  for t in prior:
@@ -113,7 +112,7 @@ def main():
  if not a.authorize_meta:raise SystemExit("Meta authorization required")
  if not (os.getenv("META_API_KEY") or os.getenv("META_AI_API_KEY")):raise SystemExit("Meta key missing")
  if out.exists():raise SystemExit("Candidate exists; no overwrite")
- _,src,sha=packet_source(packets,4)
+ src,sha=source_info(packets)
  claims=validate_claims(read(a.claims),src)
  with out.open("x",encoding="utf-8") as f:json.dump({"status":"CALL_IN_FLIGHT"},f)
  try:
