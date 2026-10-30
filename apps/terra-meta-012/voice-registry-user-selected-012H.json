@@ -1,0 +1,28 @@
+{
+  "schema": "TERRA_META_012H_USER_SELECTED_VOICES",
+  "status": "ROLE_MAPPING_PENDING",
+  "voices": [
+    {
+      "name": "Joel Labo",
+      "voice_id": "TrvjhxOWz4IB9qYry8Lb"
+    },
+    {
+      "name": "Bakumba",
+      "voice_id": "cEjGxRhK5rId1bacJPJr"
+    },
+    {
+      "name": "Alima",
+      "voice_id": "4SFJvuIUvxaPLgk8FoK3"
+    },
+    {
+      "name": "Loïc",
+      "voice_id": "ojsdYNTmnPdf7yAl8rI5"
+    },
+    {
+      "name": "Toni",
+      "voice_id": "M4ZqLOXSFqxSkn9RDxFO"
+    }
+  ],
+  "scientific_approval": false,
+  "tts_authorized": false
+}
