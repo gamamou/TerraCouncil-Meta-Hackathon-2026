@@ -6,7 +6,7 @@ import argparse,datetime,hashlib,json,os,re
 from pathlib import Path
 from council import meta_call,SPARK,WONDER
 from terra_demo_001_faith_gateway import load
-from terra_demo_003_preflight import preflight
+from tools.terra_demo_003_preflight import preflight
 
 POLICY="""You are part of TerraCouncil, a decision-support scientific council.
 Use only supplied FAITH source facts. Do not fabricate site diagnostics, distances,
