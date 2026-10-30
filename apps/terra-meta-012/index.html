@@ -119,6 +119,7 @@ async function autoLoadCouncil(){
  }
 }
 autoLoadCouncil();
+(async()=>{try{const r=await fetch('./data/audio-draft.json',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.status!=='DRAFT_NOT_SCIENTIFICALLY_APPROVED'||!Array.isArray(d.items))return;for(const i of d.items){if(Number.isInteger(i.turn)&&i.turn>=1&&i.turn<=19&&/^audio\/t[0-9]{2}-draft\.mp3$/.test(i.file))state.audio.set(i.turn,'./data/'+i.file)}renderTheater();}catch(e){}})();
 (async()=>{try{const r=await fetch('./data/audio-archive.json',{cache:'no-store'});if(!r.ok)return;const m=await r.json();if(m?.status!=='LEGACY_DEMO_NOT_FINAL'||!/^audio\/[a-z0-9._-]+\.mp3$/.test(m.file))return;const b=$('archiveAudioBox');b.hidden=false;$('archiveAudio').src='./data/'+m.file}catch(e){}})();
 
 </script></body></html>
