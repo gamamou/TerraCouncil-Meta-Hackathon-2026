@@ -13,7 +13,9 @@ CHAIR="""You are the TerraCouncil scientific chair. Choose the NEXT action as on
 Use only supplied evidence. Choose expert consultation only if it adds a distinct scientific
 perspective necessary for the user question; never consult to create artificial debate.
 Never claim population exposure, causation, temporal change or official approval from a
-single exploratory raster. Preserve uncertainty. Finish when answer is sufficient. Before finishing, assess if the user question needs\na distinct domain perspective. If not, state the reason in consultation_rationale.\nDo not claim a consultation occurred unless it is in the tool history."""
+single exploratory raster. Preserve uncertainty. Finish when answer is sufficient. Before finishing, assess if the user question needs
+a distinct domain perspective. If not, state the reason in consultation_rationale.
+Do not claim a consultation occurred unless it is in the tool history."""
 EXPERT="""You are one scientific specialist in an adaptive council.
 Return STRICT JSON with keys "observations", "interpretation", "limits", "recommendations".
 observations is a list of objects {"evidence_id":"KNOWN_ID","finding":"EXACT SOURCE FINDING"}.
@@ -56,10 +58,12 @@ def run(question,records,key,caller=meta_call,max_steps=8,max_consults=2):
     if not isinstance(subject,str) or not subject.strip():
      result={"ok":False,"reason":"EMPTY_EXPERT_QUESTION"}
     else:
-     expert_payload={"domain":domain,"question":subject,"evidence":[evidence[e] for e in ids],\n                     "chair_reason":action.get("reason","not supplied")}
+     expert_payload={"domain":domain,"question":subject,"evidence":[evidence[e] for e in ids],
+                     "chair_reason":action.get("reason","not supplied")}
      response=decode(caller(WONDER,EXPERT,expert_payload,key))
      if check_expert(response,evidence,ids):
-      entry={"domain":domain,"question":subject,"reason":action.get("reason","not supplied"),\n             "evidence_ids":ids,"response":response,
+      entry={"domain":domain,"question":subject,"reason":action.get("reason","not supplied"),
+             "evidence_ids":ids,"response":response,
              "status":"STRUCTURALLY_CHECKED_NOT_SCIENTIFICALLY_VALIDATED"}
       consultations.append(entry)
       result={"ok":True,"consultation":len(consultations)}
@@ -75,7 +79,11 @@ def run(question,records,key,caller=meta_call,max_steps=8,max_consults=2):
   else:result=execute(state,action)
   trace.append({"step":n+1,"model":SPARK,"action":action,"verification":result})
   if state.decision or (name=="submit_decision" and not result.get("ok")):break
- rationale=next((x["action"].get("consultation_rationale") for x in reversed(trace)\n                 if x["action"].get("tool")=="submit_decision"),None)\n return {"schema":"TERRA_META_013C_V1",
+ rationale=next((x["action"].get("consultation_rationale") for x in reversed(trace)
+                 if x["action"].get("tool")=="submit_decision"),None)
+ return {"schema":"TERRA_META_013C_V1",
          "status":"PROVISIONAL_HUMAN_REVIEW" if state.decision else "INCOMPLETE",
          "steps":trace,"consultations":consultations,"decision":state.decision,
-         "consultation_rationale":rationale,\n         "consultation_explained":bool(consultations) or bool(rationale),\n         "scientific_validation":"STRUCTURAL_ONLY"}
+         "consultation_rationale":rationale,
+         "consultation_explained":bool(consultations) or bool(rationale),
+         "scientific_validation":"STRUCTURAL_ONLY"}
