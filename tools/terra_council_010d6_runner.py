@@ -47,7 +47,20 @@ def safe_previous(root,plan,turn):
   included.append({"turn":t["turn"],"role":t["role"],"spoken_text":t["spoken_text"]})
  for i in range(5,turn):
   o=output(root,i,"oral");a=output(root,i,"audit")
-  if not o.exists() or not a.exists():raise ValueError(f"Missing earlier 010D6 turn {i}")
+  if i==11 and not o.exists() and not a.exists():
+   o=Path(root)/"Boke-010D7B-T11-oral.json"
+   a=Path(root)/"Boke-010D7B-T11-audit.json"
+  if not o.exists() or not a.exists():raise ValueError(f"Missing earlier 010D6/010D7B turn {i}")
+  if i==11 and o.name.startswith("Boke-010D7B"):
+   recovered=Path(root)/"Boke-010D7-T11-extract-recovered.json"
+   if not recovered.exists():raise ValueError("Missing T11 recovery provenance")
+   rec=read(recovered)
+   expected=digest(json.dumps(rec,ensure_ascii=False,sort_keys=True))
+   if rec.get("status")!="RECOVERED_CLAIMS_HUMAN_REVIEW_REQUIRED":
+    raise ValueError("Invalid T11 recovery status")
+   for record in (read(o),read(a)):
+    if record.get("recovery_sha256")!=expected or record.get("source_sha256")!=rec.get("source_sha256"):
+     raise ValueError("T11 recovery chain mismatch")
   oral,audit=read(o),read(a)
   if audit.get("oral_sha256")!=digest(oral.get("spoken_text","")):raise ValueError("Prior oral hash mismatch")
   if audit.get("source_sha256")!=oral.get("source_sha256"):raise ValueError("Prior source mismatch")
