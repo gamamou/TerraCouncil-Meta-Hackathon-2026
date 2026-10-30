@@ -15,7 +15,7 @@ class Tests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as root:
    plan={"turns":[],"prior_audited_context":[]}
    with self.assertRaises(ValueError):safe_previous(root,plan,6)
- def test_prior_scientific_flags_stop(self):
+ def test_prior_scientific_flags_quarantined(self):
   with tempfile.TemporaryDirectory() as root:
    plan={"turns":[],"prior_audited_context":[]}
    speech="Les donnees sont exploratoires."
@@ -25,7 +25,9 @@ class Tests(unittest.TestCase):
       "assessments":[{"claim_id":"C01","verdict":"PRESERVED"}]}
    output(root,5,"oral").write_text(json.dumps(o),encoding="utf-8")
    output(root,5,"audit").write_text(json.dumps(a),encoding="utf-8")
-   with self.assertRaises(ValueError):safe_previous(root,plan,6)
+   included,excluded=safe_previous(root,plan,6)
+   self.assertEqual(included,[])
+   self.assertEqual(excluded,[5])
  def test_no_forged_hash(self):
   with tempfile.TemporaryDirectory() as root:
    plan={"turns":[],"prior_audited_context":[]}
