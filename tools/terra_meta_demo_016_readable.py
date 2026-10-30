@@ -28,8 +28,7 @@ small{color:#64748b}@media print{body{background:white}main{margin:0;padding:0}s
 <section><h2>Limites des preuves</h2><ul>"""+limitations+"""</ul></section>
 <section><h2>Investigations proposées (non autorisées)</h2><table><thead>
 <tr><th>ID</th><th>Action</th><th>Responsable proposé</th><th>État</th></tr></thead><tbody>"""+rows+"""</tbody></table></section>
-<section><h2>Passport et audio</h2><p>Passport : """+esc(brief.get("passport",{}).get("status"))+
-""" · Audio : """+esc(brief.get("audio",{}).get("status"))+"""</p></section>
+<section><h2>Passport et audio</h2><p>Passport : """+esc(brief.get("passport",{}).get("status"))+""" · Audio : """+esc(brief.get("audio",{}).get("status"))+"""</p></section>
 <small>Les affirmations des modèles n'ont pas été vérifiées individuellement. Aucune décision n'est approuvée automatiquement.</small>
 </main></body></html>"""
 
