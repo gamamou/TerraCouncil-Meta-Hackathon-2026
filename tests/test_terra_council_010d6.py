@@ -19,8 +19,10 @@ class Tests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as root:
    plan={"turns":[],"prior_audited_context":[]}
    speech="Les donnees sont exploratoires."
-   o={"role":"communities","spoken_text":speech,"source_sha256":"correct"}
-   a={"source_sha256":"correct","oral_sha256":hashlib.sha256(speech.encode()).hexdigest(),
+   o={"role":"communities","spoken_text":speech,"source_sha256":"correct",
+      "status":"ORAL_HUMAN_REVIEW_REQUIRED"}
+   a={"source_sha256":"correct","status":"SEMANTIC_HUMAN_REVIEW_REQUIRED",
+      "oral_sha256":hashlib.sha256(speech.encode()).hexdigest(),
       "unsupported_additions":["invented exposure"],"critical_omissions":[],
       "assessments":[{"claim_id":"C01","verdict":"PRESERVED"}]}
    output(root,5,"oral").write_text(json.dumps(o),encoding="utf-8")
