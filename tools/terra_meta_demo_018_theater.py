@@ -35,7 +35,7 @@ def render(theater):
           esc(item["text"])+'</pre></details></section>')
     actions="".join('<li>'+esc(a.get("action"))+' <small>('+esc(a.get("status"))+')</small></li>'
                     for a in theater["investigations"])
-    return """<!doctype html><html lang="fr"><head><meta charset="utf-8">
+    return ("""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TerraCouncil — Council Theater</title><style>
 body{margin:0;background:#edf2f6;color:#1b3444;font:16px/1.55 system-ui,sans-serif}
@@ -59,7 +59,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}
 <p>Ces actions ne sont ni approuvées ni assignées.</p></section>
 <section><h2>TerraCouncil Passport</h2><p>Session : """+esc(theater["session_id"])+
 """</p><p>État : """+esc(theater["passport_status"])+"""</p></section>
-</main></body></html>"""
+</main></body></html>""")
 
 def main():
     p=argparse.ArgumentParser();p.add_argument("--session",required=True)
