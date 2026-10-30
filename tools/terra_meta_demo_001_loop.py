@@ -16,8 +16,8 @@ inventory of data. You may issue JSON actions, one per turn:
 Supported entity names: PilotCandidate, MiningPermit, PermitSpatialContext,
 SiteRehabilitationRecommendation, RehabilitationSolution.
 Search data first. The user does not know the ranking. Do not invent values or joins.
-A catalog solution is NOT a site-approved intervention. Rank ties must be explained.
-Consult Wonder on a meaningful challenge when cross-disciplinary criticism is needed.
+A catalog solution is NOT a site-approved intervention. Rank ties must be explained. If many sites tie, clearly state that five selected are provisional and do not falsely claim objectively optimal five. No site-specific restoration diagnosis has been verified.
+For this DEMO-004, you MUST consult Wonder after reviewing actual candidate and catalog data and BEFORE final_answer. Summarize and respond to Wonder in review_of_critique.
 Only cite IDs you have actually retrieved. Missing evidence = conditional, not fact."""
 CRITIC="""You are Meta Muse Wonder acting as independent mining restoration critic.
 Inspect the chair's current candidate reasoning and available FAITH evidence.
@@ -25,6 +25,10 @@ Return strict JSON with keys "critique", "missing_evidence", "revision_suggestio
 all arrays of strings. Challenge causal leaps, tie-breaking, unsupported site joins,
 and catalog solutions treated as proven interventions. No fabricated site data."""
 def parse(raw):
+ if isinstance(raw,str):
+  raw=raw.strip()
+  if raw.startswith("```"):
+   raw=raw.split("\n",1)[1].rsplit("```",1)[0].strip()
  obj=json.loads(raw) if isinstance(raw,str) else raw
  if not isinstance(obj,dict):raise ValueError("Expected JSON object")
  return obj
@@ -54,6 +58,10 @@ def run(question,gateway,key,caller=meta_call,max_steps=13):
     result={"status":"SCIENTIFIC_CRITIQUE_RECEIVED","critique":critique}
   elif tool=="final_answer":
    sites=action.get("sites",[])
+   if wonder is None:
+    result={"status":"REJECTED_DEMO004_REQUIRES_WONDER_CRITIQUE"}
+    history.append({"step":i+1,"actor":SPARK,"action":action,"result":result})
+    continue
    if not isinstance(sites,list) or len(sites)!=5:
     result={"status":"REJECTED_EXPECT_FIVE_SITES"}
    elif any(not isinstance(s,dict) or s.get("shape_uid") not in observed_ids for s in sites):
