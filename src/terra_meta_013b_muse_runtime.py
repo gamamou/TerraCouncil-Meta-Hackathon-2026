@@ -29,5 +29,7 @@ def run(question,records,key,caller=meta_call,max_steps=8):
   else:result=execute(state,action)
   trace.append({"step":i+1,"model":SPARK,"action":action,"verification":result})
   if state.decision:break
+  if action.get("tool")=="submit_decision" and not result.get("ok"):
+   break
  return {"status":"PROVISIONAL_HUMAN_REVIEW" if state.decision else "INCOMPLETE",
          "steps":trace,"decision":state.decision}
