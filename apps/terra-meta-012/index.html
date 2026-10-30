@@ -91,4 +91,17 @@ $('theaterAudio').addEventListener('ended',()=>{if(!state.playingAll||!state.cou
 
 let player=null;function playTurn(n){const url=state.audio.get(n);if(!url){alert('Aucun MP3 validé chargé pour T'+n);return}if(player){player.pause();player.remove()}player=document.createElement('audio');player.controls=true;player.src=url;player.autoplay=true;document.querySelector('#council').prepend(player);player.play().catch(()=>{})}
 $('printBtn').addEventListener('click',()=>{show('brief');window.print()});
+async function autoLoadCouncil(){
+ try{
+  const response=await fetch('./data/council.json',{cache:'no-store'});
+  if(!response.ok)throw Error('Aucun manifeste embarqué');
+  const council=verifyManifest(await response.json());
+  state.council=council;renderCouncil();
+  $('status').textContent='19 interventions du pilote Boké chargées automatiquement. Les alertes scientifiques restent visibles.';
+ }catch(e){
+  $('status').textContent='Chargement automatique indisponible : '+e.message+'. Utilisez le bouton de chargement ou installez le manifeste via le script.';
+ }
+}
+autoLoadCouncil();
+
 </script></body></html>
