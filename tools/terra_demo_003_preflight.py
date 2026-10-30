@@ -2,7 +2,7 @@
 import argparse,json
 from pathlib import Path
 from terra_demo_001_faith_gateway import load
-from terra_demo_002_join_audit import audit
+from tools.terra_demo_002_join_audit import audit
 
 def preflight(data):
  report=audit(data)
