@@ -51,9 +51,15 @@ def safe_previous(root,plan,turn):
   oral,audit=read(o),read(a)
   if audit.get("oral_sha256")!=digest(oral.get("spoken_text","")):raise ValueError("Prior oral hash mismatch")
   if audit.get("source_sha256")!=oral.get("source_sha256"):raise ValueError("Prior source mismatch")
-  flags=audit.get("unsupported_additions",[])+audit.get("critical_omissions",[])
+  if oral.get("status")!="ORAL_HUMAN_REVIEW_REQUIRED" or audit.get("status")!="SEMANTIC_HUMAN_REVIEW_REQUIRED":
+   raise ValueError(f"Prior turn {i} has invalid review status")
+  if not isinstance(audit.get("assessments"),list) or not audit["assessments"]:
+   raise ValueError(f"Missing semantic assessments at T{i}")
+  flags=audit.get("unsupported_additions",[])+audit.get("critical_omissions",[])+audit.get("numerical_mutations",[])
   bad=[x for x in audit["assessments"] if x["verdict"] in ("PARTIAL","OMITTED","CONTRADICTED")]
-  if flags or bad:raise ValueError(f"Unresolved scientific flags at T{i}")
+  if flags or bad:
+   excluded.append(i)
+   continue
   included.append({"turn":i,"role":oral["role"],"spoken_text":oral["spoken_text"]})
  return included,excluded
 def main():
