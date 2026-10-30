@@ -2,7 +2,7 @@
 Only model reasoning makes selections; Python validates cited IDs and logs actions.
 Requires a locally exported, reviewed JSON snapshot (never uploads source to GitHub).
 """
-import argparse,json,os
+import argparse,json,os,re
 from pathlib import Path
 from council import meta_call,SPARK,WONDER
 from terra_demo_001_faith_gateway import Gateway,load,invoke
@@ -24,14 +24,28 @@ Inspect the chair's current candidate reasoning and available FAITH evidence.
 Return strict JSON with keys "critique", "missing_evidence", "revision_suggestions":
 all arrays of strings. Challenge causal leaps, tie-breaking, unsupported site joins,
 and catalog solutions treated as proven interventions. No fabricated site data."""
+class InvalidModelAction(ValueError):
+ def __init__(self,raw,reason):
+  self.preview=(raw[:1200] if isinstance(raw,str) else repr(raw)[:1200])
+  super().__init__(reason)
+
 def parse(raw):
- if isinstance(raw,str):
-  raw=raw.strip()
-  if raw.startswith("```"):
-   raw=raw.split("\n",1)[1].rsplit("```",1)[0].strip()
- obj=json.loads(raw) if isinstance(raw,str) else raw
- if not isinstance(obj,dict):raise ValueError("Expected JSON object")
- return obj
+ if isinstance(raw,dict):return raw
+ if not isinstance(raw,str):raise InvalidModelAction(raw,"Model returned nontext action")
+ value=raw.strip()
+ if not value:raise InvalidModelAction(raw,"Meta returned an empty action")
+ if value.startswith("```"):
+  value=re.sub(r"^\x60{3}(?:json)?\\s*|\\s*\x60{3}$","",value,flags=re.I).strip()
+ try:
+  parsed=json.loads(value)
+ except json.JSONDecodeError:
+  match=re.search(r"\\{",value)
+  if not match:raise InvalidModelAction(raw,"No JSON object found")
+  try:parsed,_=json.JSONDecoder().raw_decode(value[match.start():])
+  except json.JSONDecodeError as exc:raise InvalidModelAction(raw,"Malformed JSON: "+str(exc)) from None
+ if not isinstance(parsed,dict):raise InvalidModelAction(raw,"Expected JSON action object")
+ return parsed
+
 def run(question,gateway,key,caller=meta_call,max_steps=13):
  history=[];observed_ids=set();sol_ids=set();wonder=None;out=None
  for i in range(max_steps):
@@ -101,7 +115,9 @@ def main():
   print(json.dumps({"status":result["status"],"spark_steps":len(result["history"]),
    "wonder_called":bool(result["wonder_critique"]),"output":str(target)},ensure_ascii=False))
  except Exception as error:
-  target.write_text(json.dumps({"status":"INTERRUPTED_DO_NOT_AUTORETRY",
-   "error_type":type(error).__name__},indent=2),encoding="utf8")
+  diagnostic={"status":"INTERRUPTED_DO_NOT_AUTORETRY",
+   "error_type":type(error).__name__,"reason":str(error)[:400]}
+  if isinstance(error,InvalidModelAction):diagnostic["model_response_excerpt"]=error.preview
+  target.write_text(json.dumps(diagnostic,ensure_ascii=False,indent=2),encoding="utf8")
   raise
 if __name__=="__main__":main()
