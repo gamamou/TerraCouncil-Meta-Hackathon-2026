@@ -7,7 +7,7 @@ class Tests(unittest.TestCase):
  def setUp(self):
   self.src="Aucune autorisation de developpement ne peut etre conclue."
   self.p={"schema":"TERRA_COUNCIL_009O_ORAL_PACKETS_V1","turns":[
-   {"turn":i,"speaker":("chair" if i==1 else "mining" if i==2
+   {"turn":i,"speaker":("scientific_chair" if i==1 else "mining" if i==2
     else "environment" if i==3 else "esg"),"scientific_source_text":self.src}
    for i in range(1,20)]}
   self.claims=[{"claim_id":"C01","importance":"MUST_KEEP"}]
