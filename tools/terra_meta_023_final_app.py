@@ -94,13 +94,13 @@ def frontpage(language="fr"):
     english_audio=current_audio("en")
     players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?lang="+language+"&i="+str(i)+"'></audio></div>"
           for i,t in enumerate(tracks))
-    players="<p><strong>Audio :</strong> <a href='/?lang=fr#audio'>Français</a> · <a href='/?lang=en#audio'>English</a> "+(" · English available" if english_audio else " · English audio not generated yet")+"</p>"+players
-    if players:players="<p class='muted'>Délibération en cours de lecture : "+esc(topic_label(question))+". Interventions vocales de cette session.</p>"+players
     if not players:
         players="<p class='muted'>"+("English audio is not generated for this session." if language=="en" else "Aucun audio disponible pour cette session.")+"</p>"
         if language=="en" and not state["busy"]:
-            players+="<form method='post' action='/generate-english-audio' onsubmit=\"return confirm('English voice generation uses paid AI services. Continue?')\"><button type='submit'>Generate English debate</button></form>"
-    elif audio:
+            players+="<form method='post' action='/generate-english-audio' onsubmit=\\\"return confirm('English voice generation uses paid AI services. Continue?')\\\"><button type='submit'>Generate English debate</button></form>"
+    else:
+        players="<p class='muted'>"+("Scientific debate in English" if language=="en" else "Délibération en français")+" · "+esc(topic_label(question))+"</p>"+players
+    if audio:
         source=root_for(state["session"])/"oral"/"internal_oral_script.json"
         newer=sorted(root_for(state["session"]).glob("oral_revised_*/internal_oral_script.json"),reverse=True)
         if audio.name.startswith(("audio_recovered_","audio_revised_")) and newer:source=newer[0]
