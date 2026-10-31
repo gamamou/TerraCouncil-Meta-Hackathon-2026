@@ -8,13 +8,13 @@ from tools.terra_audio_002_live import parse_dialogue,chunks,POLICY
 
 URL="https://api.elevenlabs.io/v1/text-to-dialogue"
 
-def prepare(source, voices, model):
+def prepare(source, voices, model, language="fr"):
     source=Path(source)
     doc=json.loads((source/"internal_oral_script.json").read_text(encoding="utf-8-sig"))
     turns=parse_dialogue(doc["raw_meta_output"])
     grouped=chunks(turns)
     return turns,[{"inputs":[{"text":t["text"],"voice_id":voices[t["speaker"]]} for t in g],
-        "model_id":model,"language_code":"fr"} for g in grouped]
+        "model_id":model,"language_code":language} for g in grouped]
 
 def convert(payload,key,transport=None):
     body=json.dumps(payload,ensure_ascii=False).encode("utf-8")
@@ -33,9 +33,9 @@ def convert(payload,key,transport=None):
         raise RuntimeError(f"ElevenLabs HTTP {e.code}: {body[:1300]}") from None
     except error.URLError as e:raise RuntimeError("ElevenLabs network error") from None
 
-def resume(source,output,key,voices,model="eleven_v4",execute=False,tts=convert):
-    turns,payloads=prepare(source,voices,model)
-    info={"status":"PREVIEW_NO_API_CALLS","source":str(source),"model":model,
+def resume(source,output,key,voices,model="eleven_v4",execute=False,tts=convert,language="fr"):
+    turns,payloads=prepare(source,voices,model,language)
+    info={"status":"PREVIEW_NO_API_CALLS","source":str(source),"model":model,"language":language,
         "turn_count":len(turns),"chunks":len(payloads),"characters":sum(len(x["text"]) for x in turns),
         "audio_policy":POLICY,"audio_segments":[]}
     if not execute:return info
