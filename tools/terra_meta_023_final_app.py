@@ -76,7 +76,7 @@ def session_question(folder):
         except (ValueError,OSError):pass
     return ""
 
-def frontpage():
+def frontpage(language="fr"):
     state=core.STATE.copy()
     root=Path(state["session"])
     brief=root/"05_scientific_brief.json"
@@ -86,13 +86,13 @@ def frontpage():
         b=core.read_json(brief);question=b.get("question") or ""
         level=(b.get("executive_brief") or {}).get("scientific_readiness","—")
         investigations=str(len((b.get("follow_up") or {}).get("proposed_investigations",[])))
-    audio=current_audio()
+    audio=current_audio(language)
     tracks=[]
     if audio:
         try:tracks=core.read_json(audio/"audio_manifest.json").get("audio_segments",[])
         except (ValueError,OSError):pass
     english_audio=current_audio("en")
-    players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?i="+str(i)+"'></audio></div>"
+    players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?lang="+language+"&i="+str(i)+"'></audio></div>"
           for i,t in enumerate(tracks))
     players="<p><strong>Audio :</strong> <a href='/?lang=fr#audio'>Français</a> · <a href='/?lang=en#audio'>English</a> "+(" · English available" if english_audio else " · English audio not generated yet")+"</p>"+players
     if players:players="<p class='muted'>Délibération en cours de lecture : "+esc(topic_label(question))+". Interventions vocales de cette session.</p>"+players
@@ -195,13 +195,13 @@ function setLanguage(lang){
 }
 const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'fr';
 setLanguage(lang);
-document.getElementById('ui-language').addEventListener('change',e=>setLanguage(e.target.value));
+document.getElementById('ui-language').addEventListener('change',e=>{location.href='/?lang='+e.target.value+location.hash;});
 </script></body></html>"""
 
 class Handler(core.Handler):
     def do_GET(self):
         route=urlparse(self.path)
-        if route.path=="/":return self.send(200,frontpage().encode("utf8"),"text/html; charset=utf-8")
+        if route.path=="/":return self.send(200,frontpage(parse_qs(route.query).get("lang",["fr"])[0]).encode("utf8"),"text/html; charset=utf-8")
         if route.path in ("/brief.pdf","/passport.pdf"):
             from tools.terra_meta_025_pdf import generate
             filename="05_scientific_brief.json" if route.path=="/brief.pdf" else "04_passport_preview.json"
