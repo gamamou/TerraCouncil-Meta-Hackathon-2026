@@ -152,6 +152,9 @@ class Handler(BaseHTTPRequestHandler):
             valid={x.parent.name:x for x in sessions(ARGS.storage)}
             if candidate in valid:
                 session=valid[candidate];audio=session.parent/"audio_generated"
+                if not (audio/"council_audio_01.mp3").is_file():
+                    alternatives=sorted(session.parent.glob("audio_retry_*"),reverse=True)
+                    audio=next((x for x in alternatives if (x/"council_audio_01.mp3").is_file()),audio)
                 update(session=str(session),audio=str(audio) if (audio/"council_audio_01.mp3").exists() else None,
                     phase="REPLAY",message="Session retrouvée sans appels API")
             self.send_response(303);self.send_header("Location","/");self.end_headers();return
