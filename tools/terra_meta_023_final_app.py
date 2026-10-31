@@ -86,6 +86,13 @@ def frontpage(language="fr"):
         b=core.read_json(brief);question=b.get("question") or ""
         level=(b.get("executive_brief") or {}).get("scientific_readiness","—")
         investigations=str(len((b.get("follow_up") or {}).get("proposed_investigations",[])))
+    original_question=question
+    if language=="en":
+        from tools.terra_meta_026_translation import cache_key
+        cache=root_for(state["session"])/"translations"/("en_brief_"+cache_key("brief",core.read_json(brief))+".json") if brief.is_file() else None
+        if cache and cache.exists():
+            try:question=core.read_json(cache).get("question",question)
+            except (ValueError,OSError):pass
     audio=current_audio(language)
     tracks=[]
     if audio:
@@ -151,7 +158,10 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 <p><button """+("disabled" if busy else "")+""">Lancer le Conseil</button></p></form>
 <div class="panel" style="padding:14px;margin:12px 0 0"><strong>Question sélectionnée</strong><p>"""+esc(question or "Aucune question traitée")+"""</p></div>
 <div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div><progress id="progress" value='"""+str(progress)+"""' max="100" style="width:100%;margin-top:9px"></progress><p class="muted">Progression indicative par étape (et non durée restante).</p></section>
-<section class="panel" id="deliverables"><h2>Livrables de la session</h2><p>Choisissez la langue du PDF. La traduction anglaise du Brief nécessite un appel Meta lors du premier export.</p><p><a href="/brief.pdf?lang=fr">Executive Brief · Français</a> &nbsp; <a href="/passport.pdf?lang=fr">Decision Passport · Français</a></p><p><a href="/brief.pdf?lang=en" onclick="return confirm('La première traduction peut consommer des crédits Meta. Continuer ?')">Executive Brief · English</a> &nbsp; <a href="/passport.pdf?lang=en">Decision Passport · English</a></p><small><a href="/passport.json">Passport JSON original</a></small></section>
+<section class="panel" id="deliverables"><h2>Livrables de la session</h2><p class="muted">Executive decision note and full scientific report, both available in French and English.</p>
+<p><a href="/brief.pdf?lang=fr">Note exécutive · FR</a> &nbsp; <a href="/brief.pdf?lang=en">Executive Brief · EN</a></p>
+<p><a href="/detailed.pdf?lang=fr">Rapport scientifique détaillé · FR</a> &nbsp; <a href="/detailed.pdf?lang=en">Full Scientific Report · EN</a></p>
+<p><a href="/passport.pdf?lang=fr">Passport · FR</a> &nbsp; <a href="/passport.pdf?lang=en">Passport · EN</a> &nbsp; <a href="/passport.json">Source JSON</a></p></section>
 <section class="panel" id="audio"><h2>Council Theater</h2>"""+players+"""</section>
 <section class="panel" id="actions"><h2>Actions & suivi</h2>"""+actions_html()+"""</section>
 <section class="panel"><h2>Historique des sessions</h2><ul>"""+history+"""</ul></section>
@@ -217,13 +227,13 @@ class Handler(core.Handler):
             language=parse_qs(route.query).get("lang",["fr"])[0]
             if language not in ("fr","en"):language="fr"
             return self.send(200,frontpage(language).encode("utf8"),"text/html; charset=utf-8")
-        if route.path in ("/brief.pdf","/passport.pdf"):
+        if route.path in ("/brief.pdf","/passport.pdf","/detailed.pdf"):
             from tools.terra_meta_025_pdf import generate
-            filename="05_scientific_brief.json" if route.path=="/brief.pdf" else "04_passport_preview.json"
+            filename="04_passport_preview.json" if route.path=="/passport.pdf" else "05_scientific_brief.json"
             f=Path(core.STATE["session"])/filename
             if f.is_file():
                 try:
-                    kind="brief" if route.path=="/brief.pdf" else "passport"
+                    kind="passport" if route.path=="/passport.pdf" else "brief"
                     language=parse_qs(route.query).get("lang",["fr"])[0]
                     if language not in ("fr","en"):return self.send(400,b"Unsupported language","text/plain")
                     data=core.read_json(f)
@@ -231,7 +241,7 @@ class Handler(core.Handler):
                         import os
                         from tools.terra_meta_026_translation import get_english
                         data=get_english(kind,data,root_for(core.STATE["session"]),os.getenv("MODEL_API_KEY"))
-                    body=generate(kind,data,language=language)
+                    body=generate(kind,data,language=language,detailed=(route.path=="/detailed.pdf"))
                     return self.send(200,body,"application/pdf")
                 except Exception as exc:
                     return self.send(500,("Erreur PDF : "+str(exc)).encode("utf8"),"text/plain; charset=utf-8")
