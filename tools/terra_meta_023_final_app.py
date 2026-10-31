@@ -97,7 +97,7 @@ def frontpage(language="fr"):
     if not players:
         players="<p class='muted'>"+("English audio is not generated for this session." if language=="en" else "Aucun audio disponible pour cette session.")+"</p>"
         if language=="en" and not state["busy"]:
-            players+="<form method='post' action='/generate-english-audio' onsubmit=\\\"return confirm('English voice generation uses paid AI services. Continue?')\\\"><button type='submit'>Generate English debate</button></form>"
+            players+="<form method='post' action='/generate-english-audio'><p>Paid AI generation / Génération avec frais API.</p><button type='submit'>Generate English debate</button></form>"
     else:
         players="<p class='muted'>"+("Scientific debate in English" if language=="en" else "Délibération en français")+" · "+esc(topic_label(question))+"</p>"+players
     if audio:
