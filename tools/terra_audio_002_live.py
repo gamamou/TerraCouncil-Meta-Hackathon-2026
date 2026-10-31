@@ -23,8 +23,20 @@ def parse_dialogue(raw):
         obj,_=json.JSONDecoder().raw_decode(text[at:])
     turns=obj.get("dialogue") if isinstance(obj,dict) else None
     if not isinstance(turns,list) or not 2<=len(turns)<=24:raise ValueError("Expected 2..24 dialogue turns")
+    aliases={
+        "spark":"spark","muse spark":"spark","muse-spark-1.3":"spark",
+        "scientific lead":"spark","spark — scientific lead":"spark",
+        "wonder":"wonder","muse wonder":"wonder","muse-wonder-1.0":"wonder",
+        "scientific critic":"wonder","wonder — scientific critic":"wonder",
+        "modérateur":"spark","moderateur":"spark","moderator":"spark",
+        "narrator":"spark","narrateur":"spark"
+    }
     for t in turns:
-        if not isinstance(t,dict) or t.get("speaker") not in ("spark","wonder"):raise ValueError("Unknown speaker")
+        if not isinstance(t,dict):raise ValueError("Invalid dialogue turn")
+        original=t.get("speaker")
+        speaker=aliases.get(str(original).strip().lower())
+        if not speaker:raise ValueError("Unknown speaker label: "+str(original)[:80])
+        t["speaker"]=speaker
         if not isinstance(t.get("text"),str) or not 1<=len(t["text"])<=1900:raise ValueError("Invalid turn text")
     return turns
 
