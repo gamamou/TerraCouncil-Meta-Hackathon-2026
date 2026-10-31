@@ -179,7 +179,7 @@ class Handler(core.Handler):
                     return self.send(200,body,"application/pdf")
                 except Exception as exc:
                     return self.send(500,("Erreur PDF : "+str(exc)).encode("utf8"),"text/plain; charset=utf-8")
-    if route.path=="/status":
+        if route.path=="/status":
             s={k:core.STATE.get(k) for k in ("phase","message","busy")}
             return self.send(200,json.dumps(s,ensure_ascii=False).encode("utf8"),"application/json")
         if route.path=="/passport.json":
