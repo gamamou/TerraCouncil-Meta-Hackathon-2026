@@ -37,7 +37,7 @@ def actions_html():
     d=core.read_json(f);tasks=d.get("tasks",[])
     rows="".join("<tr><td>"+esc(t.get("task_id"))+"</td><td>"+esc(t.get("action") or t.get("title") or t.get("description"))+
         "</td><td>"+esc(t.get("status"))+"</td></tr>" for t in tasks)
-    return "<p>Investigations proposées, non autorisées automatiquement.</p><table><thead><tr><th>ID</th><th>Action</th><th>Statut</th></tr></thead><tbody>"+rows+"</tbody></table>"
+    return "<p class='muted'>Contrôles scientifiques préalables, non autorisés automatiquement. Les actions ci-dessous proviennent du moteur de vérification des sites miniers ; elles ne constituent pas un plan sectoriel spécifique à la question courante.</p><table><thead><tr><th>ID</th><th>Action</th><th>Statut</th></tr></thead><tbody>"+rows+"</tbody></table>"
 def passport_html():
     f=Path(core.STATE["session"])/"04_passport_preview.json"
     if not f.exists():return "<p>Passport indisponible.</p>"
@@ -66,9 +66,20 @@ def frontpage():
     if audio:
         try:tracks=core.read_json(audio/"audio_manifest.json").get("audio_segments",[])
         except (ValueError,OSError):pass
-    players="".join("<div class='player'><audio controls preload='metadata' src='/audio?i="+str(i)+"'></audio></div>"
-          for i,_ in enumerate(tracks))
+    players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?i="+str(i)+"'></audio></div>"
+          for i,t in enumerate(tracks))
     if not players:players="<p class='muted'>Aucun audio disponible pour cette session.</p>"
+    elif audio:
+        source=root_for(state["session"])/"oral"/"internal_oral_script.json"
+        newer=sorted(root_for(state["session"]).glob("oral_revised_*/internal_oral_script.json"),reverse=True)
+        if audio.name.startswith(("audio_recovered_","audio_revised_")) and newer:source=newer[0]
+        try:
+            from tools.terra_audio_002_live import parse_dialogue
+            turns=parse_dialogue(core.read_json(source)["raw_meta_output"])
+            speakers=sorted(set(t["speaker"] for t in turns))
+            players="<p><strong>Voix du dialogue :</strong> "+esc(", ".join(speakers))+" · "+str(len(turns))+" interventions</p>"+players
+            if len(speakers)<2:players="<p role='alert'><strong>Attention :</strong> audio à voix unique. Ce résultat ne constitue pas un débat multivoix validé.</p>"+players
+        except (OSError,ValueError,KeyError,TypeError):pass
     oral=root_for(state["session"])/"oral"/"internal_oral_script.json"
     revised=list(root_for(state["session"]).glob("oral_revised_*/internal_oral_script.json"))
     retry=bool(oral.is_file() or revised)
@@ -91,7 +102,7 @@ button{background:#12647d;color:white;border:0;border-radius:10px;padding:11px 1
 button:disabled{opacity:.55}a{color:#09647a}audio{width:100%}.player{margin:14px 0}
 .stat{font-size:21px;font-weight:750;overflow-wrap:anywhere}dt{font-weight:700;margin-top:12px}dd{margin:3px 0;overflow-wrap:anywhere}
 table{border-collapse:collapse;width:100%}td,th{padding:9px;border-bottom:1px solid #d9e4eb;text-align:left}
-#status{padding:13px;border-radius:10px;background:#edf4f7}nav{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
+#status{padding:13px;border-radius:10px;background:#edf4f7;border-left:4px solid #12647d}#status[aria-busy=true]{background:#fff5d9;border-left-color:#c8871e}.player strong{display:inline-block;margin-bottom:8px}nav{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
 nav a{color:white}li{padding:3px}small{color:#617a88}
 @media(max-width:750px){.grid{display:block}header h1{font-size:28px}}@media print{form,nav,audio{display:none}}
 </style></head><body><main><header><div class="eyebrow">SUSTAINAFRICA · FAITH · TERRACOUNCIL</div>
@@ -103,7 +114,7 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 <textarea name="question" required>"""+esc(question or "Identifiez cinq sites miniers en Guinée prioritaires pour un programme pilote de réhabilitation.")+"""</textarea>
 <label><input type="checkbox" name="audio" value="yes" checked> Générer le débat oral ElevenLabs v4</label>
 <p><button """+("disabled" if busy else "")+""">Lancer le Conseil</button></p></form>
-<div id="status" role="status" aria-live="polite"><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div></section>
+<div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div></section>
 <div class="grid"><section class="panel" id="brief"><h2>Executive Brief</h2><p class="muted">Maturité scientifique</p>
 <div class="stat">"""+esc(level)+"""</div><p>Investigations : """+investigations+"""</p><a href="/brief">Ouvrir le rapport</a></section>
 <section class="panel" id="passport"><h2>Decision Passport</h2>"""+passport_html()+"""</section></div>
@@ -115,8 +126,10 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 const previous="""+json.dumps({"phase":state["phase"],"busy":busy},ensure_ascii=False)+""";
 async function poll(){try{
  const r=await fetch('/status');const s=await r.json();
- if(s.busy){document.getElementById('status').textContent='Étape : '+s.phase+' · '+s.message;}
- if(previous.busy && !s.busy){location.reload();}
+ const box=document.getElementById('status');
+ box.setAttribute('aria-busy',String(s.busy));
+ box.textContent=(s.busy?'⏳ Traitement en cours — ':'Étape : ')+s.phase+' · '+s.message;
+ if(!s.busy && s.phase!==previous.phase && s.phase!=='READY' && s.phase!=='REPLAY'){location.reload();}
 }catch(e){}}
 setInterval(poll,3000);
 </script></body></html>"""
