@@ -144,9 +144,6 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 <div class="panel" style="padding:14px;margin:12px 0 0"><strong>Question sélectionnée</strong><p>"""+esc(question or "Aucune question traitée")+"""</p></div>
 <div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div><progress id="progress" value='"""+str(progress)+"""' max="100" style="width:100%;margin-top:9px"></progress><p class="muted">Progression indicative par étape (et non durée restante).</p></section>
 <section class="panel" id="deliverables"><h2>Livrables de la session</h2><p class="muted">Rapports PDF et documents de traçabilité.</p><p><a href="/brief.pdf">Executive Brief · PDF</a> &nbsp; <a href="/passport.pdf">Decision Passport · PDF</a> &nbsp; <a href="/passport.json">Passport · JSON</a></p></section>
-<div class="grid"><section class="panel" id="brief"><h2>Executive Brief</h2><p class="muted">Maturité scientifique</p>
-<div class="stat">"""+esc(level)+"""</div><p>Investigations : """+investigations+"""</p><a href="/brief.pdf">Ouvrir le rapport PDF</a></section>
-<section class="panel" id="passport"><h2>Decision Passport</h2>"""+passport_html()+"""</section></div>
 <section class="panel" id="audio"><h2>Council Theater</h2>"""+players+"""</section>
 <section class="panel" id="actions"><h2>Actions & suivi</h2>"""+actions_html()+"""</section>
 <section class="panel"><h2>Historique des sessions</h2><ul>"""+history+"""</ul></section>
