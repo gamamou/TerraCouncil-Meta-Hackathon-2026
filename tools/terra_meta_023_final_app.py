@@ -63,6 +63,17 @@ def topic_label(question):
     found=[label for label,terms in categories if any(w in q for w in terms)]
     return " · ".join(found[:3]) if found else "Conseil scientifique"
 
+def session_question(folder):
+    f=folder.parent/"question.json"
+    if f.exists():
+        try:return core.read_json(f).get("question","")
+        except (ValueError,OSError):pass
+    f=folder/"05_scientific_brief.json"
+    if f.exists():
+        try:return core.read_json(f).get("question","")
+        except (ValueError,OSError):pass
+    return ""
+
 def frontpage():
     state=core.STATE.copy()
     root=Path(state["session"])
@@ -80,6 +91,7 @@ def frontpage():
         except (ValueError,OSError):pass
     players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?i="+str(i)+"'></audio></div>"
           for i,t in enumerate(tracks))
+    if players:players="<p class='muted'>Délibération en cours de lecture : "+esc(topic_label(question))+". Interventions vocales de cette session.</p>"+players
     if not players:players="<p class='muted'>Aucun audio disponible pour cette session.</p>"
     elif audio:
         source=root_for(state["session"])/"oral"/"internal_oral_script.json"
@@ -99,8 +111,11 @@ def frontpage():
     if not audio and retry and not state["busy"]:
         players+="<form method='post' action='/resume-audio' onsubmit=\"return confirm('Reprendre ElevenLabs uniquement ? Cet appel est payant.')\"><button>Reprendre la génération audio</button></form>"
     items=core.sessions(core.ARGS.storage)
-    history="".join("<li><a href='/select?session="+esc(x.parent.name)+"'>"+esc(x.parent.name)+"</a></li>" for x in items)
+    history="".join("<li><a href='/select?session="+esc(x.parent.name)+"'>"+esc(topic_label(session_question(x)))+"</a> · "+esc(x.parent.name)+"</li>" for x in items)
     busy=bool(state["busy"])
+    stage=state.get("phase","READY")
+    progress={"READY":0,"FAITH_COUNCIL":20,"DOCUMENTS":60,"DOCUMENTS_READY":100,
+              "META_ORAL":73,"ELEVENLABS":86,"COMPLETE":100,"AUDIO_FAILED":100}.get(stage,0)
     return """<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TerraCouncil · Decision Intelligence</title>
 <style>
@@ -126,7 +141,8 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 <textarea name="question" required placeholder="Saisissez une nouvelle question scientifique…"></textarea>
 <label><input type="checkbox" name="audio" value="yes" checked> Générer également le débat oral</label>
 <p><button """+("disabled" if busy else "")+""">Lancer le Conseil</button></p></form>
-<div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div></section>
+<div class="panel" style="padding:14px;margin:12px 0 0"><strong>Question sélectionnée</strong><p>"""+esc(question or "Aucune question traitée")+"""</p></div>
+<div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div><progress id="progress" value='"""+str(progress)+"""' max="100" style="width:100%;margin-top:9px"></progress><p class="muted">Progression indicative par étape (et non durée restante).</p></section>
 <section class="panel" id="deliverables"><h2>Livrables de la session</h2><p class="muted">Rapports PDF et documents de traçabilité.</p><p><a href="/brief.pdf">Executive Brief · PDF</a> &nbsp; <a href="/passport.pdf">Decision Passport · PDF</a> &nbsp; <a href="/passport.json">Passport · JSON</a></p></section>
 <div class="grid"><section class="panel" id="brief"><h2>Executive Brief</h2><p class="muted">Maturité scientifique</p>
 <div class="stat">"""+esc(level)+"""</div><p>Investigations : """+investigations+"""</p><a href="/brief.pdf">Ouvrir le rapport PDF</a></section>
@@ -141,6 +157,8 @@ async function poll(){try{
  const r=await fetch('/status');const s=await r.json();
  const box=document.getElementById('status');
  box.setAttribute('aria-busy',String(s.busy));
+ const stages={READY:0,FAITH_COUNCIL:20,DOCUMENTS:60,DOCUMENTS_READY:100,META_ORAL:73,ELEVENLABS:86,COMPLETE:100,AUDIO_FAILED:100};
+ document.getElementById('progress').value=stages[s.phase] ?? 0;
  box.textContent=(s.busy?'⏳ Traitement en cours — ':'Étape : ')+s.phase+' · '+s.message;
  if(!s.busy && s.phase!==previous.phase && s.phase!=='READY' && s.phase!=='REPLAY'){location.reload();}
 }catch(e){}}
