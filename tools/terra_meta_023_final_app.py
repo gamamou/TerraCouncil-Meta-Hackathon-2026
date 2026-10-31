@@ -50,7 +50,19 @@ def passport_html():
         "<dt>Trace SHA-256</dt><dd><code>"+esc(d.get("trace_sha256"))+"</code></dd>"
         "<dt>Révision humaine</dt><dd>"+esc((d.get("human_review") or {}).get("status"))+"</dd>"
         "<dt>Audio</dt><dd>"+("Généré, non revu" if audio else "Non disponible")+"</dd></dl>"
-        "<p><a href='/passport.json'>Exporter le Passport JSON</a></p>")
+        "<p><a href='/passport.pdf'>Télécharger le Passport PDF</a></p>")
+def topic_label(question):
+    q=(question or "").lower()
+    categories=[
+        ("Énergie",("énergie","energie","électricité","electricite","solaire")),
+        ("Climat",("climat","résilience","resilience")),
+        ("Mines",("mine","minier","bauxite")),
+        ("Agriculture",("agriculture","agricole")),
+        ("Eau",("eau","hydrologique","bassin versant")),
+        ("Biodiversité",("biodiversité","biodiversite","écologique"))]
+    found=[label for label,terms in categories if any(w in q for w in terms)]
+    return " · ".join(found[:3]) if found else "Conseil scientifique"
+
 def frontpage():
     state=core.STATE.copy()
     root=Path(state["session"])
@@ -107,16 +119,17 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 @media(max-width:750px){.grid{display:block}header h1{font-size:28px}}@media print{form,nav,audio{display:none}}
 </style></head><body><main><header><div class="eyebrow">SUSTAINAFRICA · FAITH · TERRACOUNCIL</div>
 <h1>Scientific Decision Intelligence</h1><p>De la question aux preuves, aux recommandations et au débat oral.</p>
-<nav><a href="#question">Nouvelle question</a><a href="#brief">Rapport</a><a href="#audio">Council Theater</a>
+<nav><a href="#question">Nouvelle question</a><a href="#deliverables">Livrables</a><a href="#audio">Council Theater</a>
 <a href="#passport">Passport</a><a href="#actions">Suivi</a></nav></header>
 <section class="panel" id="question"><h2>Question scientifique</h2>
 <form action="/start" method="post" onsubmit="return confirm('Démarrer une nouvelle délibération Meta ? Les appels API peuvent être facturés.')">
-<textarea name="question" required>"""+esc(question or "Identifiez cinq sites miniers en Guinée prioritaires pour un programme pilote de réhabilitation.")+"""</textarea>
-<label><input type="checkbox" name="audio" value="yes" checked> Générer le débat oral ElevenLabs v4</label>
+<textarea name="question" required placeholder="Saisissez une nouvelle question scientifique…"></textarea>
+<label><input type="checkbox" name="audio" value="yes" checked> Générer également le débat oral</label>
 <p><button """+("disabled" if busy else "")+""">Lancer le Conseil</button></p></form>
 <div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div></section>
+<section class="panel" id="deliverables"><h2>Livrables de la session</h2><p class="muted">Rapports PDF et documents de traçabilité.</p><p><a href="/brief.pdf">Executive Brief · PDF</a> &nbsp; <a href="/passport.pdf">Decision Passport · PDF</a> &nbsp; <a href="/passport.json">Passport · JSON</a></p></section>
 <div class="grid"><section class="panel" id="brief"><h2>Executive Brief</h2><p class="muted">Maturité scientifique</p>
-<div class="stat">"""+esc(level)+"""</div><p>Investigations : """+investigations+"""</p><a href="/brief">Ouvrir le rapport</a></section>
+<div class="stat">"""+esc(level)+"""</div><p>Investigations : """+investigations+"""</p><a href="/brief.pdf">Ouvrir le rapport PDF</a></section>
 <section class="panel" id="passport"><h2>Decision Passport</h2>"""+passport_html()+"""</section></div>
 <section class="panel" id="audio"><h2>Council Theater</h2>"""+players+"""</section>
 <section class="panel" id="actions"><h2>Actions & suivi</h2>"""+actions_html()+"""</section>
@@ -138,7 +151,17 @@ class Handler(core.Handler):
     def do_GET(self):
         route=urlparse(self.path)
         if route.path=="/":return self.send(200,frontpage().encode("utf8"),"text/html; charset=utf-8")
-        if route.path=="/status":
+        if route.path in ("/brief.pdf","/passport.pdf"):
+            from tools.terra_meta_025_pdf import generate
+            filename="05_scientific_brief.json" if route.path=="/brief.pdf" else "04_passport_preview.json"
+            f=Path(core.STATE["session"])/filename
+            if f.is_file():
+                try:
+                    body=generate("brief" if route.path=="/brief.pdf" else "passport",core.read_json(f))
+                    return self.send(200,body,"application/pdf")
+                except Exception as exc:
+                    return self.send(500,("Erreur PDF : "+str(exc)).encode("utf8"),"text/plain; charset=utf-8")
+    if route.path=="/status":
             s={k:core.STATE.get(k) for k in ("phase","message","busy")}
             return self.send(200,json.dumps(s,ensure_ascii=False).encode("utf8"),"application/json")
         if route.path=="/passport.json":
