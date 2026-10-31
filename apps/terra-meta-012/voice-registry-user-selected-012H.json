@@ -1,0 +1,32 @@
+{
+  "schema": "TERRA_META_012H_CONFIRMED_ROLE_VOICES",
+  "status": "USER_CONFIRMED_MAPPING",
+  "roles": {
+    "president": {
+      "name": "Joel Labo",
+      "voice_id": "TrvjhxOWz4IB9qYry8Lb"
+    },
+    "mining": {
+      "name": "Bakumba",
+      "voice_id": "cEjGxRhK5rId1bacJPJr"
+    },
+    "environment": {
+      "name": "Loïc",
+      "voice_id": "ojsdYNTmnPdf7yAl8rI5"
+    },
+    "agriculture": {
+      "name": "Alima",
+      "voice_id": "4SFJvuIUvxaPLgk8FoK3"
+    },
+    "communities": {
+      "name": "Toni",
+      "voice_id": "M4ZqLOXSFqxSkn9RDxFO"
+    },
+    "esg": {
+      "name": "Mélodie",
+      "voice_id": "MmLmgmAm7pKFUJBu1Lov"
+    }
+  },
+  "tts_authorized": false,
+  "scientific_approval": false
+}

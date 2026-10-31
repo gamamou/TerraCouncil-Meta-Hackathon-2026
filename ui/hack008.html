@@ -83,6 +83,7 @@ details.science-details>.card{border:0;background:transparent}
 <div id="dynamic-sessions"></div><div id="dynamic-results"></div><div class="card"><div class="top"><h3>3. Décisions et restitution</h3><button id="dynamic-oral" type="button" disabled>Préparer le dialogue oral</button><button id="dynamic-oral-edit" type="button" disabled>Version orale courte</button><button id="dynamic-matrix" type="button" disabled>Examiner les décisions</button><details class="advanced-actions"><summary>Contrôles et exports</summary><button id="dynamic-audit" type="button" disabled>Vérifier la fidélité</button><button id="dynamic-brief" type="button" disabled>Exporter le dossier</button><button id="dynamic-metrics" type="button" disabled>Indicateurs détaillés</button></details></div><p class="muted">Les conclusions et le dialogue oral restent soumis à une validation humaine.</p><div id="dynamic-metrics-output"></div><div id="dynamic-matrix-output"></div><div id="dynamic-oral-output"></div><div id="dynamic-oral-edit-output"></div><div id="dynamic-audit-output" role="status"></div><div class="card" id="dynamic-voice-box"><h3>4. Écouter les agents</h3>
 <p class="muted">Uniquement si le scénario passe le contrôle extractif. ElevenLabs peut facturer cette génération ; aucune génération n'est automatique.</p>
 <label><input id="dynamic-voice-consent" type="checkbox">J'autorise l'envoi de ce scénario scientifique à ElevenLabs et un unique appel vocal potentiellement facturé.</label>
+<label><input id="dynamic-voice-sharing" type="checkbox">J’autorise séparément l’envoi du scénario oral approuvé à ElevenLabs.</label>
 <div class="actions"><button id="dynamic-voice-preview" type="button" disabled>Relire le scénario</button><button id="dynamic-voice-check" type="button" disabled>Vérifier l’audio</button>
 <button id="dynamic-voice-generate" type="button" disabled>Produire l’audio</button>
 <button id="dynamic-voice-listen" type="button" disabled>Écouter le débat</button></div>
@@ -570,26 +571,45 @@ $("dynamic-brief").onclick=async()=>{
 };
 
 let dynamicVoiceState=null, dynamicAudioUrl=null;
+let automaticOralReadyFor=null;
 function updateDynamicVoiceControls(){
  const ready=Boolean(dynamicActiveId);
  $("dynamic-voice-check").disabled=!ready;
  $("dynamic-voice-preview").disabled=!ready;
  $("dynamic-voice-generate").disabled=!ready||!dynamicVoiceState||
    dynamicVoiceState.state!=="NOT_REQUESTED"||!dynamicVoiceState.key_available||
-   !$("dynamic-voice-consent").checked;
+   automaticOralReadyFor!==dynamicActiveId||
+   !$("dynamic-voice-consent").checked||!$("dynamic-voice-sharing").checked;
  $("dynamic-voice-listen").disabled=!ready||!dynamicVoiceState||dynamicVoiceState.state!=="READY";
 }
 $("dynamic-voice-consent").addEventListener("change",updateDynamicVoiceControls);
+$("dynamic-voice-sharing").addEventListener("change",updateDynamicVoiceControls);
 async function checkDynamicVoice(){
  if(!dynamicActiveId)return;
+ const session=dynamicActiveId;
+ automaticOralReadyFor=null;
+ updateDynamicVoiceControls();
  try{
-  const r=await fetch("/api/dynamic-voice-status?id="+encodeURIComponent(dynamicActiveId),opts);
-  const data=await r.json();
-  if(!r.ok)throw Error(data.detail||data.error);
-  dynamicVoiceState=data;updateDynamicVoiceControls();
-  $("dynamic-voice-state").textContent="État : "+data.state+
-     (data.key_available?" · clé vocale chargée":" · clé vocale absente");
- }catch(e){$("dynamic-voice-state").textContent=e.message;dynamicVoiceState=null;updateDynamicVoiceControls();}
+  const [statusResponse,oralResponse]=await Promise.all([
+   fetch("/api/dynamic-voice-status?id="+encodeURIComponent(session),opts),
+   fetch("/api/dynamic-voice-auto-status?id="+encodeURIComponent(session),opts)
+  ]);
+  const data=await statusResponse.json(), oral=await oralResponse.json();
+  if(!statusResponse.ok)throw Error(data.detail||data.error);
+  if(!oralResponse.ok)throw Error(oral.detail||oral.error);
+  if(dynamicActiveId!==session)return;
+  dynamicVoiceState=data;
+  automaticOralReadyFor=oral.state==="READY_FOR_SEPARATELY_CONSENTED_VOICE"?session:null;
+  updateDynamicVoiceControls();
+  $("dynamic-voice-state").textContent="Audio : "+data.state+
+   (data.key_available?" · clé vocale chargée":" · clé vocale absente")+
+   " · préparation automatique : "+oral.state+
+   (automaticOralReadyFor?" · aucune relecture systématique requise":" · génération bloquée : source ou prononciation à vérifier");
+ }catch(e){
+  if(dynamicActiveId!==session)return;
+  $("dynamic-voice-state").textContent="Préparation vocale non vérifiée : "+e.message;
+  dynamicVoiceState=null;automaticOralReadyFor=null;updateDynamicVoiceControls();
+ }
 }
 $("dynamic-voice-preview").onclick=async()=>{
  const out=$("dynamic-voice-player");out.replaceChildren();
@@ -622,10 +642,11 @@ $("dynamic-voice-generate").onclick=async()=>{
  try{
   const r=await fetch("/api/dynamic-voice-start",{method:"POST",
     headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
-    body:JSON.stringify({run_id:dynamicActiveId,approve_cost_and_sharing:true})});
+    body:JSON.stringify({run_id:dynamicActiveId,approve_cost_and_sharing:true,approve_data_sharing:$("dynamic-voice-sharing").checked,oral_mode:"automatic_source_bound"})});
   const d=await r.json();
   if(!r.ok)throw Error(d.detail||d.error);
   $("dynamic-voice-consent").checked=false;
+  $("dynamic-voice-sharing").checked=false;
   $("dynamic-voice-state").textContent="Tentative acceptée. Consultez l'état ; ne cliquez pas une seconde fois sur Générer.";
   await checkDynamicVoice();
  }catch(e){$("dynamic-voice-state").textContent="Non lancé ou état incertain : "+e.message+" Vérifiez le journal et le fournisseur avant toute autre tentative.";await checkDynamicVoice();}
@@ -640,12 +661,13 @@ $("dynamic-voice-listen").onclick=async()=>{
    fetch("/api/dynamic-voice-timing?id="+encodeURIComponent(sessionId),opts)]);
   if(!a.ok||!t.ok)throw Error("Fichiers audio indisponibles");
   const bytes=await a.arrayBuffer(), manifest=await t.json();
-  if(manifest.session_id!==sessionId || manifest.editorial_type!=="EDITORIAL_RECONSTRUCTION_NOT_VERBATIM")
+  if(manifest.session_id!==sessionId || !["EDITORIAL_RECONSTRUCTION_NOT_VERBATIM","HUMAN_APPROVED_EDITORIAL_RECONSTRUCTION"].includes(manifest.editorial_type))
      throw Error("Association source/session invalide");
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
     .map(x=>x.toString(16).padStart(2,"0")).join("");
   if(digest!==manifest.audio_sha256)throw Error("Empreinte audio incorrecte");
   if(!Array.isArray(manifest.timeline)||!manifest.timeline.length)throw Error("Horodatages absents");
+  if(manifest.timeline.some(x=>!Number.isFinite(x.start_seconds)||!Number.isFinite(x.end_seconds)||x.start_seconds<0||x.end_seconds<x.start_seconds||!Number.isInteger(x.turn)||x.turn<1||x.turn>6))throw Error("Horodatages invalides");
   if(dynamicAudioUrl)URL.revokeObjectURL(dynamicAudioUrl);
   dynamicAudioUrl=URL.createObjectURL(new Blob([bytes],{type:"audio/mpeg"}));
   const player=document.createElement("audio");player.controls=true;player.preload="metadata";
@@ -675,6 +697,85 @@ $("dynamic-audit").onclick=async()=>{
   add("p",out,"Validation scientifique de terrain : non. Synthèse ElevenLabs : non autorisée par cet audit. Aucun appel externe.","warn");
  }catch(error){add("p",out,"Audit impossible : "+error.message,"warn");}
 };
+
+async function openVoiceApprovalReview(){
+ const area=$("dynamic-oral-edit-output");
+ area.replaceChildren();
+ const session=dynamicActiveId;
+ if(!session)return;
+ try{
+  const response=await fetch("/api/dynamic-voice-review-template?id="+encodeURIComponent(session),opts);
+  const draft=await response.json();
+  if(!response.ok)throw Error(draft.detail||draft.error);
+  add("h3",area,"Approbation du dialogue oral — "+draft.turns.length+" interventions");
+  add("p",area,"Comparer chaque proposition au texte scientifique original avant de confirmer. Cette approbation ne déclenche aucun paiement ni génération vocale.","warn");
+  if(draft.saved_approval?.state==="APPROVED_FOR_VOICE_PREPARATION"){
+   add("p",area,"Une approbation est déjà enregistrée. Aucune modification silencieuse n'est autorisée.","warn");
+   return;
+  }
+  const items=[];
+  for(const turn of draft.turns){
+   const card=add("div",area,"","card");
+   add("strong",card,"Intervention "+turn.turn+" · "+turn.source_model);
+   const editor=add("textarea",card,"");
+   editor.value=turn.suggested_extract||"";
+   editor.setAttribute("aria-label","Texte oral approuvé de l'intervention "+turn.turn);
+   const detail=add("details",card,"");
+   add("summary",detail,"Afficher l'intervention scientifique originale");
+   const checkboxes=[];
+   for(const [key,label] of [
+    ["reviewed_against_original","J'ai comparé le texte avec l'original complet."],
+    ["semantic_fidelity_confirmed","Je confirme la fidélité du sens, des limites et des désaccords."],
+    ["pronunciation_checked","J'ai vérifié le français oral et les termes scientifiques."]
+   ]){
+    const line=add("label",card,"");
+    const box=document.createElement("input");
+    box.type="checkbox";
+    line.appendChild(box);
+    line.appendChild(document.createTextNode(label));
+    checkboxes.push([key,box]);
+   }
+   items.push({turn,editor,checkboxes,detail});
+  }
+  const sourceResponse=await fetch("/api/dynamic-oral-worksheet?id="+encodeURIComponent(session),opts);
+  const sourceDoc=await sourceResponse.json();
+  if(!sourceResponse.ok)throw Error(sourceDoc.detail||sourceDoc.error);
+  if(sourceDoc.worksheet_sha256!==draft.worksheet_sha256)throw Error("Source review changed");
+  for(const item of items){
+   const original=sourceDoc.turns.find(t=>t.turn===item.turn.turn);
+   if(!original)throw Error("Missing original intervention");
+   add("p",item.detail,original.original_full_text,"muted");
+   add("small",item.detail,"Références : "+original.source_evidence_ids.join(", "),"muted");
+  }
+  const reviewerLabel=add("label",area,"Nom du responsable de la relecture");
+  const reviewer=document.createElement("input");
+  reviewer.type="text";reviewer.maxLength=120;reviewer.placeholder="Identité du relecteur";reviewer.style.cssText="width:100%;padding:10px";
+  reviewerLabel.appendChild(reviewer);
+  const button=add("button",area,"Approuver les six interventions (sans générer l'audio)");
+  button.type="button";
+  const message=add("p",area,"","muted");
+  button.onclick=async()=>{
+   if(dynamicActiveId!==session){message.textContent="Session modifiée : réouvrir la relecture.";return;}
+   const payload=JSON.parse(JSON.stringify(draft));
+   payload.turns=items.map(item=>{
+    const t={...item.turn,approved_text:item.editor.value.trim()};
+    for(const [key,check] of item.checkboxes)t[key]=check.checked;
+    return t;
+   });
+   button.disabled=true;
+   try{
+    const res=await fetch("/api/dynamic-voice-review-save",{
+      method:"POST",headers:{"Content-Type":"application/json","X-Terra-Token":TOKEN},
+      body:JSON.stringify({run_id:session,reviewer:reviewer.value,review:payload})
+    });
+    const saved=await res.json();
+    if(!res.ok)throw Error(saved.detail||saved.error);
+    message.textContent="Approbation enregistrée : "+saved.approval_sha256+". Aucun appel ElevenLabs.";
+   }catch(e){message.textContent="Non approuvé : "+e.message;button.disabled=false;}
+  };
+ }catch(error){add("p",area,"Relecture indisponible : "+error.message,"warn");}
+}
+
 $("dynamic-oral-edit").onclick=async()=>{
  const area=$("dynamic-oral-edit-output");area.replaceChildren();
  if(!dynamicActiveId)return;
@@ -698,6 +799,8 @@ $("dynamic-oral-edit").onclick=async()=>{
      add("small",card,"Preuves : "+turn.source_evidence_ids.join(", "),"muted");
    }
    add("p",area,"Cette relecture locale n'est pas une approbation scientifique ni une autorisation ElevenLabs. Aucun appel externe.","tiny muted");
+   const approvalButton=add("button",area,"Relecture et approbation du scénario");
+   approvalButton.type="button";approvalButton.onclick=openVoiceApprovalReview;
  }catch(error){add("p",area,"Relecture indisponible : "+error.message,"warn");}
 };
 $("dynamic-oral").onclick=async()=>{

@@ -1,0 +1,49 @@
+name: TerraCouncil Voice 002F Offline Validation
+on:
+  pull_request:
+    paths:
+      - "src/terra_voice_*.py"
+      - "src/dynamic_voice_workflow.py"
+      - "src/dynamic_voice_plan.py"
+      - "src/local_council_server.py"
+      - "ui/hack008.html"
+      - "tests/test_terra_voice_*.py"
+      - ".github/workflows/terra-voice-002f-validation.yml"
+  workflow_dispatch:
+jobs:
+  offline-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      MODEL_API_KEY: ""
+      ELEVENLABS_API_KEY: ""
+      TERRA_VOICE_SPARK: ""
+      TERRA_VOICE_WONDER: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile source and test modules
+        run: python -m compileall -q src tests
+      - name: Run voice 001/002 offline unit tests (no external calls)
+        run: |
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_001_editorial_worksheet.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_002_approval.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_002b_storage.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_002d_runtime.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_auto_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_auto_ui_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_french_numbers_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_identifier_speech_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_segmentation_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_boke_calendar_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_decimal_precision_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_voice_spoken_length_001.py' -v
+          python -X utf8 -m unittest discover -s tests -p 'test_terra_agent_voice_registry_001.py' -v
+      - name: Confirm provider secrets not required
+        run: |
+          test -z "$MODEL_API_KEY"
+          test -z "$ELEVENLABS_API_KEY"

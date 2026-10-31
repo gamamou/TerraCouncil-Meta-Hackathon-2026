@@ -1,0 +1,9 @@
+{
+  "_instructions": "Remplacer chaque valeur null par le voice_id ElevenLabs deja choisi. Aucun identifiant n'est invente.",
+  "president": null,
+  "mining": null,
+  "environment": null,
+  "agriculture": null,
+  "communities": null,
+  "esg": null
+}
