@@ -47,10 +47,13 @@ def make_session(question,snapshot,session_dir,meta_key,eleven_key=None,voices=N
     brief=assemble(dossier,actions,passport)
     (artifacts/"05_scientific_brief.json").write_text(json.dumps(brief,ensure_ascii=False,indent=2),encoding="utf8")
     update(session=str(artifacts),audio=None,message="Brief, Passport et actions disponibles")
-    if not do_audio:return {"status":"DOCUMENTS_READY_AUDIO_NOT_REQUESTED","session":str(artifacts)}
+    if not do_audio:
+        update(phase="DOCUMENTS_READY",message="Documents disponibles. Audio non demandé pour cette session.")
+        return {"status":"DOCUMENTS_READY_AUDIO_NOT_REQUESTED","session":str(artifacts)}
     update(phase="META_ORAL",message="Adaptation orale Meta")
     oral=target/"oral"
     oral.mkdir()
+    update(phase="META_ORAL",message="Meta prépare la version orale du débat")
     raw=adapt_model(trace,meta_key)
     (oral/"internal_oral_script.json").write_text(json.dumps({"raw_meta_output":raw},ensure_ascii=False,indent=2),encoding="utf8")
     parse_dialogue(raw)
@@ -58,7 +61,7 @@ def make_session(question,snapshot,session_dir,meta_key,eleven_key=None,voices=N
     output=target/"audio_generated"
     result=audio_resume(oral,output,eleven_key,voices,model="eleven_v4",execute=True)
     if result["status"]!="AUDIO_GENERATED_UNREVIEWED":
-        update(phase="AUDIO_FAILED",message="Documents préservés. Audio non produit ; consulter audio_manifest.json")
+        update(phase="AUDIO_FAILED",message="Échec audio : "+str(result.get("error_message","Consulter audio_manifest.json"))[:220])
         return {"status":"DOCUMENTS_READY_AUDIO_FAILED","session":str(artifacts),"audio_manifest":str(output/"audio_manifest.json")}
     update(audio=str(output),phase="COMPLETE",message="Tous les livrables sont disponibles")
     passport_link={"audio_status":"AUDIO_GENERATED_UNREVIEWED","manifest":str(output/"audio_manifest.json"),
@@ -76,6 +79,10 @@ def webpage():
     audio=Path(s["audio"]) if s.get("audio") else None
     player='<audio controls preload="metadata" src="/audio"></audio>' if audio and (audio/"council_audio_01.mp3").exists() else "<p>Audio non associé à cette session.</p>"
     history="".join('<li><a href="/select?session='+x.parent.name+'">'+html.escape(x.parent.name)+'</a></li>' for x in sessions(ARGS.storage))
+    retry=""
+    source=(root.parent if root.name=="artifacts" else root)/"oral"/"internal_oral_script.json"
+    if source.is_file() and not s["busy"] and not (audio and (audio/"council_audio_01.mp3").is_file()):
+        retry='<form action="/resume-audio" method="post"><button type="submit">Reprendre la génération audio (ElevenLabs uniquement)</button></form>'
     refresh='<script>setTimeout(()=>location.reload(),12000)</script>' if s["busy"] else ""
     return """<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TerraCouncil — Hackathon</title><style>
@@ -93,7 +100,7 @@ a{color:#08617b}</style><main><header><div>SUSTAINAFRICA · FAITH · TERRACOUNCI
 <p><strong>Étape : </strong>"""+html.escape(s["phase"])+""" · """+html.escape(s["message"])+"""</p></section>
 <div class="grid"><section><h2>Executive Brief</h2>"""+detail+"""<p><a href="/brief">Ouvrir le rapport</a></p></section>
 <section><h2>Decision Passport</h2><p>Provenance et revue humaine.</p><p><a href="/passport">Consulter</a></p></section></div>
-<section><h2>Council Theater</h2><p>Spark et Wonder · Audio sans transcription publique.</p>"""+player+"""</section>
+<section><h2>Council Theater</h2>"""+player+retry+"""</section>
 <section><h2>Actions & suivi</h2><a href="/actions">Investigations proposées</a></section>
 <section><h2>Sessions précédentes</h2><ul>"""+history+"""</ul></section>
 <small>Les preuves non validées ne sont jamais présentées comme des décisions approuvées.</small></main>"""+refresh
@@ -109,6 +116,30 @@ def background(question,do_audio):
         make_session(question,ARGS.snapshot,target,key,eleven,voices,do_audio)
     except Exception as exc:update(phase="STOPPED_NO_AUTO_RETRY",message=str(exc)[:320])
     finally:update(busy=False)
+
+def resume_audio_background():
+    try:
+        path=Path(STATE["session"])
+        root=path.parent if path.name=="artifacts" else path
+        source=root/"oral"
+        if not (source/"internal_oral_script.json").is_file():
+            raise RuntimeError("Adaptation orale Meta non disponible pour cette session")
+        voices={"spark":os.getenv("ELEVENLABS_SPARK_VOICE_ID"),"wonder":os.getenv("ELEVENLABS_WONDER_VOICE_ID")}
+        key=os.getenv("ELEVENLABS_API_KEY")
+        if not key or not all(voices.values()):
+            raise RuntimeError("Paramètres ElevenLabs incomplets")
+        target=root/("audio_retry_"+uuid.uuid4().hex[:8])
+        update(phase="ELEVENLABS",message="Génération audio ElevenLabs en cours, sans nouvel appel Meta")
+        result=resume(source,target,key,voices,model="eleven_v4",execute=True)
+        if result["status"]!="AUDIO_GENERATED_UNREVIEWED":
+            update(phase="AUDIO_FAILED",message="Échec audio : "+str(result.get("error_message","Vérifier le manifeste"))[:220])
+        else:
+            update(phase="COMPLETE",audio=str(target),message="Débat audio disponible")
+            (root/"audio_passport_link.json").write_text(json.dumps({"audio_status":"AUDIO_GENERATED_UNREVIEWED","manifest":str(target/"audio_manifest.json"),"policy":POLICY},ensure_ascii=False),encoding="utf8")
+    except Exception as exc:
+        update(phase="AUDIO_FAILED",message=str(exc)[:220])
+    finally:
+        update(busy=False)
 
 class Handler(BaseHTTPRequestHandler):
     def send(self,status,body,mime):
@@ -136,11 +167,15 @@ class Handler(BaseHTTPRequestHandler):
             if audio.exists():return self.send(200,audio.read_bytes(),"audio/mpeg")
         return self.send(404,b"Not found","text/plain")
     def do_POST(self):
-        if self.path!="/start":return self.send(404,b"Not found","text/plain")
+        if self.path not in ("/start","/resume-audio"):return self.send(404,b"Not found","text/plain")
         with LOCK:
             if STATE["busy"]:return self.send(409,b"Already running","text/plain")
             STATE["busy"]=True
         try:
+            if self.path=="/resume-audio":
+                threading.Thread(target=resume_audio_background,daemon=True).start()
+                self.send_response(303);self.send_header("Location","/");self.end_headers()
+                return
             size=int(self.headers.get("Content-Length","0"))
             if size<1 or size>10000:raise ValueError("Request size invalid")
             fields=parse_qs(self.rfile.read(size).decode("utf8"))
