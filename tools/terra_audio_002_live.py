@@ -47,6 +47,8 @@ def parse_dialogue(raw):
             t["original_speaker"]=original
         t["speaker"]=speaker
         if not isinstance(t.get("text"),str) or not 1<=len(t["text"])<=1900:raise ValueError("Invalid turn text")
+    if len({t["speaker"] for t in turns}) < 2:
+        raise ValueError("DEBATE_SINGLE_VOICE: Meta generated only one distinct voice; no ElevenLabs call made")
     return turns
 
 def chunks(turns, max_chars=1900):
@@ -86,6 +88,8 @@ def adapt(trace,key,caller=meta_call):
         "that local evidence for the requested domains is unavailable and explain the conditional "+
         "multisector recommendation; never imply those mining data prove local conditions. "+
         "Keep the main counterarguments and actionable staged recommendations for the asked domain. "+
+        "Every dialogue MUST include at least one spark intervention and one wonder intervention. "+
+        "Write distinct turns with both labels, alternating where natural; do not narrate all objections as one speaker. "+
         "Use 6 to 12 short alternating turns, maximum 1800 characters per grouped audio chunk; "+
         "keep total dialogue ideally under 3500 characters. No heading or markdown.")
     return caller(SPARK,instruction,{"question":trace.get("question"),
