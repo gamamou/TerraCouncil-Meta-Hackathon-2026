@@ -76,8 +76,8 @@ def webpage():
     audio=Path(s["audio"]) if s.get("audio") else None
     player='<audio controls preload="metadata" src="/audio"></audio>' if audio and (audio/"council_audio_01.mp3").exists() else "<p>Audio non associé à cette session.</p>"
     history="".join('<li><a href="/select?session='+x.parent.name+'">'+html.escape(x.parent.name)+'</a></li>' for x in sessions(ARGS.storage))
-    return """<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="12"><title>TerraCouncil — Hackathon</title><style>
+    refresh='<script>setTimeout(()=>location.reload(),12000)</script>' if s["busy"] else ""\n    return """<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TerraCouncil — Hackathon</title><style>
 body{font:16px/1.6 system-ui;background:#edf3f7;color:#16364a;margin:0}main{max-width:980px;margin:26px auto;padding:15px}
 header{background:#13485b;color:white;padding:30px;border-radius:18px}section{background:white;border:1px solid #d7e3ed;border-radius:14px;padding:22px;margin-top:17px}
 textarea{width:100%;box-sizing:border-box;min-height:100px;font:inherit;padding:12px}
@@ -95,7 +95,7 @@ a{color:#08617b}</style><main><header><div>SUSTAINAFRICA · FAITH · TERRACOUNCI
 <section><h2>Council Theater</h2><p>Spark et Wonder · Audio sans transcription publique.</p>"""+player+"""</section>
 <section><h2>Actions & suivi</h2><a href="/actions">Investigations proposées</a></section>
 <section><h2>Sessions précédentes</h2><ul>"""+history+"""</ul></section>
-<small>Les preuves non validées ne sont jamais présentées comme des décisions approuvées.</small></main>"""
+<small>Les preuves non validées ne sont jamais présentées comme des décisions approuvées.</small></main>"""+refresh
 
 def background(question,do_audio):
     try:
