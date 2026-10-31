@@ -11,13 +11,14 @@ def esc(x):return html.escape(str(x if x is not None else ""))
 def root_for(session):
     path=Path(session)
     return path.parent if path.name=="artifacts" else path
-def audio_folders(root):
+def audio_folders(root,language="fr"):
+    if language=="en":return sorted(root.glob("audio_en_*"),reverse=True)
     return [root/"audio_generated",*sorted(root.glob("audio_retry_*"),reverse=True),
             *sorted(root.glob("audio_recovered_*"),reverse=True),
             *sorted(root.glob("audio_revised_*"),reverse=True)]
-def audio_for_session(session):
+def audio_for_session(session,language="fr"):
     root=root_for(session)
-    candidates=[x for x in audio_folders(root) if (x/"audio_manifest.json").exists()]
+    candidates=[x for x in audio_folders(root,language) if (x/"audio_manifest.json").exists()]
     verified=[]
     for folder in candidates:
         try:
@@ -28,7 +29,8 @@ def audio_for_session(session):
         except (ValueError,KeyError,OSError):continue
     if verified:return max(verified,key=lambda p:p.stat().st_mtime)
     return None
-def current_audio():
+def current_audio(language="fr"):
+    if language=="en":return audio_for_session(core.STATE["session"],"en")
     folder=Path(core.STATE["audio"]) if core.STATE.get("audio") else audio_for_session(core.STATE["session"])
     return folder if folder and folder.exists() else None
 def actions_html():
@@ -89,8 +91,10 @@ def frontpage():
     if audio:
         try:tracks=core.read_json(audio/"audio_manifest.json").get("audio_segments",[])
         except (ValueError,OSError):pass
+    english_audio=current_audio("en")
     players="".join("<div class='player'><strong>Segment "+str(i+1)+" / "+str(len(tracks))+"</strong> · "+esc(audio.name if audio else "")+" · "+esc(t.get("file"))+"<audio controls preload='metadata' src='/audio?i="+str(i)+"'></audio></div>"
           for i,t in enumerate(tracks))
+    players="<p><strong>Audio :</strong> <a href='/?lang=fr#audio'>Français</a> · <a href='/?lang=en#audio'>English</a> "+(" · English available" if english_audio else " · English audio not generated yet")+"</p>"+players
     if players:players="<p class='muted'>Délibération en cours de lecture : "+esc(topic_label(question))+". Interventions vocales de cette session.</p>"+players
     if not players:players="<p class='muted'>Aucun audio disponible pour cette session.</p>"
     elif audio:
@@ -134,6 +138,7 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 @media(max-width:750px){.grid{display:block}header h1{font-size:28px}}@media print{form,nav,audio{display:none}}
 </style></head><body><main><header><div class="eyebrow">SUSTAINAFRICA · FAITH · TERRACOUNCIL</div>
 <h1>Scientific Decision Intelligence</h1><p>De la question aux preuves, aux recommandations et au débat oral.</p>
+<p style="text-align:right"><label for="ui-language">Langue / Language :</label> <select id="ui-language" aria-label="Interface language"><option value="fr">Français</option><option value="en">English</option></select></p>
 <nav><a href="#question">Nouvelle question</a><a href="#deliverables">Livrables</a><a href="#audio">Council Theater</a>
 <a href="#passport">Passport</a><a href="#actions">Suivi</a></nav></header>
 <section class="panel" id="question"><h2>Question scientifique</h2>
@@ -160,6 +165,37 @@ async function poll(){try{
  if(!s.busy && s.phase!==previous.phase && s.phase!=='READY' && s.phase!=='REPLAY'){location.reload();}
 }catch(e){}}
 setInterval(poll,3000);
+const dictionary={
+'Question scientifique':'Scientific question',
+'Nouvelle question':'New question',
+'Livrables':'Deliverables',
+'Livrables de la session':'Session deliverables',
+'Council Theater':'Council Theater',
+'Suivi':'Action tracking',
+'Actions & suivi':'Actions and tracking',
+'Historique des sessions':'Session history',
+'Question sélectionnée':'Selected question',
+'Lancer le Conseil':'Start Council',
+'Générer également le débat oral':'Generate spoken debate',
+'Français':'French','Rapports PDF et documents de traçabilité.':'PDF reports and traceability documents.',
+'Progression indicative par étape (et non durée restante).':'Stage-based indicative progress, not remaining time.',
+'De la question aux preuves, aux recommandations et au débat oral.':'From questions and evidence to recommendations and spoken debate.'
+};
+function setLanguage(lang){
+ document.documentElement.lang=lang;
+ document.getElementById('ui-language').value=lang;
+ document.querySelector('textarea[name=question]').placeholder=lang==='en'?'Enter your scientific question…':'Saisissez une nouvelle question scientifique…';
+ document.querySelectorAll('h2,nav a,button,label,strong,p,small').forEach(el=>{
+  if(el.children.length)return;
+  if(!el.dataset.fr)el.dataset.fr=el.textContent.trim();
+  const key=el.dataset.fr;
+  el.textContent=lang==='en'?(dictionary[key]||key):key;
+ });
+ history.replaceState({},'',location.pathname+'?lang='+lang+location.hash);
+}
+const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'fr';
+setLanguage(lang);
+document.getElementById('ui-language').addEventListener('change',e=>setLanguage(e.target.value));
 </script></body></html>"""
 
 class Handler(core.Handler):
@@ -191,7 +227,8 @@ class Handler(core.Handler):
             f=Path(core.STATE["session"])/"04_passport_preview.json"
             if f.is_file():return self.send(200,f.read_bytes(),"application/json")
         if route.path=="/audio":
-            folder=current_audio()
+            language=parse_qs(route.query).get("lang",["fr"])[0]
+            folder=current_audio(language)
             if folder:
                 try:
                     tracks=core.read_json(folder/"audio_manifest.json")["audio_segments"]
