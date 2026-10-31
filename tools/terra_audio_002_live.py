@@ -70,6 +70,14 @@ def adapt(trace,key,caller=meta_call):
         "Return ONLY JSON {\\\"dialogue\\\":[{\\\"speaker\\\":\\\"spark\\\",\\\"text\\\":\\\"...\\\"},...]} . "+
         "Use simple spoken language, no technical identifiers or jargon where unnecessary. "+
         "Preserve material uncertainty and disagreement and do not invent science or claim approval. "+
+        "Make the user's CURRENT question and geography the primary topic of every exchange. "+
+        "Some FAITH results may concern unrelated sectors: when discussing climate, water, "+
+        "agriculture or biodiversity, do NOT retell mining permit inventories, rankings, "+
+        "solution IDs, or site selection unless the current question explicitly asks for them "+
+        "and they are geographically relevant. If only mining data were consulted, say briefly "+
+        "that local evidence for the requested domains is unavailable and explain the conditional "+
+        "multisector recommendation; never imply those mining data prove local conditions. "+
+        "Keep the main counterarguments and actionable staged recommendations for the asked domain. "+
         "Use 6 to 12 short alternating turns, maximum 1800 characters per grouped audio chunk; "+
         "keep total dialogue ideally under 3500 characters. No heading or markdown.")
     return caller(SPARK,instruction,{"question":trace.get("question"),
