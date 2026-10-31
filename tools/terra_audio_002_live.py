@@ -28,6 +28,7 @@ def parse_dialogue(raw):
         "scientific lead":"spark","spark — scientific lead":"spark",
         "wonder":"wonder","muse wonder":"wonder","muse-wonder-1.0":"wonder",
         "scientific critic":"wonder","wonder — scientific critic":"wonder",
+        "expert":"wonder","scientific expert":"wonder",
         "modérateur":"spark","moderateur":"spark","moderator":"spark",
         "narrator":"spark","narrateur":"spark"
     }
