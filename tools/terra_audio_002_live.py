@@ -36,7 +36,15 @@ def parse_dialogue(raw):
         if not isinstance(t,dict):raise ValueError("Invalid dialogue turn")
         original=t.get("speaker")
         speaker=aliases.get(str(original).strip().lower())
-        if not speaker:raise ValueError("Unknown speaker label: "+str(original)[:80])
+        # The hackathon uses two available voices. Unknown model-authored expert
+        # labels are voiced by Wonder, without changing the original spoken text.
+        # Preserve original role internally for scientific provenance.
+        if not speaker:
+            if not isinstance(original,str) or not original.strip():
+                raise ValueError("Missing speaker label")
+            speaker="wonder"
+        if speaker!=str(original).strip().lower():
+            t["original_speaker"]=original
         t["speaker"]=speaker
         if not isinstance(t.get("text"),str) or not 1<=len(t["text"])<=1900:raise ValueError("Invalid turn text")
     return turns
