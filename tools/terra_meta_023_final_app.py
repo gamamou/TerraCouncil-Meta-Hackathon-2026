@@ -87,11 +87,14 @@ def frontpage(language="fr"):
         level=(b.get("executive_brief") or {}).get("scientific_readiness","—")
         investigations=str(len((b.get("follow_up") or {}).get("proposed_investigations",[])))
     original_question=question
+    translated_question=False
     if language=="en":
         from tools.terra_meta_026_translation import cache_key
         cache=root_for(state["session"])/"translations"/("en_brief_"+cache_key("brief",core.read_json(brief))+".json") if brief.is_file() else None
         if cache and cache.exists():
-            try:question=core.read_json(cache).get("question",question)
+            try:
+                question=core.read_json(cache).get("question",question)
+                translated_question=True
             except (ValueError,OSError):pass
     audio=current_audio(language)
     tracks=[]
@@ -156,7 +159,7 @@ nav a{color:white}li{padding:3px}small{color:#617a88}
 <textarea name="question" required placeholder="Saisissez une nouvelle question scientifique…"></textarea>
 <label><input type="checkbox" name="audio" value="yes" checked> Générer également le débat oral</label>
 <p><button """+("disabled" if busy else "")+""">Lancer le Conseil</button></p></form>
-<div class="panel" style="padding:14px;margin:12px 0 0"><strong>Question sélectionnée</strong><p>"""+esc(question or "Aucune question traitée")+"""</p></div>
+<div class="panel" style="padding:14px;margin:12px 0 0"><strong>Question sélectionnée</strong><p>"""+esc(question or "Aucune question traitée")+"""</p>"""+("<p class='muted'>Original French question. To obtain an English translation, first open Executive Brief · EN; the translation is then reused here.</p>" if language=="en" and not translated_question else "")+"""</div>
 <div id="status" role="status" aria-live="polite" aria-busy='"""+("true" if busy else "false")+"""'><strong>Étape :</strong> """+esc(state["phase"])+""" · """+esc(state["message"])+"""</div><progress id="progress" value='"""+str(progress)+"""' max="100" style="width:100%;margin-top:9px"></progress><p class="muted">Progression indicative par étape (et non durée restante).</p></section>
 <section class="panel" id="deliverables"><h2>Livrables de la session</h2><p class="muted">Executive decision note and full scientific report, both available in French and English.</p>
 <p><a href="/brief.pdf?lang=fr">Note exécutive · FR</a> &nbsp; <a href="/brief.pdf?lang=en">Executive Brief · EN</a></p>
