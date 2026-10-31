@@ -7,6 +7,9 @@ class VoiceLabels(unittest.TestCase):
  def test_moderator_is_assigned_existing_voice(self):
   d='{"dialogue":[{"speaker":"moderator","text":"Bienvenue"},{"speaker":"wonder","text":"Nuance"}]}'
   self.assertEqual(parse_dialogue(d)[0]["speaker"],"spark")
+ def test_expert_maps_to_critical_voice(self):
+  d='{"dialogue":[{"speaker":"spark","text":"Bonjour"},{"speaker":"expert","text":"Observations"}]}'
+  self.assertEqual([t["speaker"] for t in parse_dialogue(d)],["spark","wonder"])
  def test_unknown_role_remains_visible(self):
   d='{"dialogue":[{"speaker":"agent-climat","text":"Bonjour"},{"speaker":"wonder","text":"Nuance"}]}'
   with self.assertRaisesRegex(ValueError,"agent-climat"):parse_dialogue(d)
