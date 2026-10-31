@@ -1,7 +1,7 @@
 """TERRA-META-023 — Jury-ready local interface built on proven TERRA-META-020.
 Reuse existing execution engine; no new scientific or billing logic.
 """
-import argparse,html,json,webbrowser
+import argparse,html,json,webbrowser,threading
 from pathlib import Path
 from http.server import ThreadingHTTPServer
 from urllib.parse import urlparse,parse_qs
@@ -96,7 +96,10 @@ def frontpage(language="fr"):
           for i,t in enumerate(tracks))
     players="<p><strong>Audio :</strong> <a href='/?lang=fr#audio'>Français</a> · <a href='/?lang=en#audio'>English</a> "+(" · English available" if english_audio else " · English audio not generated yet")+"</p>"+players
     if players:players="<p class='muted'>Délibération en cours de lecture : "+esc(topic_label(question))+". Interventions vocales de cette session.</p>"+players
-    if not players:players="<p class='muted'>Aucun audio disponible pour cette session.</p>"
+    if not players:
+        players="<p class='muted'>"+("English audio is not generated for this session." if language=="en" else "Aucun audio disponible pour cette session.")+"</p>"
+        if language=="en" and not state["busy"]:
+            players+="<form method='post' action='/generate-english-audio' onsubmit=\"return confirm('English voice generation uses paid AI services. Continue?')\"><button type='submit'>Generate English debate</button></form>"
     elif audio:
         source=root_for(state["session"])/"oral"/"internal_oral_script.json"
         newer=sorted(root_for(state["session"]).glob("oral_revised_*/internal_oral_script.json"),reverse=True)
@@ -112,7 +115,7 @@ def frontpage(language="fr"):
     revised=list(root_for(state["session"]).glob("oral_revised_*/internal_oral_script.json"))
     retry=bool(oral.is_file() or revised)
     # Do not automatically rerun Meta if only revised script is present.
-    if not audio and retry and not state["busy"]:
+    if language=="fr" and not audio and retry and not state["busy"]:
         players+="<form method='post' action='/resume-audio' onsubmit=\"return confirm('Reprendre ElevenLabs uniquement ? Cet appel est payant.')\"><button>Reprendre la génération audio</button></form>"
     items=core.sessions(core.ARGS.storage)
     history="".join("<li><a href='/select?session="+esc(x.parent.name)+"'>"+esc(topic_label(session_question(x)))+"</a> · "+esc(x.parent.name)+"</li>" for x in items)
@@ -199,9 +202,21 @@ document.getElementById('ui-language').addEventListener('change',e=>{location.hr
 </script></body></html>"""
 
 class Handler(core.Handler):
+    def do_POST(self):
+        if self.path!="/generate-english-audio":return super().do_POST()
+        with core.LOCK:
+            if core.STATE["busy"]:return self.send(409,b"Already running","text/plain")
+            core.STATE["busy"]=True
+        threading.Thread(target=generate_english_background,daemon=True).start()
+        self.send_response(303)
+        self.send_header("Location","/?lang=en#audio")
+        self.end_headers()
     def do_GET(self):
         route=urlparse(self.path)
-        if route.path=="/":return self.send(200,frontpage(parse_qs(route.query).get("lang",["fr"])[0]).encode("utf8"),"text/html; charset=utf-8")
+        if route.path=="/":
+            language=parse_qs(route.query).get("lang",["fr"])[0]
+            if language not in ("fr","en"):language="fr"
+            return self.send(200,frontpage(language).encode("utf8"),"text/html; charset=utf-8")
         if route.path in ("/brief.pdf","/passport.pdf"):
             from tools.terra_meta_025_pdf import generate
             filename="05_scientific_brief.json" if route.path=="/brief.pdf" else "04_passport_preview.json"
@@ -239,6 +254,20 @@ class Handler(core.Handler):
                 except (ValueError,KeyError,IndexError,OSError):pass
             return self.send(404,b"Audio unavailable","text/plain")
         return super().do_GET()
+
+def generate_english_background():
+    try:
+        from tools.terra_audio_027_english import run
+        root=root_for(core.STATE["session"])
+        core.update(phase="META_ORAL",message="Preparing English scientific dialogue")
+        outcome=run(root,execute=True)
+        if outcome["status"]!="AUDIO_GENERATED_UNREVIEWED":
+            raise RuntimeError(str(outcome.get("error") or outcome["status"]))
+        core.update(phase="COMPLETE",message="English debate available")
+    except Exception as exc:
+        core.update(phase="AUDIO_FAILED",message="English audio: "+str(exc)[:250])
+    finally:
+        core.update(busy=False)
 
 def main():
     parser=argparse.ArgumentParser()
